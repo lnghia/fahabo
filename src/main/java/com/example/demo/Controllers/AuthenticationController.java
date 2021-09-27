@@ -206,4 +206,17 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Try again after 5 minutes."))));
         }
     }
+
+    @PostMapping("/forgot_password")
+    public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
+        User user = ((CustomUserDetails)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser();
+
+        if(requestBody.getPassword().equals(requestBody.getRepeatPassword())){
+            user.setPassword(requestBody.getPassword());
+            userService.saveUser(user);
+            return ResponseEntity.ok(new Response("Changed password successfully.", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Password and repeat password must match."))));
+    }
 }
