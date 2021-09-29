@@ -114,9 +114,9 @@
 				<version>4.4.3</version>
 				<configuration>
 					<propertyFile>src/main/resources/application.properties</propertyFile>
-<!--					<url>jdbc:postgresql://localhost:5432/demo</url>-->
-<!--					<username>postgres</username>-->
-<!--					<password>postgres</password>-->
+					<url>${env.SPRING_DATASOURCE_URL}</url>
+					<username>${env.SPRING_DATASOURCE_USERNAME}</username>
+					<password>${env.SPRING_DATASOURCE_PASSWORD}</password>
 				</configuration>
 				<executions>
 					<execution>
