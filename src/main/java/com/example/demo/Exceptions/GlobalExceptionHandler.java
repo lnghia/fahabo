@@ -30,7 +30,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
-        body.put("message", errors);
+        body.put("data", null);
+        body.put("errors", errors);
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }

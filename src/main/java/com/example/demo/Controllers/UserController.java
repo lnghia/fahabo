@@ -45,13 +45,13 @@ public class UserController {
 
         user.setPassword("123");
         user.setEmail("jkl@gmail.com");
-        user.setLanguageCode(0);
+        user.setLanguageCode("vi");
         user.setDeleted(false);
 
         user1.setDeleted(false);
         user1.setPassword("123");
         user.setPhoneNumber("000");
-        user1.setLanguageCode(0);
+        user1.setLanguageCode("vi");
 
         userService.saveUser(user);
 

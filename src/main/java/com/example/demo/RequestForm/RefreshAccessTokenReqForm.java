@@ -6,6 +6,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class RefreshAccessTokenReqForm {
-    @NotNull
+
     private String refreshToken;
 }

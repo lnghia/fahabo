@@ -1,5 +1,6 @@
 package com.example.demo.Controllers;
 
+import Messages.ResponseMsg;
 import com.example.demo.EmailSender.EmailSenderProvider;
 import com.example.demo.Exceptions.OTPGenerationCoolDownHasNotMet;
 import com.example.demo.Helpers.Helper;
@@ -94,7 +95,7 @@ public class AuthenticationController {
 
     @PostMapping("/token")
     public ResponseEntity<Response> refreshToken(@Valid @NotNull @RequestBody RefreshAccessTokenReqForm refreshTokenReq) {
-        if (tokenProvider.validateToken(refreshTokenReq.getRefreshToken())) {
+        if (refreshTokenReq.getRefreshToken() != null && tokenProvider.validateToken(refreshTokenReq.getRefreshToken())) {
             int userId = tokenProvider.getUserIdFromJWT(refreshTokenReq.getRefreshToken());
             User user = userService.getUserById(userId);
             CustomUserDetails userDetails = new CustomUserDetails(user);
@@ -112,7 +113,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(response);
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null, new ArrayList<>(List.of("refresh token invalid or might have expired."))));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.RefreshToken.fail.toString()))));
     }
 
     @PostMapping("/register_with_email")
@@ -125,7 +126,7 @@ public class AuthenticationController {
             newuser.setEmail(requestBody.getEmail());
             newuser.setUsername(requestBody.getEmail());
         } else {
-            return ResponseEntity.ok(new Response(null, new ArrayList<>(List.of("Email already exists."))));
+            return ResponseEntity.ok(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignUp.emailExists.toString()))));
         }
 
         try {
@@ -136,7 +137,7 @@ public class AuthenticationController {
             newuser.setOneTimePassword(otp);
             emailSender.sendOTPEmail(otp, requestBody.getEmail());
         } catch (OTPGenerationCoolDownHasNotMet ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("Server error."))));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.System.fail.toString()))));
         }
 
         userService.saveUser(newuser);
@@ -178,13 +179,13 @@ public class AuthenticationController {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String otp = requestBody.getOtp();
 
-        if(otpTokenProvider.validateOTP(otp, userDetails.getUser())){
+        if(otp != null && otpTokenProvider.validateOTP(otp, userDetails.getUser())){
             userDetails.getUser().setValidEmail(true);
             userService.saveUser(userDetails.getUser());
             return ResponseEntity.ok(new Response("Verify successfully.", new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Verify unsuccessfully."))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
     }
 //
     @GetMapping("/getOTP")
@@ -203,7 +204,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(new Response("success", new ArrayList<>()));
         }
         catch (OTPGenerationCoolDownHasNotMet ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Try again after 5 minutes."))));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.FetchOTP.fail.toString()))));
         }
     }
 

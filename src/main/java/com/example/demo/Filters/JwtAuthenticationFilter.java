@@ -1,5 +1,6 @@
 package com.example.demo.Filters;
 
+import Messages.ResponseMsg;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.SecurityProvider.JwtTokenProvider;
 import com.example.demo.Service.UserService;
@@ -60,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     Map<String, ArrayList<String>> responseBody = new HashMap<>();
 
-                    responseBody.put("errors", new ArrayList<>(List.of("Failed to authenticate.")));
+                    responseBody.put("errors", new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString())));
 
                     httpServletResponse.setStatus(UNAUTHORIZED.value());
                     httpServletResponse.setContentType(APPLICATION_JSON_VALUE);

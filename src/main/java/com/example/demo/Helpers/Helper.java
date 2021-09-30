@@ -11,6 +11,22 @@ import java.util.*;
 public class Helper {
     private static Helper instance;
 
+    ArrayList<Integer> dateNumInMonths= new ArrayList<>(List.of(
+            0,
+            31,
+            28,
+            31,
+            30,
+            31,
+            30,
+            31,
+            31,
+            30,
+            31,
+            30,
+            31
+    ));
+
     public static Helper getInstance() {
         if (instance == null) instance = new Helper();
         return instance;
@@ -23,11 +39,34 @@ public class Helper {
                         "/api/v1/token",
                         "/api/v1/register_with_email",
                         "/api/v1/register_with_phone",
-                        "/api/v1/register_with_phone"));
+                        "/api/v1/register_with_phone",
+                        "/api/v1/lang_code"));
     }
 
     public String mapToJsonString(HashMap<Object, Object> map) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(map);
+    }
+
+    public boolean isLeapYear(int y){
+        if(y % 4 != 0){
+            return false;
+        }
+        if(y % 100 != 0){
+            return true;
+        }
+        if(y % 400 != 0){
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean isValidDate(int dd, int mm, int yyyy){
+        if(dd < 0 || mm < 0 || yyyy < 0) return false;
+
+        dateNumInMonths.set(2, ((isLeapYear(yyyy) ? 29 : 28)));
+
+        return (mm <= 12 && dateNumInMonths.get(mm) >= dd);
     }
 }

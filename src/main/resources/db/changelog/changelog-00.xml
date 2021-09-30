@@ -12,9 +12,9 @@
             <column name="contact_id" type="VARCHAR(255)"/>
             <column name="email" type="VARCHAR(255)"/>
             <column name="is_deleted" type="BOOLEAN"/>
-            <column name="is_valid_email" type="BOOLEAN"/>
-            <column name="is_valid_phone_number" type="BOOLEAN"/>
-            <column name="language_code" type="INTEGER">
+            <column name="is_valid_email" type="BOOLEAN" defaultValue="false"/>
+            <column name="is_valid_phone_number" type="BOOLEAN" defaultValue="false"/>
+            <column name="language_code" type="char(6)">
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>

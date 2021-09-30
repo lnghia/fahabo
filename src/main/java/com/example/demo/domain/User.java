@@ -34,7 +34,7 @@ public class User {
 
     private String contactId;
 
-    private int languageCode;
+    private String languageCode;
 
     private Boolean isDeleted = false;
 
@@ -116,11 +116,11 @@ public class User {
         this.contactId = contactId;
     }
 
-    public int getLanguageCode() {
+    public String getLanguageCode() {
         return languageCode;
     }
 
-    public void setLanguageCode(int languageCode) {
+    public void setLanguageCode(String languageCode) {
         this.languageCode = languageCode;
     }
 
@@ -158,7 +158,7 @@ public class User {
 
     public User(){}
 
-    public User(String name, Date birthday, int languageCode, String password) {
+    public User(String name, Date birthday, String languageCode, String password) {
         this.name = name;
         this.birthday = birthday;
         this.languageCode = languageCode;

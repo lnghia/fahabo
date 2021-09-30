@@ -1,5 +1,6 @@
 package com.example.demo.RequestForm;
 
+import com.example.demo.Validators.Name.ValidName;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -7,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class RegisterUserWithPhoneReqForm {
-    @NotNull
+    @ValidName
 //    @Pattern(regexp = "\\p{L}")
     private String name;
 
@@ -18,7 +19,7 @@ public class RegisterUserWithPhoneReqForm {
     private String birthday;
 
     @NotNull
-    private int languageCode;
+    private String languageCode;
 
     @NotNull
     private String password;

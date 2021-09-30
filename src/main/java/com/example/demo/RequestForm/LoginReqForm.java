@@ -2,14 +2,17 @@ package com.example.demo.RequestForm;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
+import com.example.demo.Validators.Password.PasswordRequired;
+import com.example.demo.Validators.Username.ValidUsername;
 import lombok.Data;
 
 @Data
 public class LoginReqForm {
-    @NotNull(message = "The username is required.")
+    @ValidUsername
     private String username;
 
-    @NotNull(message = "The password is required.")
+    @PasswordRequired
     private String password;
 
     public String getUsername() {
