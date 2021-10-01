@@ -26,9 +26,9 @@ public class User {
 
     private String email;
 
-    private Boolean isValidEmail;
+    private Boolean isValidEmail = false;
 
-    private Boolean isValidPhoneNumber;
+    private Boolean isValidPhoneNumber = false;
 
     private Date birthday;
 

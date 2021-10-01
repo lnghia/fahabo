@@ -120,8 +120,10 @@ public class AuthenticationController {
     @PostMapping("/register_with_email")
     public ResponseEntity<Response> registerWithEmail(@Valid @RequestBody RegisterUserWithEmailReqForm requestBody) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        User newuser = new User(requestBody.getName(), formatter.parse(requestBody.getBirthday()), requestBody.getLanguageCode(), requestBody.getPassword());
-        Date now = new Date();
+        User newuser = new User(requestBody.getName(),
+                ((requestBody.getBirthday() != null) ? formatter.parse(requestBody.getBirthday()) : null),
+                ((requestBody.getLanguageCode() != null) ? requestBody.getLanguageCode() : null),
+                requestBody.getPassword());
 
         if (userService.getUserByEmail(requestBody.getEmail()) == null) {
             newuser.setEmail(requestBody.getEmail());
@@ -131,6 +133,7 @@ public class AuthenticationController {
         }
 
         try {
+            Date now = new Date();
             String otp = otpTokenProvider.generateOTP(now, true);
 
             log.info("[OTP]: " + otp);
@@ -176,15 +179,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Response> verify(@Valid @RequestBody VerificationOTPReqForm requestBody){
+    public ResponseEntity<Response> verify(@Valid @RequestBody VerificationOTPReqForm requestBody) {
         String otp = requestBody.getOtp();
         User user = userService.getUserByUsername(requestBody.getEmail());
 
-        if(user == null){
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
         }
 
-        if(otp != null && otpTokenProvider.validateOTP(otp, user)){
+        if (otp != null && otpTokenProvider.validateOTP(otp, user)) {
             user.setValidEmail(true);
             userService.saveUser(user);
             return ResponseEntity.ok(new Response("Verify successfully.", new ArrayList<>()));
@@ -192,15 +195,16 @@ public class AuthenticationController {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
     }
-//
+
+    //
     @PostMapping("/getOTP")
-    public ResponseEntity<Response> sendOTP(@Valid @RequestBody GetOTPReqForm requestBody){
-        try{
+    public ResponseEntity<Response> sendOTP(@Valid @RequestBody GetOTPReqForm requestBody) {
+        try {
             User user = userService.getUserByUsername(requestBody.getEmail());
             String otp = otpTokenProvider.generateOTP(user.getLastSentVerification(), false);
             Date now = new Date();
 
-            if(user == null){
+            if (user == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
             }
 
@@ -211,17 +215,16 @@ public class AuthenticationController {
             emailSender.sendOTPEmail(otp, user.getEmail());
 
             return ResponseEntity.ok(new Response("success", new ArrayList<>()));
-        }
-        catch (OTPGenerationCoolDownHasNotMet ex){
+        } catch (OTPGenerationCoolDownHasNotMet ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.FetchOTP.fail.toString()))));
         }
     }
 
     @PostMapping("/forgot_password")
-    public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
-        User user = ((CustomUserDetails)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser();
+    public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody) {
+        User user = ((CustomUserDetails) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser();
 
-        if(requestBody.getPassword().equals(requestBody.getRepeatPassword())){
+        if (requestBody.getPassword().equals(requestBody.getRepeatPassword())) {
             user.setPassword(requestBody.getPassword());
             userService.saveUser(user);
             return ResponseEntity.ok(new Response("Changed password successfully.", new ArrayList<>()));
