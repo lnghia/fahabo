@@ -34,3 +34,5 @@ build/
 
 application-override.properties
 env.sh
+log/
+*.log
