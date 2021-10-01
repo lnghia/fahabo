@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class VerificationOTPReqForm {
-
     private String otp;
 
     @ValidEmail

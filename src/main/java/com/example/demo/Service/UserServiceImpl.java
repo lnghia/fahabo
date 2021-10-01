@@ -28,6 +28,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public User updateUser(User user) {
+        return userRepo.save(user);
+    }
+
+    @Override
     public User getUserByEmail(String email) {
         return userRepo.findByEmail(email);
     }
@@ -52,11 +57,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public boolean authenticate(String username, String password) {
-        User userByEmail = userRepo.findByEmail(username);
-        User userByPhone = userRepo.findByPhoneNumber(username);
+        User user = userRepo.findByUsername(username);
 
-        return ((userByEmail != null && !userByEmail.getDeleted() && passwordEncoder.matches(password, userByEmail.getPassword())) ||
-                (userByPhone != null && !userByPhone.getDeleted() && passwordEncoder.matches(password, userByPhone.getPassword())));
+        boolean tmp = passwordEncoder.matches(user.getPassword(), password);
+
+        return (user != null && !user.getDeleted() && passwordEncoder.matches(password, user.getPassword()));
     }
 
     @Override

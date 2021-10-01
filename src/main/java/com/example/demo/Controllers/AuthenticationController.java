@@ -53,6 +53,35 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@Valid @RequestBody LoginReqForm loginReqForm) {
+        Map<String, Object> data = new HashMap<>();
+
+        if (userService.authenticate(loginReqForm.getUsername(), loginReqForm.getPassword())) {
+            User user = userService.getUserByUsername(loginReqForm.getUsername());
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
+            String access_token = tokenProvider.generateAccessToken(customUserDetails);
+            String refresh_token = tokenProvider.generateRefreshToken(customUserDetails);
+
+            if (user.getValidEmail()) {
+                data = new HashMap<>() {{
+                    put("access_token", access_token);
+                    put("refresh_token", refresh_token);
+                    put("isValidEmail", "true");
+                    put("user", user.getJson());
+                }};
+            } else {
+                data = new HashMap<>() {{
+                    put("isValidEmail", "false");
+                }};
+            }
+
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("", new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
+    }
+
+    @PostMapping("/aaa")
+    public ResponseEntity<Response> lll(@Valid @RequestBody LoginReqForm loginReqForm) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginReqForm.getUsername(),
@@ -65,14 +94,26 @@ public class AuthenticationController {
         String access_token = tokenProvider.generateAccessToken((CustomUserDetails) authentication.getPrincipal());
         String refresh_token = tokenProvider.generateRefreshToken((CustomUserDetails) authentication.getPrincipal());
 
-        Map<String, String> data = new HashMap<>() {{
-            put("accessToken", access_token);
-            put("refreshToken", refresh_token);
-        }};
+        Map<String, String> data;
+
+        if (((CustomUserDetails) authentication.getPrincipal()).getUser().getValidEmail()) {
+            data = new HashMap<>() {{
+                put("accessToken", access_token);
+                put("refreshToken", refresh_token);
+                put("isValidEmail", "true");
+                put("user", ((CustomUserDetails) authentication.getPrincipal()).getUser().getJson().toString());
+            }};
+        } else {
+            data = new HashMap<>() {{
+                put("isValidEmail", "false");
+            }};
+        }
 
         Response response = new Response(data, new ArrayList<>());
 
         return ResponseEntity.ok(response);
+
+//        return ResponseEntity.ok(new Response("", new ArrayList<>()));
 
 //        if(userService.authenticate(loginReqForm.getUsername(), loginReqForm.getPassword())){
 //            User user = userService.getUserByUsername(loginReqForm.getUsername());
@@ -94,7 +135,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<Response> refreshToken(@Valid @NotNull @RequestBody RefreshAccessTokenReqForm refreshTokenReq) {
+    public ResponseEntity<Response> refreshToken(@Valid @NotNull @RequestBody RefreshAccessTokenReqForm
+                                                         refreshTokenReq) {
         if (refreshTokenReq.getRefreshToken() != null && tokenProvider.validateToken(refreshTokenReq.getRefreshToken())) {
             int userId = tokenProvider.getUserIdFromJWT(refreshTokenReq.getRefreshToken());
             User user = userService.getUserById(userId);
@@ -118,7 +160,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register_with_email")
-    public ResponseEntity<Response> registerWithEmail(@Valid @RequestBody RegisterUserWithEmailReqForm requestBody) throws ParseException {
+    public ResponseEntity<Response> registerWithEmail(@Valid @RequestBody RegisterUserWithEmailReqForm requestBody) throws
+            ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         User newuser = new User(requestBody.getName(),
                 ((requestBody.getBirthday() != null) ? formatter.parse(requestBody.getBirthday()) : null),
@@ -150,7 +193,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register_with_phone")
-    public ResponseEntity<Response> registerWithPhone(@Valid @RequestBody RegisterUserWithPhoneReqForm requestBody) throws ParseException {
+    public ResponseEntity<Response> registerWithPhone(@Valid @RequestBody RegisterUserWithPhoneReqForm requestBody) throws
+            ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         User newuser = new User(requestBody.getName(), formatter.parse(requestBody.getBirthday()), requestBody.getLanguageCode(), requestBody.getPassword());
         Date now = new Date();
@@ -189,8 +233,21 @@ public class AuthenticationController {
 
         if (otp != null && otpTokenProvider.validateOTP(otp, user)) {
             user.setValidEmail(true);
-            userService.saveUser(user);
-            return ResponseEntity.ok(new Response("Verify successfully.", new ArrayList<>()));
+            userService.updateUser(user);
+
+            CustomUserDetails userDetails = new CustomUserDetails(user);
+
+            String access_token = tokenProvider.generateAccessToken(userDetails);
+            String refresh_token = tokenProvider.generateRefreshToken(userDetails);
+
+            Map<String, Object> data = new HashMap<>() {{
+                put("accessToken", access_token);
+                put("refreshToken", refresh_token);
+                put("isValidEmail", user.getValidEmail().toString());
+                put("user", user.getJson());
+            }};
+
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));

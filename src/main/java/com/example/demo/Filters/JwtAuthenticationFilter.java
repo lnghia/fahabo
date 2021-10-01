@@ -80,7 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         }
         filterChain.doFilter(httpServletRequest, httpServletResponse);
-
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
