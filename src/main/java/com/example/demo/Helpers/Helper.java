@@ -40,7 +40,9 @@ public class Helper {
                         "/api/v1/register_with_email",
                         "/api/v1/register_with_phone",
                         "/api/v1/register_with_phone",
-                        "/api/v1/lang_code"));
+                        "/api/v1/lang_code",
+                        "/api/v1/getOTP",
+                        "/api/v1/verify"));
     }
 
     public String mapToJsonString(HashMap<Object, Object> map) throws JsonProcessingException {

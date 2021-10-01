@@ -176,24 +176,32 @@ public class AuthenticationController {
 
     @PostMapping("/verify")
     public ResponseEntity<Response> verify(@Valid @RequestBody VerificationOTPReqForm requestBody){
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String otp = requestBody.getOtp();
+        User user = userService.getUserByUsername(requestBody.getEmail());
 
-        if(otp != null && otpTokenProvider.validateOTP(otp, userDetails.getUser())){
-            userDetails.getUser().setValidEmail(true);
-            userService.saveUser(userDetails.getUser());
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+        }
+
+        if(otp != null && otpTokenProvider.validateOTP(otp, user)){
+            user.setValidEmail(true);
+            userService.saveUser(user);
             return ResponseEntity.ok(new Response("Verify successfully.", new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
     }
 //
-    @GetMapping("/getOTP")
-    public ResponseEntity<Response> sendOTP(){
+    @PostMapping("/getOTP")
+    public ResponseEntity<Response> sendOTP(@Valid @RequestBody GetOTPReqForm requestBody){
         try{
-            User user = ((CustomUserDetails)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser();
+            User user = userService.getUserByUsername(requestBody.getEmail());
             String otp = otpTokenProvider.generateOTP(user.getLastSentVerification(), false);
             Date now = new Date();
+
+            if(user == null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+            }
 
             log.info("[OTP]: " + otp);
             user.setLastSentVerification(now);

@@ -16,9 +16,7 @@ public class BirthdayValidator implements ConstraintValidator<ValidBirthday, Str
 
     @Override
     public boolean isValid(String date, ConstraintValidatorContext constraintValidatorContext) {
-        if(date == null){
-            return  false;
-        }
+        if(date == null || date.isEmpty() || date.isBlank()) return true;
 
         Pattern pattern = Pattern.compile(regex);
 
