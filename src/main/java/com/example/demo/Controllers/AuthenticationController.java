@@ -106,6 +106,7 @@ public class AuthenticationController {
             Map<String, String> data = new HashMap<>() {{
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
+                put("isValidEmail", user.getValidEmail().toString());
             }};
 
             Response response = new Response(data, new ArrayList<>());
