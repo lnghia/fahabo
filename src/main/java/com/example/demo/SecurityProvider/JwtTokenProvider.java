@@ -32,6 +32,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateTokenValidWithin(CustomUserDetails userDetails, int min){
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + min * 60 * 1000);
+
+        return Jwts.builder()
+                .setSubject(Long.toString(userDetails.getUser().getId()))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+
     public String generateRefreshToken(CustomUserDetails userDetails){
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_JWT_EXPIRATION);

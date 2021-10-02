@@ -10,6 +10,7 @@ import com.example.demo.SecurityProvider.JwtTokenProvider;
 import com.example.demo.SecurityProvider.OTPTokenProvider;
 import com.example.demo.Service.UserService;
 import com.example.demo.Stringee.StringeeHelper;
+import com.example.demo.Validators.RequestBody.RequestBodyRequired;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.User;
 import lombok.extern.slf4j.Slf4j;
@@ -279,7 +280,10 @@ public class AuthenticationController {
 
     @PostMapping("/forgot_password")
     public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody) {
-        User user = ((CustomUserDetails) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser();
+        User user = userService.getUserByUsername(requestBody.getUsername());
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        String access_token = tokenProvider.generateAccessToken(userDetails);
 
         if (requestBody.getPassword().equals(requestBody.getRepeatPassword())) {
             user.setPassword(requestBody.getPassword());
