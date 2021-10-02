@@ -225,7 +225,7 @@ public class AuthenticationController {
     @PostMapping("/verify")
     public ResponseEntity<Response> verify(@Valid @RequestBody VerificationOTPReqForm requestBody) {
         String otp = requestBody.getOtp();
-        User user = userService.getUserByUsername(requestBody.getEmail());
+        User user = userService.getUserByUsername(requestBody.getUsername());
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
@@ -257,7 +257,7 @@ public class AuthenticationController {
     @PostMapping("/getOTP")
     public ResponseEntity<Response> sendOTP(@Valid @RequestBody GetOTPReqForm requestBody) {
         try {
-            User user = userService.getUserByUsername(requestBody.getEmail());
+            User user = userService.getUserByUsername(requestBody.getUsername());
             String otp = otpTokenProvider.generateOTP(user.getLastSentVerification(), false);
             Date now = new Date();
 
