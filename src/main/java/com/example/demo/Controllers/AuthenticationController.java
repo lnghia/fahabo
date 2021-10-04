@@ -257,14 +257,19 @@ public class AuthenticationController {
     //
     @PostMapping("/getOTP")
     public ResponseEntity<Response> sendOTP(@Valid @RequestBody GetOTPReqForm requestBody) {
+        User user = userService.getUserByUsername(requestBody.getUsername());
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+        }
+        if(user.getValidEmail()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+        }
+
         try {
-            User user = userService.getUserByUsername(requestBody.getUsername());
+
             String otp = otpTokenProvider.generateOTP(user.getLastSentVerification(), false);
             Date now = new Date();
-
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
-            }
 
             log.info("[OTP]: " + otp);
             user.setLastSentVerification(now);
@@ -282,12 +287,12 @@ public class AuthenticationController {
     public ResponseEntity<Response> getResetPwOTP(@Valid @RequestBody GetOTPReqForm requestBody){
         User user = userService.getUserByUsername(requestBody.getUsername());
 
+        if(user == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+
         try {
             String otp = otpTokenProvider.generateResetPwOTP(user.getResetPasswordOTPIssuedAt());
             Date now = new Date();
-
-            if(user == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
 
             log.info("[OTP]: " + otp);
             user.setResetPasswordOTPIssuedAt(now);
