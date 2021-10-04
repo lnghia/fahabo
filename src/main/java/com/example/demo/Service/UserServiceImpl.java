@@ -59,8 +59,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public boolean authenticate(String username, String password) {
         User user = userRepo.findByUsername(username);
 
-        boolean tmp = passwordEncoder.matches(user.getPassword(), password);
-
         return (user != null && !user.getDeleted() && passwordEncoder.matches(password, user.getPassword()));
     }
 
