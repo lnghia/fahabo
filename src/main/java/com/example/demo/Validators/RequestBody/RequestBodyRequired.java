@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, ANNOTATION_TYPE, TYPE_USE })
-@Constraint(validatedBy = UsernameValidator.class)
+@Constraint(validatedBy = RequestBodyValidator.class)
 public @interface RequestBodyRequired {
     String message() default "validation.requestBodyRequired";
 
