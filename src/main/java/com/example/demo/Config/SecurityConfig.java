@@ -50,7 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/forgot_password").permitAll()
                 .antMatchers("/api/v1/users/newuser").permitAll()
                 .antMatchers("/api/v1/users").permitAll()
-                .antMatchers("/api/v1/lang_code").permitAll()
                 .antMatchers("/api/v1/verify").permitAll()
                 .antMatchers("/api/v1/getOTP").permitAll()
                 .anyRequest().authenticated();
