@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, ANNOTATION_TYPE, TYPE_USE })
-@Constraint(validatedBy = UsernameValidator.class)
+@Constraint(validatedBy = OTPRequiredValidator.class)
 public @interface OTPRequired {
     String message() default "verification.fail";
 
