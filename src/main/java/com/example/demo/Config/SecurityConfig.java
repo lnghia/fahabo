@@ -52,6 +52,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/users").permitAll()
                 .antMatchers("/api/v1/verify").permitAll()
                 .antMatchers("/api/v1/getOTP").permitAll()
+                .antMatchers("/api/v1/lang_code").permitAll()
+                .antMatchers("/api/v1/get_reset_password_otp").permitAll()
+                .antMatchers("/api/v1/verify_reset_password").permitAll()
+                .antMatchers("/api/v1/change_password").permitAll()
+                .antMatchers("/api/v1/country_code_list").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

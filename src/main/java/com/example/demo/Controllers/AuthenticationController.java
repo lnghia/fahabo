@@ -269,7 +269,7 @@ public class AuthenticationController {
             log.info("[OTP]: " + otp);
             user.setLastSentVerification(now);
             user.setOneTimePassword(otp);
-            userService.saveUser(user);
+            userService.updateUser(user);
             emailSender.sendOTPEmail(otp, user.getEmail());
 
             return ResponseEntity.ok(new Response("success", new ArrayList<>()));
@@ -278,17 +278,59 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/forgot_password")
-    public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody) {
+    @PostMapping("/get_reset_password_otp")
+    public ResponseEntity<Response> getResetPwOTP(@Valid @RequestBody GetOTPReqForm requestBody){
         User user = userService.getUserByUsername(requestBody.getUsername());
-        CustomUserDetails userDetails = new CustomUserDetails(user);
 
-        String access_token = tokenProvider.generateAccessToken(userDetails);
+        try {
+            String otp = otpTokenProvider.generateResetPwOTP(user.getResetPasswordOTPIssuedAt());
+            Date now = new Date();
 
-        if (requestBody.getPassword().equals(requestBody.getRepeatPassword())) {
+            if(user == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+
+            log.info("[OTP]: " + otp);
+            user.setResetPasswordOTPIssuedAt(now);
+            user.setResetPasswordOTP(otp);
+            userService.updateUser(user);
+            emailSender.sendResetPwOTPEmail(otp, user.getEmail());
+
+            return ResponseEntity.ok(new Response("success", new ArrayList<>()));
+
+        } catch (OTPGenerationCoolDownHasNotMet e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.FetchOTP.fail.toString()))));
+        }
+    }
+
+    @PostMapping("/verify_reset_password")
+    public ResponseEntity<Response> verifyResetPassword(@Valid @RequestBody VerificationOTPReqForm requestBody){
+        String otp = requestBody.getOtp();
+        User user = userService.getUserByUsername(requestBody.getUsername());
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+        }
+
+        if (otp != null && otpTokenProvider.validateResetPasswordOTP(otp, user)) {
+            return ResponseEntity.ok(new Response("success", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
+    }
+
+    @PostMapping("/change_password")
+    public ResponseEntity<Response> changePassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
+        User user = userService.getUserByUsername(requestBody.getUsername());
+        String otp = requestBody.getOtp();
+
+        if(!otpTokenProvider.validateResetPasswordOTP(otp, user))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
+
+        if(requestBody.getPassword().equals(requestBody.getRepeatPassword())){
             user.setPassword(requestBody.getPassword());
+            user.setResetPasswordOTP("");
             userService.saveUser(user);
-            return ResponseEntity.ok(new Response("Changed password successfully.", new ArrayList<>()));
+            return ResponseEntity.ok(new Response("Your password has been changed successfully!", new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Password and repeat password must match."))));

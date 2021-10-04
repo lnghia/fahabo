@@ -36,4 +36,26 @@ public class EmailSenderProvider {
 
         return true;
     }
+
+    @Async
+    public boolean sendResetPwOTPEmail(String otp, String receiver){
+        SimpleMailMessage message = new SimpleMailMessage();
+        String content = String.format("Reset the password for the fahabo account %s. Here is your code: %s", otp, receiver);
+
+        message.setTo(receiver);
+        message.setSubject("Fahabo account password reset");
+        message.setText(content);
+
+        try{
+            new Thread(() -> {
+                this.javaMailSender.send(message);
+            }).start();
+        }
+        catch (Exception ex){
+            log.error(ex.getMessage());
+            return false;
+        }
+
+        return true;
+    }
 }

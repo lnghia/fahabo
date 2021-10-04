@@ -44,6 +44,28 @@ public class User {
 
     private Date lastSentVerification;
 
+    @Column(name = "reset_pw_otp")
+    private String resetPasswordOTP;
+
+    public String getResetPasswordOTP() {
+        return resetPasswordOTP;
+    }
+
+    public void setResetPasswordOTP(String resetPasswordOTP) {
+        this.resetPasswordOTP = resetPasswordOTP;
+    }
+
+    public Date getResetPasswordOTPIssuedAt() {
+        return resetPasswordOTPIssuedAt;
+    }
+
+    public void setResetPasswordOTPIssuedAt(Date resetPasswodOTPIssedAt) {
+        this.resetPasswordOTPIssuedAt = resetPasswodOTPIssedAt;
+    }
+
+    @Column(name = "reset_pw_otp_issued_at")
+    private Date resetPasswordOTPIssuedAt;
+
     public int getId() {
         return id;
     }

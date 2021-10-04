@@ -1,5 +1,6 @@
 package com.example.demo.RequestForm;
 
+import com.example.demo.Validators.OTPRequired.OTPRequired;
 import com.example.demo.Validators.Password.PasswordRequired;
 import com.example.demo.Validators.Password.ValidPassword;
 import com.example.demo.Validators.Username.ValidUsername;
@@ -11,6 +12,9 @@ import javax.validation.constraints.NotNull;
 public class ForgotPasswordReqForm {
     @ValidUsername
     private String username;
+
+    @OTPRequired
+    private String otp;
 
     @ValidPassword
     private String password;
