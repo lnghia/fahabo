@@ -16,7 +16,7 @@ import java.util.Date;
 
 @Data
 public class RegisterUserWithEmailReqForm {
-    @ValidName
+//    @ValidName
 //    @Pattern(regexp = "\\p{L}")
     private String name;
 

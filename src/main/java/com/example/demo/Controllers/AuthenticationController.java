@@ -66,12 +66,12 @@ public class AuthenticationController {
                 data = new HashMap<>() {{
                     put("access_token", access_token);
                     put("refresh_token", refresh_token);
-                    put("isValidEmail", "true");
+                    put("isValidEmail", true);
                     put("user", user.getJson());
                 }};
             } else {
                 data = new HashMap<>() {{
-                    put("isValidEmail", "false");
+                    put("isValidEmail", false);
                 }};
             }
 
@@ -95,18 +95,18 @@ public class AuthenticationController {
         String access_token = tokenProvider.generateAccessToken((CustomUserDetails) authentication.getPrincipal());
         String refresh_token = tokenProvider.generateRefreshToken((CustomUserDetails) authentication.getPrincipal());
 
-        Map<String, String> data;
+        Map<String, Object> data;
 
         if (((CustomUserDetails) authentication.getPrincipal()).getUser().getValidEmail()) {
             data = new HashMap<>() {{
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
-                put("isValidEmail", "true");
+                put("isValidEmail", true);
                 put("user", ((CustomUserDetails) authentication.getPrincipal()).getUser().getJson().toString());
             }};
         } else {
             data = new HashMap<>() {{
-                put("isValidEmail", "false");
+                put("isValidEmail", false);
             }};
         }
 
@@ -146,10 +146,10 @@ public class AuthenticationController {
             String access_token = tokenProvider.generateAccessToken(userDetails);
             String refresh_token = tokenProvider.generateRefreshToken(userDetails);
 
-            Map<String, String> data = new HashMap<>() {{
+            Map<String, Object> data = new HashMap<>() {{
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
-                put("isValidEmail", user.getValidEmail().toString());
+                put("isValidEmail", user.getValidEmail());
             }};
 
             Response response = new Response(data, new ArrayList<>());
@@ -173,7 +173,7 @@ public class AuthenticationController {
             newuser.setEmail(requestBody.getEmail());
             newuser.setUsername(requestBody.getEmail());
         } else {
-            return ResponseEntity.ok(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignUp.emailExists.toString()))));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignUp.emailExists.toString()))));
         }
 
         try {
@@ -244,7 +244,7 @@ public class AuthenticationController {
             Map<String, Object> data = new HashMap<>() {{
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
-                put("isValidEmail", user.getValidEmail().toString());
+                put("isValidEmail", user.getValidEmail());
                 put("user", user.getJson());
             }};
 
