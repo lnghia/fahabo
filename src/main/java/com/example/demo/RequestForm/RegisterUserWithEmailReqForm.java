@@ -4,6 +4,7 @@ import com.example.demo.Validators.Birthday.ValidBirthday;
 import com.example.demo.Validators.Email.ValidEmail;
 import com.example.demo.Validators.LangCode.ValidLangCode;
 import com.example.demo.Validators.Name.ValidName;
+import com.example.demo.Validators.Password.PasswordRequired;
 import com.example.demo.Validators.Password.ValidPassword;
 import lombok.Data;
 
@@ -29,6 +30,6 @@ public class RegisterUserWithEmailReqForm {
     @ValidLangCode
     private String languageCode;
 
-    @ValidPassword
+    @PasswordRequired
     private String password;
 }
