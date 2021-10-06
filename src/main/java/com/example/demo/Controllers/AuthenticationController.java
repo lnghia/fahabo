@@ -8,6 +8,7 @@ import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.SecurityProvider.JwtTokenProvider;
 import com.example.demo.SecurityProvider.OTPTokenProvider;
+import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Stringee.StringeeHelper;
 import com.example.demo.Validators.RequestBody.RequestBodyRequired;
@@ -42,6 +43,9 @@ public class AuthenticationController {
 
     @Autowired
     OTPTokenProvider otpTokenProvider;
+
+    @Autowired
+    private SocialAccountTypeService socialAccountTypeService;
 
     @Autowired
     private UserService userService;
@@ -169,6 +173,8 @@ public class AuthenticationController {
                 ((requestBody.getLanguageCode() != null) ? requestBody.getLanguageCode() : null),
                 requestBody.getPassword());
 
+        newuser.setSocialAccountType(socialAccountTypeService.getById(requestBody.getAuthType()));
+
         if (userService.getUserByEmail(requestBody.getEmail()) == null) {
             newuser.setEmail(requestBody.getEmail());
             newuser.setUsername(requestBody.getEmail());
@@ -289,6 +295,15 @@ public class AuthenticationController {
 
         if(user == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+
+        if(!user.getSocialAccountType().equals(socialAccountTypeService.getBySocialName("Manual"))){
+            HashMap<String, Object> data = new HashMap<>(){{
+                put("authType", user.getSocialAccountType().getId());
+               put("resetPasswordLink", user.getSocialAccountType().getChangePasswordUrl());
+            }};
+
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+        }
 
         try {
             String otp = otpTokenProvider.generateResetPwOTP(user.getResetPasswordOTPIssuedAt());

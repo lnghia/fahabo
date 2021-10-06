@@ -1,5 +1,6 @@
 package com.example.demo.RequestForm;
 
+import com.example.demo.Validators.AuthType.ValidAuthType;
 import com.example.demo.Validators.Birthday.ValidBirthday;
 import com.example.demo.Validators.Email.ValidEmail;
 import com.example.demo.Validators.LangCode.ValidLangCode;
@@ -32,4 +33,7 @@ public class RegisterUserWithEmailReqForm {
 
     @PasswordRequired
     private String password;
+
+    @ValidAuthType
+    private String authType;
 }

@@ -1,6 +1,7 @@
 package com.example.demo.domain;
 
 import lombok.Data;
+import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
@@ -43,6 +44,11 @@ public class User {
     private String oneTimePassword;
 
     private Date lastSentVerification;
+
+//    @Column(name = "social_account_type")
+    @ManyToOne
+    @JoinColumn(name = "social_account_type", referencedColumnName = "id")
+    private SocialAccountType socialAccountType;
 
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
@@ -178,6 +184,14 @@ public class User {
         this.lastSentVerification = lastSentVerification;
     }
 
+    public SocialAccountType getSocialAccountType() {
+        return socialAccountType;
+    }
+
+    public void setSocialAccountType(SocialAccountType socialAccountType) {
+        this.socialAccountType = socialAccountType;
+    }
+
     public User(){}
 
     public User(String name, Date birthday, String languageCode, String password) {
@@ -219,6 +233,7 @@ public class User {
         rs.put("birthday", (birthday != null) ? formatter.format(birthday) : "");
         rs.put("contactId", contactId);
         rs.put("languageCode", languageCode);
+        rs.put("authType", socialAccountType.getJson());
 
         return rs;
     }
