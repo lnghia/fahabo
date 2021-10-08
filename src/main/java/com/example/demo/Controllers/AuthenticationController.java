@@ -25,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -52,6 +53,9 @@ public class AuthenticationController {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private EmailSenderProvider emailSender;
@@ -269,7 +273,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
         }
         if(user.getValidEmail()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("verification.hasBeenVerified"))));
         }
 
         try {
@@ -338,8 +342,8 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
     }
 
-    @PostMapping("/change_password")
-    public ResponseEntity<Response> changePassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
+    @PostMapping("/reset_password")
+    public ResponseEntity<Response> resetPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
         User user = userService.getUserByUsername(requestBody.getUsername());
         String otp = requestBody.getOtp();
 
@@ -354,5 +358,25 @@ public class AuthenticationController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("Password and repeat password must match."))));
+    }
+
+    @PostMapping("/change_password")
+    public ResponseEntity<Response> changePassword(@Valid @RequestBody ChangePasswordReqForm requestBody){
+        User user = ((CustomUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        if(!passwordEncoder.matches(requestBody.getCurrentPassword(), user.getPassword())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
+        }
+
+        if(requestBody.getNewPassword().equals(requestBody.getConfirmNewPassword())){
+            user.setPassword(requestBody.getNewPassword());
+            userService.saveUser(user);
+
+            emailSender.sendPasswordHasChangedEmail(user.getEmail());
+
+            return ResponseEntity.ok(new Response("Your password has been changed successfully!", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.confirmNewPasswordMustMatch"))));
     }
 }

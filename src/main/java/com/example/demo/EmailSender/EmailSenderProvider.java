@@ -7,6 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 @Slf4j
 public class EmailSenderProvider {
@@ -40,10 +42,32 @@ public class EmailSenderProvider {
     @Async
     public boolean sendResetPwOTPEmail(String otp, String receiver){
         SimpleMailMessage message = new SimpleMailMessage();
-        String content = String.format("Reset the password for the fahabo account %s. Here is your code: %s", otp, receiver);
+        String content = String.format("Reset the password for the fahabo account %s. Here is your code: %s", receiver, otp);
 
         message.setTo(receiver);
         message.setSubject("Fahabo account password reset");
+        message.setText(content);
+
+        try{
+            new Thread(() -> {
+                this.javaMailSender.send(message);
+            }).start();
+        }
+        catch (Exception ex){
+            log.error(ex.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean sendPasswordHasChangedEmail(String receiver){
+        SimpleMailMessage message = new SimpleMailMessage();
+        Date now = new Date();
+        String content = String.format("Your fahabo account %s password has been changed successfully today at %s", receiver, now.toString());
+
+        message.setTo(receiver);
+        message.setSubject("Fahabo account password has been changed");
         message.setText(content);
 
         try{

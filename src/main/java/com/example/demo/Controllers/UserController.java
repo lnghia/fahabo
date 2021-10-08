@@ -1,6 +1,7 @@
 package com.example.demo.Controllers;
 
 import com.example.demo.RequestForm.LoginReqForm;
+import com.example.demo.RequestForm.TempReqForm;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.UserService;
 import com.example.demo.Service.UserServiceImpl;
@@ -56,5 +57,10 @@ public class UserController {
         userService.saveUser(user);
 
         return ResponseEntity.ok(new Response(userService.saveUser(user1), new ArrayList<>(List.of("user information invalid."))));
+    }
+
+    @PostMapping("/temp")
+    private ResponseEntity<Response> temp(@Valid @RequestBody TempReqForm temp){
+        return ResponseEntity.ok(new Response(temp, new ArrayList<>()));
     }
 }
