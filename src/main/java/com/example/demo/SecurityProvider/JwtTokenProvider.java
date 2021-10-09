@@ -21,6 +21,9 @@ public class JwtTokenProvider {
     private long REFRESH_JWT_EXPIRATION;
 
     public String generateAccessToken(CustomUserDetails userDetails) {
+//        log.debug(Long.toString(ACCESS_JWT_EXPIRATION));
+//        log.debug(Long.toString(REFRESH_JWT_EXPIRATION));
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_JWT_EXPIRATION);
 
