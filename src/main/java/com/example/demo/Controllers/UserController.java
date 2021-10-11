@@ -181,6 +181,10 @@ public class UserController {
                 }
             });
 
+            if(successUploads.isEmpty()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+            }
+
             user.setAvatar(successUploads.get(0).getUri());
             userService.updateUser(user);
 
