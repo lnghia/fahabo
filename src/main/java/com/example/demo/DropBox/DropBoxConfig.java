@@ -10,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class DropBoxConfig {
-//    @Value("${DROPBOX_ACCESS_TOKEN}")
-//    private String DROPBOX_ACCESS_TOKEN="gCSzM4qiQ6IAAAAAAAAAASwDV5C7QnLTmmukyzZuYUjfl7tt6jc4tAoIosGC8JZY";
-
     @Value("${DROPBOX_ACCESS_TOKEN}")
     private String DROPBOX_ACCESS_TOKEN;
 
