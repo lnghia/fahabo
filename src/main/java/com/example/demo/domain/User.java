@@ -244,7 +244,7 @@ public class User {
         rs.put("isValidPhoneNumber", isValidPhoneNumber);
         rs.put("birthday", (birthday != null) ? formatter.format(birthday) : "");
         rs.put("contactId", contactId);
-        rs.put("languageCode", languageCode);
+        rs.put("languageCode", languageCode.trim());
         rs.put("authType", socialAccountType.getJson());
         rs.put("avatar", avatar);
 
