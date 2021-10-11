@@ -12,6 +12,8 @@ public class LangCodeValidator implements ConstraintValidator<ValidLangCode, Str
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+        if(s == null || s.isBlank() || s.isEmpty()) return true;
+
         return languageCodeService.isLangCodeSupported(s);
     }
 }
