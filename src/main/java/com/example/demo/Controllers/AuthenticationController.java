@@ -354,6 +354,9 @@ public class AuthenticationController {
             user.setPassword(requestBody.getPassword());
             user.setResetPasswordOTP("");
             userService.saveUser(user);
+
+            emailSender.sendPasswordHasChangedEmail(user.getEmail());
+
             return ResponseEntity.ok(new Response("Your password has been changed successfully!", new ArrayList<>()));
         }
 

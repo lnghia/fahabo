@@ -102,6 +102,9 @@ public class UserController {
         if (requestBody.getName() != null) {
             user.setName(requestBody.getName());
         }
+        if(requestBody.getLanguageCode() != null){
+            user.setLanguageCode(requestBody.getLanguageCode());
+        }
 
         userService.updateUser(user);
 
