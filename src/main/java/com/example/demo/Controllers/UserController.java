@@ -161,6 +161,8 @@ public class UserController {
 
         DropBoxUploader uploader = new DropBoxUploader(dbxClientV2);
 
+        requestBody.getAvatar().setName(userService.generateImgUploadId(user));
+
         try {
             UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.getAvatar()));
 

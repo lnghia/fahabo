@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -60,6 +61,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepo.findByUsername(username);
 
         return (user != null && !user.getDeleted() && passwordEncoder.matches(password, user.getPassword()));
+    }
+
+    @Override
+    public String generateImgUploadId(User user) {
+        return String.format("avatar_%s_%s.png", user.getId(), new Date().getTime());
     }
 
     @Override
