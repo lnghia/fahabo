@@ -365,7 +365,7 @@ public class AuthenticationController {
         User user = ((CustomUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         if(!passwordEncoder.matches(requestBody.getCurrentPassword(), user.getPassword())){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
         }
 
         if(requestBody.getNewPassword().equals(requestBody.getConfirmNewPassword())){
