@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="111021_add_avatar_uri_field_in_users" author="nghia">
+        <addColumn tableName="users">
+            <column name="avatar" type="varchar" defaultValue="https://www.studynhac.vn/assets/img/default-avatar.jpg"></column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

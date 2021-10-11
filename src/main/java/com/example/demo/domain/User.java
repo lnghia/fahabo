@@ -45,7 +45,9 @@ public class User {
 
     private Date lastSentVerification;
 
-//    @Column(name = "social_account_type")
+    private String avatar;
+
+    //    @Column(name = "social_account_type")
     @ManyToOne
     @JoinColumn(name = "social_account_type", referencedColumnName = "id")
     private SocialAccountType socialAccountType;
@@ -94,6 +96,15 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getPhoneNumber() {
@@ -192,7 +203,8 @@ public class User {
         this.socialAccountType = socialAccountType;
     }
 
-    public User(){}
+    public User() {
+    }
 
     public User(String name, Date birthday, String languageCode, String password) {
         this.name = name;
@@ -201,7 +213,7 @@ public class User {
         this.password = password;
     }
 
-    public String toString(){
+    public String toString() {
         return "{" +
                 "id='" + id + '\'' +
                 ", username='" + username + '\'' +
@@ -219,7 +231,7 @@ public class User {
                 "}";
     }
 
-    public HashMap<String, Object> getJson(){
+    public HashMap<String, Object> getJson() {
         HashMap<String, Object> rs = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -234,6 +246,7 @@ public class User {
         rs.put("contactId", contactId);
         rs.put("languageCode", languageCode);
         rs.put("authType", socialAccountType.getJson());
+        rs.put("avatar", avatar);
 
         return rs;
     }
