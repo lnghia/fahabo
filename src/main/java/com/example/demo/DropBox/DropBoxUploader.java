@@ -1,12 +1,17 @@
 package com.example.demo.DropBox;
 
+import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.sharing.PathLinkMetadata;
 import javassist.compiler.ast.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +96,28 @@ public class DropBoxUploader implements AutoCloseable{
         log.info("Execution complete.");
 
         return new UploadExecutionResult(itemCreationResults);
+    }
+
+    public String createSharedLink(String uri){
+        if(uri == null || uri.isEmpty() || uri.isBlank()){
+            log.info("No item to create.");
+            return null;
+        }
+
+        URLConnection con = null;
+        try {
+            con = new URL(uri.replace("dl=0", "raw=1")).openConnection();
+            con.connect();
+            InputStream in = con.getInputStream();
+            in.close();
+
+            return con.getURL().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("Error while trying to get redirected uri for: " + uri);
+        }
+
+        return null;
     }
 
     private void createSharedLinks(){

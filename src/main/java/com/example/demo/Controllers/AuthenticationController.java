@@ -4,6 +4,7 @@ import Messages.ResponseMsg;
 import com.example.demo.EmailSender.EmailSenderProvider;
 import com.example.demo.Exceptions.OTPGenerationCoolDownHasNotMet;
 import com.example.demo.Helpers.Helper;
+import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.SecurityProvider.JwtTokenProvider;
@@ -40,6 +41,9 @@ import java.util.*;
 @Slf4j
 public class AuthenticationController {
     @Autowired
+    private UserHelper userHelper;
+
+    @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
@@ -75,7 +79,7 @@ public class AuthenticationController {
                     put("access_token", access_token);
                     put("refresh_token", refresh_token);
                     put("isValidEmail", true);
-                    put("user", user.getJson());
+                    put("user", userHelper.UserToJson(user));
                 }};
             } else {
                 data = new HashMap<>() {{
@@ -110,7 +114,7 @@ public class AuthenticationController {
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
                 put("isValidEmail", true);
-                put("user", ((CustomUserDetails) authentication.getPrincipal()).getUser().getJson().toString());
+                put("user", userHelper.UserToJson(((CustomUserDetails) authentication.getPrincipal()).getUser()).toString());
             }};
         } else {
             data = new HashMap<>() {{
@@ -200,7 +204,7 @@ public class AuthenticationController {
 
         userService.saveUser(newuser);
 
-        return ResponseEntity.ok(new Response(newuser.getJson(), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(userHelper.UserToJson(newuser), new ArrayList<>()));
     }
 
     @PostMapping("/register_with_phone")
@@ -230,7 +234,7 @@ public class AuthenticationController {
 
         userService.saveUser(newuser);
 
-        return ResponseEntity.ok(new Response(newuser.getJson(), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(userHelper.UserToJson(newuser), new ArrayList<>()));
     }
 
     @PostMapping("/verify")
@@ -255,7 +259,7 @@ public class AuthenticationController {
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
                 put("isValidEmail", user.getValidEmail());
-                put("user", user.getJson());
+                put("user", userHelper.UserToJson(user));
             }};
 
             return ResponseEntity.ok(new Response(data, new ArrayList<>()));

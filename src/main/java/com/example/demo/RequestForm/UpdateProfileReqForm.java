@@ -12,7 +12,7 @@ public class UpdateProfileReqForm {
     private String name;
 
     @ValidBirthday
-    private String birthDay;
+    private String birthday;
 
     private String phoneNumber;
 

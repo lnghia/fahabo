@@ -1,6 +1,11 @@
 package com.example.demo.domain;
 
+import com.dropbox.core.v2.DbxClientV2;
+import com.example.demo.DropBox.DropBoxAuthenticator;
+import com.example.demo.DropBox.DropBoxUploader;
+import com.example.demo.Helpers.UserHelper;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Repository;
 
@@ -246,7 +251,7 @@ public class User {
         rs.put("contactId", contactId);
         rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
         rs.put("authType", socialAccountType.getJson());
-        rs.put("avatar", avatar);
+        rs.put("avatar", getAvatar());
 
         return rs;
     }

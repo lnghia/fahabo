@@ -6,6 +6,7 @@ import com.example.demo.DropBox.DropBoxConfig;
 import com.example.demo.DropBox.DropBoxUploader;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.Helpers.Helper;
+import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.TempReqForm;
 import com.example.demo.RequestForm.UpdateAvatarReqForm;
 import com.example.demo.RequestForm.UploadImagesReqForm;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserController {
     @Autowired
+    private UserHelper userHelper;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -44,7 +48,7 @@ public class UserController {
     @GetMapping
     private ResponseEntity<Response> getUsers() {
         List<User> users = userService.getUsers();
-        List<Object> data = users.stream().map(User::getJson).collect(Collectors.toList());
+        List<Object> data = users.stream().map(user -> userHelper.UserToJson(user)).collect(Collectors.toList());
 
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
@@ -93,8 +97,8 @@ public class UserController {
             user.setEmail(requestBody.getEmail());
             user.setUsername(requestBody.getEmail());
         }
-        if (requestBody.getBirthDay() != null) {
-            user.setBirthday(formatter.parse(requestBody.getBirthDay()));
+        if (requestBody.getBirthday() != null) {
+            user.setBirthday(formatter.parse(requestBody.getBirthday()));
         }
         if (requestBody.getPhoneNumber() != null) {
             user.setPhoneNumber(requestBody.getPhoneNumber());
@@ -108,7 +112,7 @@ public class UserController {
 
         userService.updateUser(user);
 
-        return ResponseEntity.ok(new Response(user.getJson(), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(userHelper.UserToJson(user), new ArrayList<>()));
     }
 
     @GetMapping("/preview_images")
@@ -150,7 +154,7 @@ public class UserController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         HashMap<String, Object> data = new HashMap<>() {{
-            put("uri", user.getAvatar());
+            put("uri", userHelper.createShareLink(user.getAvatar()));
         }};
 
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -179,10 +183,10 @@ public class UserController {
 
             executionResult.getCreationResults().forEach((k, v) -> {
                 if(v.isOk()){
-                    successUploads.add(new Image(k, v.uri.get()));
+                    successUploads.add(new Image(k, v.metadata, v.uri.get()));
                 }
                 else{
-                    failUploads.add(new Image(k, v.uri.get()));
+                    failUploads.add(new Image(k, v.metadata));
                 }
             });
 
@@ -190,7 +194,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
             }
 
-            user.setAvatar(successUploads.get(0).getUri());
+            user.setAvatar(successUploads.get(0).getMetadata().getUrl());
             userService.updateUser(user);
 
 //            executionResult.getSuccessfulUploads().forEach((k, v) -> {
