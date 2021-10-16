@@ -31,6 +31,8 @@ public class UserHelper {
         HashMap<String, Object> rs = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
+        String avatarUri = createShareLink(user.getAvatar());
+
         rs.put("id", user.getId());
         rs.put("username", user.getUsername());
         rs.put("name", user.getName());
@@ -42,7 +44,7 @@ public class UserHelper {
         rs.put("contactId", user.getContactId());
         rs.put("languageCode", (user.getLanguageCode() == null) ? null : user.getLanguageCode().trim());
         rs.put("authType", user.getSocialAccountType().getJson());
-        rs.put("avatar", createShareLink(user.getAvatar()));
+        rs.put("avatar", (avatarUri != null) ? avatarUri : user.getAvatar());
 
         return rs;
     }
