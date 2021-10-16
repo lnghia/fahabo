@@ -1,6 +1,7 @@
 package com.example.demo.Repo;
 
 import com.example.demo.domain.Family;
+import com.example.demo.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,10 @@ public interface FamilyRepo extends JpaRepository<Family, Integer> {
 
     @Query(value = "SELECT * FROM families WHERE name=:name", nativeQuery = true)
     Family getByName(@Param("name") String name);
+
+    @Query(value = "SELECT * FROM families WHERE id=:id", nativeQuery = true)
+    Family getById(@Param("id") int id);
+
+    @Query(value = "SELECT user_id FROM users_in_families WHERE user_id=:id", nativeQuery = true)
+    Integer getMemberById(@Param("id") int id);
 }

@@ -57,10 +57,12 @@ public class FamilyControllers {
 
         Family family = new Family(requestBody.familyName);
 
-        requestBody.ids.forEach(id -> {
-            User tmpUser = familyHelper.getUserService().getUserById(id);
-            users.add(tmpUser);
-        });
+        if(requestBody.ids != null){
+            requestBody.ids.forEach(id -> {
+                User tmpUser = familyHelper.getUserService().getUserById(id);
+                users.add(tmpUser);
+            });
+        }
         users.add(user);
 
         familyHelper.createFamily(family);

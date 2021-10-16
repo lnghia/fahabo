@@ -5,12 +5,14 @@ import com.example.demo.DropBox.DropBoxAuthenticator;
 import com.example.demo.DropBox.DropBoxConfig;
 import com.example.demo.DropBox.DropBoxUploader;
 import com.example.demo.DropBox.UploadExecutionResult;
+import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.CustomUserDetails;
+import com.example.demo.domain.Family;
 import com.example.demo.domain.Image;
 import com.example.demo.domain.User;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,9 @@ public class UserController {
 
     @Autowired
     private DropBoxAuthenticator dropBoxAuthenticator;
+
+    @Autowired
+    private FamilyHelper familyHelper;
 
     @GetMapping
     private ResponseEntity<Response> getUsers() {
@@ -222,5 +227,20 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
         }
+    }
+
+    @PostMapping("/join_family")
+    public ResponseEntity<Response> joinFamily(@Valid @RequestBody JoinFamilyReqForm requestBody){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyHelper.getFamilyService().findById(requestBody.familyId);
+
+        if(familyHelper.getFamilyService().findMemberById(user.getId()) != null){
+            return ResponseEntity.ok(new Response(family.getJson(family.getThumbnail() != familyHelper.defaultThumbnail), new ArrayList<>()));
+        }
+
+        userService.joinFamily(user, family);
+        familyHelper.getFamilyService().addMember(user, family);
+
+        return ResponseEntity.ok(new Response(family.getJson(family.getThumbnail() != familyHelper.defaultThumbnail), new ArrayList<>()));
     }
 }

@@ -2,14 +2,10 @@ package com.example.demo.Service.Family;
 
 import com.example.demo.Repo.FamilyRepo;
 import com.example.demo.RequestForm.CreateFamilyReqForm;
-import com.example.demo.Service.Role.RoleService;
-import com.example.demo.Service.UserService;
 import com.example.demo.domain.Family;
-import com.example.demo.domain.Role;
 import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,5 +86,15 @@ public class FamilyServiceImpl implements FamilyService{
     @Override
     public Family findByName(String name) {
         return familyRepo.getByName(name);
+    }
+
+    @Override
+    public Family findById(int id) {
+        return familyRepo.getById(id);
+    }
+
+    @Override
+    public Integer findMemberById(int id) {
+        return familyRepo.getMemberById(id);
     }
 }

@@ -13,4 +13,6 @@ public interface FamilyService {
     Family createFamily(User creator, Family createdFamily, CreateFamilyReqForm requestBody);
     void addMember(User user, Family family);
     Family findByName(String name);
+    Family findById(int id);
+    Integer findMemberById(int id);
 }

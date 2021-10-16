@@ -1,7 +1,6 @@
-package com.example.demo.Validators.FamilyName;
+package com.example.demo.Validators.FamilyId;
 
-import com.example.demo.Validators.FamilyId.FamilyIdValidator;
-import com.example.demo.Validators.IdValidator.IdValidator;
+import com.example.demo.Validators.FamilyName.FamilyNameValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -15,9 +14,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, ANNOTATION_TYPE, TYPE_USE })
-@Constraint(validatedBy = FamilyNameValidator.class)
-public @interface ValidFamilyName {
-    String message() default "validation.familyNameInvalid";
+@Constraint(validatedBy = FamilyIdValidator.class)
+public @interface ValidFamilyId {
+    String message() default "validation.familyIdInvalid";
 
     Class<?>[] groups() default {};
 
