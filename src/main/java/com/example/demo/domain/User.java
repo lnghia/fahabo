@@ -4,7 +4,9 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.DropBoxAuthenticator;
 import com.example.demo.DropBox.DropBoxUploader;
 import com.example.demo.Helpers.UserHelper;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Repository;
@@ -12,8 +14,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import static javax.persistence.GenerationType.AUTO;
 
@@ -51,6 +52,22 @@ public class User {
     private Date lastSentVerification;
 
     private String avatar;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Collection<Role> roles;
+
+    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "users_in_families",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "family_id")
+    )
+    private Collection<Family> families = new ArrayList<>();
 
     //    @Column(name = "social_account_type")
     @ManyToOne
@@ -206,6 +223,22 @@ public class User {
 
     public void setSocialAccountType(SocialAccountType socialAccountType) {
         this.socialAccountType = socialAccountType;
+    }
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Collection<Family> getFamilies() {
+        return families;
+    }
+
+    public void setFamilies(Collection<Family> families) {
+        this.families = families;
     }
 
     public User() {

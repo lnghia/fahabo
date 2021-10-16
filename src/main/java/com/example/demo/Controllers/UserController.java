@@ -7,10 +7,7 @@ import com.example.demo.DropBox.DropBoxUploader;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
-import com.example.demo.RequestForm.TempReqForm;
-import com.example.demo.RequestForm.UpdateAvatarReqForm;
-import com.example.demo.RequestForm.UploadImagesReqForm;
-import com.example.demo.RequestForm.UpdateProfileReqForm;
+import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.CustomUserDetails;
@@ -111,6 +108,17 @@ public class UserController {
         }
 
         userService.updateUser(user);
+
+        return ResponseEntity.ok(new Response(userHelper.UserToJson(user), new ArrayList<>()));
+    }
+
+    @PostMapping("/get_profile")
+    public ResponseEntity<Response> getProfile(@Valid @RequestBody GetProfileReqForm requestBody){
+        User user = userService.getUserById(requestBody.id);
+
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("user.doesNotExist"))));
+        }
 
         return ResponseEntity.ok(new Response(userHelper.UserToJson(user), new ArrayList<>()));
     }

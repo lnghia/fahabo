@@ -9,4 +9,8 @@
   http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
     <include file="src/main/resources/db/changelog/changelog-00.xml"/>
     <include file="src/main/resources/db/changelog/changelog-03.xml"/>
+    <include file="src/main/resources/db/changelog/04-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/05-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/11-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/14-10-21-changelog.xml"/>
 </databaseChangeLog>

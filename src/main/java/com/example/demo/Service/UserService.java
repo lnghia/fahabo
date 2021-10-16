@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.domain.Family;
 import com.example.demo.domain.User;
 import org.springframework.stereotype.Service;
 
@@ -15,4 +16,6 @@ public interface UserService {
     User getUserById(int id);
     boolean authenticate(String username, String password);
     String generateImgUploadId(User user);
+    void joinFamily(List<User> users, Family family);
+    void joinFamily(User user, Family family);
 }

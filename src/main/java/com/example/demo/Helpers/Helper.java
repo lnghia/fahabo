@@ -5,13 +5,19 @@ import com.example.demo.domain.Image;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.mail.imap.protocol.Item;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 public class Helper {
     private static Helper instance;
 
@@ -108,5 +114,27 @@ public class Helper {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String createSharedLink(String uri){
+        if(uri == null || uri.isEmpty() || uri.isBlank()){
+            log.info("No item to create.");
+            return null;
+        }
+
+        URLConnection con = null;
+        try {
+            con = new URL(uri.replace("dl=0", "raw=1")).openConnection();
+            con.connect();
+            InputStream in = con.getInputStream();
+            in.close();
+
+            return con.getURL().toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.info("Error while trying to get redirected uri for: " + uri);
+        }
+
+        return null;
     }
 }
