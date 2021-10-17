@@ -1,5 +1,12 @@
 package com.example.demo.RequestForm;
 
+import com.example.demo.Validators.AuthType.ValidAuthType;
+import com.example.demo.Validators.Birthday.ValidBirthday;
+import com.example.demo.Validators.Email.ValidEmail;
+import com.example.demo.Validators.LangCode.ValidLangCode;
+import com.example.demo.Validators.Name.ValidName;
+import com.example.demo.Validators.Password.PasswordRequired;
+import com.example.demo.Validators.Password.ValidPassword;
 import lombok.Data;
 
 import javax.persistence.Index;
@@ -11,20 +18,22 @@ import java.util.Date;
 
 @Data
 public class RegisterUserWithEmailReqForm {
-    @NotNull
+//    @ValidName
 //    @Pattern(regexp = "\\p{L}")
     private String name;
 
-    @NotNull
-    @Email
+    @ValidEmail
     private String email;
 
-    @NotNull
+    @ValidBirthday
     private String birthday;
 
-    @NotNull
-    private int languageCode;
+    @ValidLangCode
+    private String languageCode;
 
-    @NotNull
+    @PasswordRequired
     private String password;
+
+    @ValidAuthType
+    private String authType;
 }

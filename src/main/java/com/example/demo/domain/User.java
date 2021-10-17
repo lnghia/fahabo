@@ -1,6 +1,12 @@
 package com.example.demo.domain;
 
+import com.dropbox.core.v2.DbxClientV2;
+import com.example.demo.DropBox.DropBoxAuthenticator;
+import com.example.demo.DropBox.DropBoxUploader;
+import com.example.demo.Helpers.UserHelper;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
@@ -26,15 +32,15 @@ public class User {
 
     private String email;
 
-    private Boolean isValidEmail;
+    private Boolean isValidEmail = false;
 
-    private Boolean isValidPhoneNumber;
+    private Boolean isValidPhoneNumber = false;
 
     private Date birthday;
 
     private String contactId;
 
-    private int languageCode;
+    private String languageCode;
 
     private Boolean isDeleted = false;
 
@@ -43,6 +49,35 @@ public class User {
     private String oneTimePassword;
 
     private Date lastSentVerification;
+
+    private String avatar;
+
+    //    @Column(name = "social_account_type")
+    @ManyToOne
+    @JoinColumn(name = "social_account_type", referencedColumnName = "id")
+    private SocialAccountType socialAccountType;
+
+    @Column(name = "reset_pw_otp")
+    private String resetPasswordOTP;
+
+    public String getResetPasswordOTP() {
+        return resetPasswordOTP;
+    }
+
+    public void setResetPasswordOTP(String resetPasswordOTP) {
+        this.resetPasswordOTP = resetPasswordOTP;
+    }
+
+    public Date getResetPasswordOTPIssuedAt() {
+        return resetPasswordOTPIssuedAt;
+    }
+
+    public void setResetPasswordOTPIssuedAt(Date resetPasswodOTPIssedAt) {
+        this.resetPasswordOTPIssuedAt = resetPasswodOTPIssedAt;
+    }
+
+    @Column(name = "reset_pw_otp_issued_at")
+    private Date resetPasswordOTPIssuedAt;
 
     public int getId() {
         return id;
@@ -66,6 +101,15 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getPhoneNumber() {
@@ -116,11 +160,11 @@ public class User {
         this.contactId = contactId;
     }
 
-    public int getLanguageCode() {
+    public String getLanguageCode() {
         return languageCode;
     }
 
-    public void setLanguageCode(int languageCode) {
+    public void setLanguageCode(String languageCode) {
         this.languageCode = languageCode;
     }
 
@@ -156,16 +200,25 @@ public class User {
         this.lastSentVerification = lastSentVerification;
     }
 
-    public User(){}
+    public SocialAccountType getSocialAccountType() {
+        return socialAccountType;
+    }
 
-    public User(String name, Date birthday, int languageCode, String password) {
+    public void setSocialAccountType(SocialAccountType socialAccountType) {
+        this.socialAccountType = socialAccountType;
+    }
+
+    public User() {
+    }
+
+    public User(String name, Date birthday, String languageCode, String password) {
         this.name = name;
         this.birthday = birthday;
         this.languageCode = languageCode;
         this.password = password;
     }
 
-    public String toString(){
+    public String toString() {
         return "{" +
                 "id='" + id + '\'' +
                 ", username='" + username + '\'' +
@@ -183,7 +236,7 @@ public class User {
                 "}";
     }
 
-    public HashMap<String, Object> getJson(){
+    public HashMap<String, Object> getJson() {
         HashMap<String, Object> rs = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -196,7 +249,9 @@ public class User {
         rs.put("isValidPhoneNumber", isValidPhoneNumber);
         rs.put("birthday", (birthday != null) ? formatter.format(birthday) : "");
         rs.put("contactId", contactId);
-        rs.put("languageCode", languageCode);
+        rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
+        rs.put("authType", socialAccountType.getJson());
+        rs.put("avatar", getAvatar());
 
         return rs;
     }

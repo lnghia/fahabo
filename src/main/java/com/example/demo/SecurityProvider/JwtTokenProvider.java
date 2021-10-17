@@ -21,8 +21,23 @@ public class JwtTokenProvider {
     private long REFRESH_JWT_EXPIRATION;
 
     public String generateAccessToken(CustomUserDetails userDetails) {
+//        log.debug(Long.toString(ACCESS_JWT_EXPIRATION));
+//        log.debug(Long.toString(REFRESH_JWT_EXPIRATION));
+
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_JWT_EXPIRATION);
+
+        return Jwts.builder()
+                .setSubject(Long.toString(userDetails.getUser().getId()))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+
+    public String generateTokenValidWithin(CustomUserDetails userDetails, int min){
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + min * 60 * 1000);
 
         return Jwts.builder()
                 .setSubject(Long.toString(userDetails.getUser().getId()))

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    
+    <changeSet id="social_account_type" author="nghia">
+        <createTable tableName="social_account_type">
+            <column name="id" type="varchar">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_social_account_type"></constraints>
+            </column>
+            <column name="social_name" type="varchar"/>
+            <column name="change_password_url" type="varchar"/>
+        </createTable>
+
+        <insert tableName="social_account_type">
+            <column name="id" value="GOOGLE_AUTH"></column>
+            <column name="social_name" value="Google"/>
+            <column name="change_password_url" value='https://accounts.google.com/signin/v2/challenge/pwd?continue=https%3A%2F%2Fmyaccount.google.com%2Fsigninoptions%2Fpassword%3Fcontinue%3Dhttps%3A%2F%2Fmyaccount.google.com%2Fsecurity&amp;service=accountsettings&amp;osid=1&amp;rart=ANgoxcd9rm8ILqCvlpQ4kt7RQzRONvF0PkLVZkIlytlj8CEgMbnACbVTD1Zp-3TKBaZuBCr1TzJ6_yqR_TCc3Ffr06HIZ-QbZg&amp;TL=AM3QAYa0wwPrAysfta7BQnBdMGxTeB3u9BmaCC-5LyV6JTZG34nBNaAalm2SHN75&amp;flowName=GlifWebSignIn&amp;cid=1&amp;flowEntry=ServiceLogin'/>
+        </insert>
+
+        <insert tableName="social_account_type">
+            <column name="id" value="FACEBOOK_AUTH"></column>
+            <column name="social_name" value="Facebook"/>
+            <column name="change_password_url" value="https://www.facebook.com/settings?tab=security&amp;section=password"/>
+        </insert>
+
+        <insert tableName="social_account_type">
+            <column name="id" value="MANUAL_AUTH"></column>
+            <column name="social_name" value="Manual"/>
+        </insert>
+
+        <insert tableName="social_account_type">
+            <column name="id" value="APPLE_AUTH"></column>
+            <column name="social_name" value="Apple"/>
+            <column name="change_password_url" value="https://support.apple.com/en-us/HT201355"/>
+        </insert>
+
+        <addColumn tableName="users">
+            <column name="social_account_type" type="varchar" defaultValue="MANUAL_AUTH">
+                <constraints nullable="false" foreignKeyName="fk_users_social_type" references="social_account_type(id)"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            drop table social_account_type;
+            alter table users drop column social_account_type;
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

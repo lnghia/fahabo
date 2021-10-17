@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,6 +25,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepo.save(user);
+    }
+
+    @Override
+    public User updateUser(User user) {
         return userRepo.save(user);
     }
 
@@ -52,11 +58,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public boolean authenticate(String username, String password) {
-        User userByEmail = userRepo.findByEmail(username);
-        User userByPhone = userRepo.findByPhoneNumber(username);
+        User user = userRepo.findByUsername(username);
 
-        return ((userByEmail != null && !userByEmail.getDeleted() && passwordEncoder.matches(password, userByEmail.getPassword())) ||
-                (userByPhone != null && !userByPhone.getDeleted() && passwordEncoder.matches(password, userByPhone.getPassword())));
+        return (user != null && !user.getDeleted() && passwordEncoder.matches(password, user.getPassword()));
+    }
+
+    @Override
+    public String generateImgUploadId(User user) {
+        return String.format("avatar_%s_%s.png", user.getId(), new Date().getTime());
     }
 
     @Override

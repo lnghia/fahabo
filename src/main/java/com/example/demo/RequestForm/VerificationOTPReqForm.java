@@ -1,11 +1,15 @@
 package com.example.demo.RequestForm;
 
+import com.example.demo.Validators.OTPRequired.OTPRequired;
+import com.example.demo.Validators.Password.PasswordRequired;
+import com.example.demo.Validators.Username.ValidUsername;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 @Data
 public class VerificationOTPReqForm {
-    @NotNull
+    @OTPRequired
     private String otp;
+
+    @ValidUsername
+    private String username;
 }

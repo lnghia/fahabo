@@ -4,16 +4,16 @@ import java.util.ArrayList;
 
 public class Response {
     private Object data;
-    private ArrayList<String> message;
+    private ArrayList<String> errors;
 
     public Response(){
         data = null;
-        message = new ArrayList<>();
+        errors = new ArrayList<>();
     }
 
-    public Response(Object data, ArrayList<String> error) {
+    public Response(Object data, ArrayList<String> errors) {
         this.data = data;
-        this.message = error;
+        this.errors = errors;
     }
 
     public Object getData() {
@@ -24,11 +24,11 @@ public class Response {
         this.data = data;
     }
 
-    public ArrayList<String> getError() {
-        return message;
+    public ArrayList<String> getErrors() {
+        return errors;
     }
 
-    public void setError(ArrayList<String> error) {
-        this.message = error;
+    public void setErrors(ArrayList<String> errors) {
+        this.errors = errors;
     }
 }
