@@ -105,6 +105,15 @@ public class Family {
         }};
     }
 
+    public HashMap<String, Object> getJson(String thumbnailRedirected){
+        return new HashMap<>(){{
+            put("familyName", familyName);
+            put("familyId", id);
+            put("thumbnail", ((thumbnailRedirected == null) ? thumbnail : thumbnailRedirected));
+            put("memberNum", usersInFamily.size());
+        }};
+    }
+
     public HashMap<String, Object> getJsonInDetail(boolean getThumbnail){
         return new HashMap<>(){{
             put("familyName", familyName);

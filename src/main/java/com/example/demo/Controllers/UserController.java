@@ -1,10 +1,7 @@
 package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
-import com.example.demo.DropBox.DropBoxAuthenticator;
-import com.example.demo.DropBox.DropBoxConfig;
-import com.example.demo.DropBox.DropBoxUploader;
-import com.example.demo.DropBox.UploadExecutionResult;
+import com.example.demo.DropBox.*;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
@@ -110,7 +107,7 @@ public class UserController {
         if (requestBody.getName() != null) {
             user.setName(requestBody.getName());
         }
-        if(requestBody.getLanguageCode() != null){
+        if (requestBody.getLanguageCode() != null) {
             user.setLanguageCode(requestBody.getLanguageCode());
         }
 
@@ -120,10 +117,10 @@ public class UserController {
     }
 
     @PostMapping("/get_profile")
-    public ResponseEntity<Response> getProfile(@Valid @RequestBody GetProfileReqForm requestBody){
+    public ResponseEntity<Response> getProfile(@Valid @RequestBody GetProfileReqForm requestBody) {
         User user = userService.getUserById(requestBody.id);
 
-        if(user == null){
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("user.doesNotExist"))));
         }
 
@@ -197,15 +194,14 @@ public class UserController {
             ArrayList<Image> failUploads = new ArrayList<>();
 
             executionResult.getCreationResults().forEach((k, v) -> {
-                if(v.isOk()){
+                if (v.isOk()) {
                     successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                }
-                else{
+                } else {
                     failUploads.add(new Image(k, v.metadata));
                 }
             });
 
-            if(successUploads.isEmpty()){
+            if (successUploads.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
             }
 
@@ -232,11 +228,11 @@ public class UserController {
     }
 
     @PostMapping("/join_family")
-    public ResponseEntity<Response> joinFamily(@Valid @RequestBody JoinFamilyReqForm requestBody){
+    public ResponseEntity<Response> joinFamily(@Valid @RequestBody JoinFamilyReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if(family.checkIfUserExist(user)){
+        if (family.checkIfUserExist(user)) {
             return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
         }
 
@@ -251,16 +247,16 @@ public class UserController {
     }
 
     @PostMapping("/leave_family")
-    public ResponseEntity<Response> leaveFamily(@Valid @RequestBody JoinFamilyReqForm requestBody){
+    public ResponseEntity<Response> leaveFamily(@Valid @RequestBody JoinFamilyReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if(family.checkIfUserExist(user)){
+        if (family.checkIfUserExist(user)) {
             UserInFamily userInFamily = family.deleteUser(user);
             UserInFamily userInFamily1 = user.deleteFamily(family);
             userService.updateUser(user);
             familyService.saveFamily(family);
-            if(userInFamily != null){
+            if (userInFamily != null) {
                 userInFamilyService.delete(userInFamily);
 //                userInFamilyService.saveUserInFamily(userInFamily);
             }
@@ -272,19 +268,19 @@ public class UserController {
     }
 
     @PostMapping("/kick_member")
-    public ResponseEntity<Response> kickMember(@Valid @RequestBody KickMemberReqForm requestBody){
+    public ResponseEntity<Response> kickMember(@Valid @RequestBody KickMemberReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if(userInFamilyService.hasRole(user, family, "HOST")){
+        if (userInFamilyService.hasRole(user, family, "HOST")) {
             User userToKick = userService.getUserById(requestBody.userIdToKick);
 
-            if(family.checkIfUserExist(userToKick)){
+            if (family.checkIfUserExist(userToKick)) {
                 UserInFamily association = family.deleteUser(userToKick);
                 userToKick.deleteFamily(family);
                 userService.updateUser(userToKick);
                 familyService.saveFamily(family);
-                if(association != null){
+                if (association != null) {
                     userInFamilyService.delete(association);
                 }
 
@@ -295,5 +291,39 @@ public class UserController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("family.kickMemberFailure"))));
+    }
+
+    @GetMapping("/get_families")
+    public ResponseEntity<Response> getFamilies(@RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                                @RequestParam(name = "size", required = false, defaultValue = "5") Integer size) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(), page, size);
+//        List<Family> families = user.getUserInFamilies().stream().map(UserInFamily::getFamily).collect(Collectors.toList());
+        List<Family> families = userInFamilies.stream().map(UserInFamily::getFamily).collect(Collectors.toList());
+
+        ArrayList<HashMap<String, Object>> data;
+        try {
+            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+
+            GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(new ArrayList<>(families.stream().map(family -> {
+                return new Image(family.getFamilyName(), family.getThumbnail());
+            }).collect(Collectors.toList())));
+
+            if (result != null) {
+                data = new ArrayList<>(families.stream()
+                        .map(family -> {
+                            return (result.getSuccessfulResults().containsKey(family.getFamilyName())) ? family.getJson(result.getSuccessfulResults().get(family.getFamilyName()).getUri()) : family.getJson(null);
+                        }).collect(Collectors.toList()));
+
+                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+            }
+
+            return ResponseEntity.ok(new Response(families.stream().map(family -> family.getJson(null)).collect(Collectors.toList()), new ArrayList<>()));
+        } catch (ExecutionException | InterruptedException e) {
+            log.error("Couldn't retrieve redirected thumbnail urls, unknown error.");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(families.stream().map(family -> family.getJson(null)).collect(Collectors.toList()),
+                    new ArrayList<>(List.of("unknownError"))));
+        }
     }
 }

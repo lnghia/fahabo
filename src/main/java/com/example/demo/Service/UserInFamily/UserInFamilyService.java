@@ -15,4 +15,6 @@ public interface UserInFamilyService {
     boolean hasRole(User user, Family family, String roleName);
     List<Integer> getUserIdsInFamily(int familyId, int page, int size);
     List<User> getUsersInFamily(int familyId, int page, int size);
+    List<UserInFamily> findAllByUserId(int userId);
+    List<UserInFamily> findAllByUserIdWithPagination(int userId, int page, int size);
 }
