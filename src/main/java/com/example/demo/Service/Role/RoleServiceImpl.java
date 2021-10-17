@@ -6,17 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoleServiceImpl implements RoleService {
+public class RoleServiceImpl implements RoleService{
     @Autowired
-    RoleRepo roleRepo;
+    private RoleRepo roleRepo;
 
     @Override
-    public Role findByRoleName(String name) {
-        return roleRepo.getByRoleName(name);
-    }
-
-    @Override
-    public void updateRole(Role role) {
-        roleRepo.save(role);
+    public Role findByName(String name) {
+        return roleRepo.findByName(name);
     }
 }

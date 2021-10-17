@@ -7,12 +7,8 @@ import com.example.demo.domain.User;
 import java.util.ArrayList;
 
 public interface FamilyService {
-    boolean setHost(User user, Family family);
-    void addUser(ArrayList<User> users, Family family);
-    void updateFamily(Family family);
-    Family createFamily(User creator, Family createdFamily, CreateFamilyReqForm requestBody);
-    void addMember(User user, Family family);
-    Family findByName(String name);
+    public Family saveFamily(Family family);
     Family findById(int id);
-    Integer findMemberById(int id);
+    String generateImgUploadId(int familyId);
+    Family findByName(String name);
 }

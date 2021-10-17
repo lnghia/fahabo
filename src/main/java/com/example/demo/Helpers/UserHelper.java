@@ -45,6 +45,7 @@ public class UserHelper {
         rs.put("languageCode", (user.getLanguageCode() == null) ? null : user.getLanguageCode().trim());
         rs.put("authType", user.getSocialAccountType().getJson());
         rs.put("avatar", (avatarUri != null) ? avatarUri : user.getAvatar());
+        rs.put("familyNum", user.getUserInFamilies().size());
 
         return rs;
     }

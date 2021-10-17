@@ -1,29 +1,20 @@
 package com.example.demo.domain;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Set;
 
 @Entity
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private int id;
 
     @Column(name = "role_name")
-    private String roleName;
+    private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "family_id")
-    )
-    private Set<Family> families;
-
-    @ManyToMany(mappedBy = "roles")
-    private Collection<User> users;
+    @OneToMany(mappedBy = "role")
+    private Set<UserInFamily> usersWithRolesInFamilies;
 
     public int getId() {
         return id;
@@ -33,27 +24,11 @@ public class Role {
         this.id = id;
     }
 
-    public String getRoleName() {
-        return roleName;
+    public String getName() {
+        return name;
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
-    public Set<Family> getFamilies() {
-        return families;
-    }
-
-    public void setFamilies(Set<Family> families) {
-        this.families = families;
-    }
-
-    public Collection<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Collection<User> users) {
-        this.users = users;
+    public void setName(String name) {
+        this.name = name;
     }
 }

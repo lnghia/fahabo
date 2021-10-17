@@ -2,10 +2,7 @@ package com.example.demo.Service;
 
 import com.example.demo.Repo.UserRepo;
 import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Family;
-import com.example.demo.domain.Role;
 import com.example.demo.domain.User;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
@@ -83,33 +81,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public UserDetails loadUserById(int id){
         User user = userRepo.findById(id);
-        Collection<Role> roles = user.getRoles();
-
-        Hibernate.initialize(roles);
+//        Collection<Role> roles = user.getRoles();
+//
+//        Hibernate.initialize(roles);
 
         return new CustomUserDetails(user);
-    }
-
-    @Transactional
-    public void joinFamily(List<User> users, Family family){
-        users.forEach(user -> {
-            user.getFamilies().add(family);
-            updateUser(user);
-        });
-    }
-
-    @Override
-    @Transactional
-    public void joinFamily(User user, Family family) {
-        if(user.getFamilies() == null){
-            user.setFamilies(new HashSet<>(List.of(family)));
-        }
-        else{
-//            Collection<Family> families = user.getFamilies();
-//            families.add(family);
-//            user.setFamilies(families);
-            user.getFamilies().add(family);
-        }
-        userRepo.save(user);
     }
 }

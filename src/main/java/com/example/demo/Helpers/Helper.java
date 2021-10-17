@@ -37,6 +37,8 @@ public class Helper {
             31
     ));
 
+    public final String DEFAULT_FAMILY_THUMBNAIL = "https://media.istockphoto.com/vectors/large-happy-family-is-standing-and-hugging-several-generations-with-vector-id1221390042?b=1&k=20&m=1221390042&s=612x612&w=0&h=DIY35-8Q2jZe8LMLdwXETf54sKwQL3_F6OCtXdTnB44=";
+
     public static Helper getInstance() {
         if (instance == null) instance = new Helper();
         return instance;

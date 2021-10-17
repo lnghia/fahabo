@@ -10,11 +10,10 @@ import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
+import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.Service.UserService;
-import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Family;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.User;
+import com.example.demo.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,7 +44,10 @@ public class UserController {
     private DropBoxAuthenticator dropBoxAuthenticator;
 
     @Autowired
-    private FamilyHelper familyHelper;
+    private FamilyService familyService;
+
+    @Autowired
+    private UserInFamilyService userInFamilyService;
 
     @GetMapping
     private ResponseEntity<Response> getUsers() {
@@ -232,15 +234,66 @@ public class UserController {
     @PostMapping("/join_family")
     public ResponseEntity<Response> joinFamily(@Valid @RequestBody JoinFamilyReqForm requestBody){
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        Family family = familyHelper.getFamilyService().findById(requestBody.familyId);
+        Family family = familyService.findById(requestBody.familyId);
 
-        if(familyHelper.getFamilyService().findMemberById(user.getId()) != null){
-            return ResponseEntity.ok(new Response(family.getJson(family.getThumbnail() != familyHelper.defaultThumbnail), new ArrayList<>()));
+        if(family.checkIfUserExist(user)){
+            return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
         }
 
-        userService.joinFamily(user, family);
-        familyHelper.getFamilyService().addMember(user, family);
+        UserInFamily userInFamily = new UserInFamily(user, family);
+        userInFamilyService.saveUserInFamily(userInFamily);
+        user.addFamily(userInFamily);
+        family.addUser(userInFamily);
+        userService.updateUser(user);
+        familyService.saveFamily(family);
 
-        return ResponseEntity.ok(new Response(family.getJson(family.getThumbnail() != familyHelper.defaultThumbnail), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
+    }
+
+    @PostMapping("/leave_family")
+    public ResponseEntity<Response> leaveFamily(@Valid @RequestBody JoinFamilyReqForm requestBody){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(requestBody.familyId);
+
+        if(family.checkIfUserExist(user)){
+            UserInFamily userInFamily = family.deleteUser(user);
+            UserInFamily userInFamily1 = user.deleteFamily(family);
+            userService.updateUser(user);
+            familyService.saveFamily(family);
+            if(userInFamily != null){
+                userInFamilyService.delete(userInFamily);
+//                userInFamilyService.saveUserInFamily(userInFamily);
+            }
+
+            return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>()));
+    }
+
+    @PostMapping("/kick_member")
+    public ResponseEntity<Response> kickMember(@Valid @RequestBody KickMemberReqForm requestBody){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(requestBody.familyId);
+
+        if(userInFamilyService.hasRole(user, family, "HOST")){
+            User userToKick = userService.getUserById(requestBody.userIdToKick);
+
+            if(family.checkIfUserExist(userToKick)){
+                UserInFamily association = family.deleteUser(userToKick);
+                userToKick.deleteFamily(family);
+                userService.updateUser(userToKick);
+                familyService.saveFamily(family);
+                if(association != null){
+                    userInFamilyService.delete(association);
+                }
+
+                return ResponseEntity.ok(new Response("kicked successfully.", new ArrayList<>()));
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("family.kickMemberFailure"))));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("family.kickMemberFailure"))));
     }
 }

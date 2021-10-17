@@ -9,12 +9,12 @@ import javax.validation.ConstraintValidatorContext;
 
 public class FamilyNameValidator implements ConstraintValidator<ValidFamilyName, String> {
     @Autowired
-    private FamilyHelper familyHelper;
+    private FamilyService familyService;
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if(s == null || s.isBlank() || s.isEmpty()) return false;
 
-        return familyHelper.getFamilyService().findByName(s) == null;
+        return familyService.findByName(s) == null;
     }
 }

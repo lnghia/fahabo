@@ -53,21 +53,16 @@ public class User {
 
     private String avatar;
 
-    @ManyToMany
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Collection<Role> roles;
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    @JoinTable(
+//            name = "users_roles",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id")
+//    )
+//    private Collection<Role> roles;
 
-    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_in_families",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "family_id")
-    )
-    private Collection<Family> families = new ArrayList<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<UserInFamily> userInFamilies = new HashSet<>();
 
     //    @Column(name = "social_account_type")
     @ManyToOne
@@ -225,20 +220,20 @@ public class User {
         this.socialAccountType = socialAccountType;
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
+//    public Collection<Role> getRoles() {
+//        return roles;
+//    }
+//
+//    public void setRoles(Collection<Role> roles) {
+//        this.roles = roles;
+//    }
+
+    public Set<UserInFamily> getUserInFamilies() {
+        return userInFamilies;
     }
 
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
-    }
-
-    public Collection<Family> getFamilies() {
-        return families;
-    }
-
-    public void setFamilies(Collection<Family> families) {
-        this.families = families;
+    public void setUserInFamilies(Set<UserInFamily> userInFamilies) {
+        this.userInFamilies = userInFamilies;
     }
 
     public User() {
@@ -249,6 +244,33 @@ public class User {
         this.birthday = birthday;
         this.languageCode = languageCode;
         this.password = password;
+    }
+
+    public User(int id, String name, String avatar, String phoneNumber){
+        this.id = id;
+        this.name = name;
+        this.avatar = avatar;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void addFamily(UserInFamily userInFamily){
+        userInFamilies.add(userInFamily);
+    }
+
+    public UserInFamily deleteFamily(Family family){
+        UserInFamily userInFamily = userInFamilies.stream().filter(userInFamily1 ->
+            userInFamily1.getFamilyId() == family.getId()
+        ).findFirst().orElse(null);
+
+        if(userInFamily != null){
+            userInFamilies.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
+        }
+
+        return userInFamily;
+    }
+
+    public void deleteFamily(UserInFamily userInFamily){
+        userInFamilies.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
     }
 
     public String toString() {
@@ -285,6 +307,39 @@ public class User {
         rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
         rs.put("authType", socialAccountType.getJson());
         rs.put("avatar", getAvatar());
+        rs.put("familyNum", userInFamilies.size());
+
+        return rs;
+    }
+
+    public HashMap<String, Object> getJson(String avatarUrl) {
+        HashMap<String, Object> rs = new HashMap<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        rs.put("id", id);
+        rs.put("username", username);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("email", email);
+        rs.put("isValidEmail", isValidEmail);
+        rs.put("isValidPhoneNumber", isValidPhoneNumber);
+        rs.put("birthday", (birthday != null) ? formatter.format(birthday) : "");
+        rs.put("contactId", contactId);
+        rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
+        rs.put("authType", socialAccountType.getJson());
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+        rs.put("familyNum", userInFamilies.size());
+
+        return rs;
+    }
+
+    public HashMap<String, Object> getShortJson(String avatarUrl){
+        HashMap<String, Object> rs = new HashMap<>();
+
+        rs.put("id", id);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
 
         return rs;
     }
