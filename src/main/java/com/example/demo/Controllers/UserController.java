@@ -235,13 +235,14 @@ public class UserController {
     public ResponseEntity<Response> joinFamily(@Valid @RequestBody JoinFamilyReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
+        Role role = roleService.findByName("MEMBER");
 
         if (family.checkIfUserExist(user)) {
             return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
         }
 
         UserInFamily userInFamily = new UserInFamily(user, family);
-        userInFamilyService.setRoleForUserInFamily(user, family, roleService.findByName("MEMBER"));
+        userInFamily.setRole(role);
         userInFamilyService.saveUserInFamily(userInFamily);
         user.addFamily(userInFamily);
         family.addUser(userInFamily);
