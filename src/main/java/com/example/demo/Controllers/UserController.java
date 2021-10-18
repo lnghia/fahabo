@@ -8,6 +8,7 @@ import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Service.Role.RoleService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.*;
@@ -45,6 +46,9 @@ public class UserController {
 
     @Autowired
     private UserInFamilyService userInFamilyService;
+
+    @Autowired
+    private RoleService roleService;
 
     @GetMapping
     private ResponseEntity<Response> getUsers() {
@@ -237,6 +241,7 @@ public class UserController {
         }
 
         UserInFamily userInFamily = new UserInFamily(user, family);
+        userInFamilyService.setRoleForUserInFamily(user, family, roleService.findByName("MEMBER"));
         userInFamilyService.saveUserInFamily(userInFamily);
         user.addFamily(userInFamily);
         family.addUser(userInFamily);
