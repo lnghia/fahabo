@@ -15,6 +15,6 @@ public class FamilyNameValidator implements ConstraintValidator<ValidFamilyName,
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if(s == null || s.isBlank() || s.isEmpty()) return false;
 
-        return familyService.findByName(s) == null;
+        return true;
     }
 }

@@ -126,6 +126,7 @@ public class FamilyControllers {
             }
         } else {
             family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+            familyService.saveFamily(family);
         }
 
         return ResponseEntity.ok(new Response(family.getJson((requestBody.thumbnail != null)), new ArrayList<>()));
