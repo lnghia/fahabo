@@ -21,11 +21,11 @@ public class UserInFamily implements Serializable {
     @Column(name = "role_id")
     private int roleId;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "users", referencedColumnName = "id")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "families", referencedColumnName = "id")
     private Family family;
 
