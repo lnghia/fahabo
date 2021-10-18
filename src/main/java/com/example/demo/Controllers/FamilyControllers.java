@@ -84,7 +84,7 @@ public class FamilyControllers {
         userService.updateUser(user);
         familyService.saveFamily(family);
 
-        if (requestBody.thumbnail != null) {
+        if (requestBody.thumbnail != null && !requestBody.thumbnail.getBase64Data().isBlank() && !requestBody.thumbnail.getBase64Data().isEmpty() && requestBody.thumbnail.getBase64Data() != null) {
             DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
 
             DropBoxUploader uploader = new DropBoxUploader(clientV2);

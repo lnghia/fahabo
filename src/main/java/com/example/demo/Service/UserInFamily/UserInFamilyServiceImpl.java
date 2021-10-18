@@ -25,6 +25,7 @@ public class UserInFamilyServiceImpl implements UserInFamilyService{
     private RoleService roleService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public UserInFamily saveUserInFamily(UserInFamily userInFamily) {
 //        return userInFamilyRepo.save(userInFamily.getUser().getId(), userInFamily.getFamily().getId());
         return userInFamilyRepo.save(userInFamily);
