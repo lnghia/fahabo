@@ -122,7 +122,8 @@ public class UserController {
 
     @PostMapping("/get_profile")
     public ResponseEntity<Response> getProfile(@Valid @RequestBody GetProfileReqForm requestBody) {
-        User user = userService.getUserById(requestBody.id);
+        User user = (requestBody.id == null) ? ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser() :
+                userService.getUserById(requestBody.id);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("user.doesNotExist"))));
