@@ -84,6 +84,10 @@ public class FamilyControllers {
         userService.updateUser(user);
         familyService.saveFamily(family);
 
+        HashMap<String, Object> data = new HashMap<>(){{
+            put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
+        }};
+
         if (requestBody.thumbnail != null && !requestBody.thumbnail.getBase64Data().isBlank() && !requestBody.thumbnail.getBase64Data().isEmpty() && requestBody.thumbnail.getBase64Data() != null) {
             DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
 
@@ -95,10 +99,14 @@ public class FamilyControllers {
                 UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.thumbnail));
 
                 if (executionResult == null) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                    family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+                    familyService.saveFamily(family);
+
+                    data.put("family", family.getJson(false));
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
                 }
 
-                HashMap<String, Object> data = new HashMap<>();
+//                HashMap<String, Object> data = new HashMap<>();
                 ArrayList<Image> successUploads = new ArrayList<>();
                 ArrayList<Image> failUploads = new ArrayList<>();
 
@@ -114,22 +122,27 @@ public class FamilyControllers {
                     family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
                     familyService.saveFamily(family);
 
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(family.getJson((requestBody.thumbnail != null)), new ArrayList<>(List.of("upload.fail"))));
+                    data.put("family", family.getJson(false));
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
                 }
 
                 family.setThumbnail(successUploads.get(0).getMetadata().getUrl());
                 familyService.saveFamily(family);
             } catch (ExecutionException | InterruptedException e) {
+                family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+                familyService.saveFamily(family);
                 log.error("Threading exception while initializing client: " + e.getMessage());
                 e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(family.getJson((requestBody.thumbnail != null)), new ArrayList<>(List.of("upload.fail"))));
+                data.put("family", family.getJson(false));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
             }
         } else {
             family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
             familyService.saveFamily(family);
         }
+        data.put("family", family.getJson((requestBody.thumbnail != null)));
 
-        return ResponseEntity.ok(new Response(family.getJson((requestBody.thumbnail != null)), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
 
     @GetMapping("/detail")

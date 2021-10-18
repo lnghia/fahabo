@@ -239,7 +239,12 @@ public class UserController {
         Role role = roleService.findByName("MEMBER");
 
         if (family.checkIfUserExist(user)) {
-            return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
+            HashMap<String, Object> data = new HashMap<>(){{
+                put("family", family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)));
+                put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
+            }};
+
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         }
 
         UserInFamily userInFamily = new UserInFamily(user, family);
@@ -250,7 +255,12 @@ public class UserController {
         userService.updateUser(user);
         familyService.saveFamily(family);
 
-        return ResponseEntity.ok(new Response(family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)), new ArrayList<>()));
+        HashMap<String, Object> data = new HashMap<>(){{
+            put("family", family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)));
+            put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
+        }};
+
+        return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
 
     @PostMapping("/leave_family")
