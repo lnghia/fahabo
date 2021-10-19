@@ -143,7 +143,7 @@ public class FamilyControllers {
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
 
-    @GetMapping("/detail")
+    @PostMapping("/detail")
     public ResponseEntity<Response> familyDetail(@Valid @RequestBody FamilyDetailReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
