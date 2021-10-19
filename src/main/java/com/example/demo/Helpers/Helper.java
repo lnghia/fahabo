@@ -137,6 +137,6 @@ public class Helper {
             log.info("Error while trying to get redirected uri for: " + uri);
         }
 
-        return null;
+        return uri;
     }
 }

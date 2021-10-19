@@ -210,7 +210,7 @@ public class FamilyControllers {
             }
             familyService.saveFamily(family);
 
-            return ResponseEntity.ok(new Response("Changed successfully.", new ArrayList<>()));
+            return ResponseEntity.ok(new Response(family.getJson(true), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
