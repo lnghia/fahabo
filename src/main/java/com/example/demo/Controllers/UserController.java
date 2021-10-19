@@ -239,7 +239,7 @@ public class UserController {
         Role role = roleService.findByName("MEMBER");
 
         if (family.checkIfUserExist(user)) {
-            HashMap<String, Object> data = new HashMap<>(){{
+            HashMap<String, Object> data = new HashMap<>() {{
                 put("family", family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)));
                 put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
             }};
@@ -255,7 +255,7 @@ public class UserController {
         userService.updateUser(user);
         familyService.saveFamily(family);
 
-        HashMap<String, Object> data = new HashMap<>(){{
+        HashMap<String, Object> data = new HashMap<>() {{
             put("family", family.getJson(!family.getThumbnail().equals(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL)));
             put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
         }};
@@ -268,7 +268,23 @@ public class UserController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if (family.checkIfUserExist(user)) {
+        if (family.checkIfUserExist(user) && family.getUsersInFamily().size() > 1) {
+            if (userInFamilyService.hasRole(user, family, "HOST")) {
+                UserInFamily newHost = family.getUsersInFamily().stream().filter(userInFamily1 -> {
+                    return userInFamily1.getUser().getId() != user.getId();
+                }).findAny().orElse(null);
+
+                if(newHost != null){
+                    Role role = roleService.findByName("HOST");
+                    User _user = userService.getUserById(newHost.getUserId());
+
+                    newHost.setRole(role);
+                    userInFamilyService.saveUserInFamily(newHost);
+//                    log.info(newHost.getUser().getJson().toString());
+//                    log.info(_user.getJson().toString());
+                }
+            }
+
             UserInFamily userInFamily = family.deleteUser(user);
             UserInFamily userInFamily1 = user.deleteFamily(family);
             userService.updateUser(user);
@@ -281,7 +297,7 @@ public class UserController {
             return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("family.leaveFamilyFailure"))));
     }
 
     @PostMapping("/kick_member")
@@ -292,7 +308,7 @@ public class UserController {
         if (userInFamilyService.hasRole(user, family, "HOST")) {
             User userToKick = userService.getUserById(requestBody.userIdToKick);
 
-            if (family.checkIfUserExist(userToKick)) {
+            if (family.checkIfUserExist(userToKick) && family.getUsersInFamily().size() > 1) {
                 UserInFamily association = family.deleteUser(userToKick);
                 userToKick.deleteFamily(family);
                 userService.updateUser(userToKick);
