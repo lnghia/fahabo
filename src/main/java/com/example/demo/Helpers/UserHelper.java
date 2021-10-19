@@ -15,6 +15,8 @@ import java.util.HashMap;
 public class UserHelper {
     private DropBoxAuthenticator dropBoxAuthenticator;
 
+    public String DEFAULT_AVATAR = "https://thumbs.dreamstime.com/b/default-avatar-profile-trendy-style-social-media-user-icon-187599373.jpg";
+
     @Autowired
     public UserHelper(DropBoxAuthenticator dropBoxAuthenticator) {
         this.dropBoxAuthenticator = dropBoxAuthenticator;

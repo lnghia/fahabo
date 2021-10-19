@@ -202,6 +202,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.System.fail.toString()))));
         }
 
+        newuser.setAvatar(userHelper.DEFAULT_AVATAR);
         userService.saveUser(newuser);
 
         return ResponseEntity.ok(new Response(userHelper.UserToJson(newuser), new ArrayList<>()));
