@@ -5,9 +5,7 @@ import com.example.demo.DropBox.*;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
-import com.example.demo.RequestForm.CreateFamilyReqForm;
-import com.example.demo.RequestForm.FamilyDetailReqForm;
-import com.example.demo.RequestForm.JoinFamilyReqForm;
+import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.Role.RoleService;
@@ -84,7 +82,7 @@ public class FamilyControllers {
         userService.updateUser(user);
         familyService.saveFamily(family);
 
-        HashMap<String, Object> data = new HashMap<>(){{
+        HashMap<String, Object> data = new HashMap<>() {{
             put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
         }};
 
@@ -195,6 +193,79 @@ public class FamilyControllers {
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(users.stream().map(user1 -> user1.getShortJson(null)).collect(Collectors.toList()),
                         new ArrayList<>(List.of("avatar.unavailable"))));
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @PostMapping("/update_family")
+    public ResponseEntity<Response> updateFamily(@Valid @RequestBody UpdateFamilyReqForm requestBody) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(requestBody.familyId);
+
+        if (family.checkIfUserExist(user)) {
+            if (requestBody.name != null && !requestBody.name.isEmpty() && !requestBody.name.isBlank()) {
+                family.setFamilyName(requestBody.name);
+            }
+            familyService.saveFamily(family);
+
+            return ResponseEntity.ok(new Response("Changed successfully.", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @PostMapping("/update_thumbnail")
+    public ResponseEntity<Response> updateThumbnail(@Valid @RequestBody UploadFamilyThumbnailReqForm requestBody) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(requestBody.familyId);
+
+        if (family.checkIfUserExist(user)) {
+            if (requestBody.thumbnail == null ||
+                    requestBody.thumbnail.getBase64Data() == null ||
+                    requestBody.thumbnail.getBase64Data().isBlank() ||
+                    requestBody.thumbnail.getBase64Data().isEmpty()) {
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.invalidFile"))));
+
+            }
+            DbxClientV2 dbxClientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+            DropBoxUploader uploader = new DropBoxUploader(dbxClientV2);
+
+            requestBody.thumbnail.setName(familyService.generateImgUploadId(family.getId()));
+
+            try {
+                UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.thumbnail));
+
+                if (executionResult == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                }
+
+                ArrayList<Image> successUploads = new ArrayList<>();
+                ArrayList<Image> failUploads = new ArrayList<>();
+
+                executionResult.getCreationResults().forEach((k, v) -> {
+                    if (v.isOk()) {
+                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
+                    } else {
+                        failUploads.add(new Image(k, v.metadata));
+                    }
+                });
+
+                if (successUploads.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                }
+
+                family.setThumbnail(successUploads.get(0).getMetadata().getUrl());
+                familyService.saveFamily(family);
+
+                return ResponseEntity.ok(new Response(family.getJson(successUploads.get(0).getUri()), new ArrayList<>()));
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Threading exception while initializing client: " + e.getMessage());
+                e.printStackTrace();
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
             }
         }
 
