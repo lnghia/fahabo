@@ -244,7 +244,7 @@ public class UserController {
                 put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
             }};
 
-            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("family.hasBeenJoined"))));
         }
 
         UserInFamily userInFamily = new UserInFamily(user, family);

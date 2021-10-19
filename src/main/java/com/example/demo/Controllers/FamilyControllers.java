@@ -194,7 +194,7 @@ public class FamilyControllers {
                 log.error("Couldn't retrieve redirected url, unknown error.");
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(users.stream().map(user1 -> user1.getShortJson(null)).collect(Collectors.toList()),
-                        new ArrayList<>(List.of("unknownError"))));
+                        new ArrayList<>(List.of("avatar.unavailable"))));
             }
         }
 
