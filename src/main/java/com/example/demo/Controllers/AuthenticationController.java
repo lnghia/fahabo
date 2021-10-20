@@ -76,8 +76,8 @@ public class AuthenticationController {
 
             if (user.getValidEmail()) {
                 data = new HashMap<>() {{
-                    put("access_token", access_token);
-                    put("refresh_token", refresh_token);
+                    put("accessToken", access_token);
+                    put("refreshToken", refresh_token);
                     put("isValidEmail", true);
                     put("user", userHelper.UserToJson(user));
                 }};
