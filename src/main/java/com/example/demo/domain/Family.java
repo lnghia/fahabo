@@ -23,6 +23,9 @@ public class Family {
     @OneToMany(mappedBy = "family", fetch = FetchType.EAGER)
     private Set<UserInFamily> usersInFamily = new HashSet<>();
 
+    @OneToMany(mappedBy = "family", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Album> albums = new HashSet<>();
+
 //    @ManyToMany(mappedBy = "families")
 //    private Set<Role> roles;
 
@@ -70,34 +73,46 @@ public class Family {
         this.usersInFamily = usersInFamily;
     }
 
-    public void addUser(UserInFamily userInFamily){
+    public void addUser(UserInFamily userInFamily) {
         usersInFamily.add(userInFamily);
     }
 
-    public boolean checkIfUserExist(User user){
+    public boolean checkIfUserExist(User user) {
         return usersInFamily.stream().filter(userInFamily ->
-            userInFamily.getUser().getId() == user.getId()
+                userInFamily.getUser().getId() == user.getId()
         ).findAny().isPresent();
     }
 
-    public UserInFamily deleteUser(User user){
+    public UserInFamily deleteUser(User user) {
         UserInFamily userInFamily = usersInFamily.stream().filter(userInFamily1 ->
                 userInFamily1.getUser().getId() == user.getId()
         ).findFirst().orElse(null);
 
-        if(userInFamily != null){
+        if (userInFamily != null) {
             usersInFamily.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
         }
 
         return userInFamily;
     }
 
-    public void deleteUser(UserInFamily userInFamily){
+    public void deleteUser(UserInFamily userInFamily) {
         usersInFamily.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
     }
 
-    public HashMap<String, Object> getJson(boolean getThumbnail){
-        return new HashMap<>(){{
+    public Set<Album> getAlbums() {
+        return albums;
+    }
+
+    public void setAlbums(Set<Album> albums) {
+        this.albums = albums;
+    }
+
+    public void addAlbum(Album album) {
+        albums.add(album);
+    }
+
+    public HashMap<String, Object> getJson(boolean getThumbnail) {
+        return new HashMap<>() {{
             put("familyName", familyName);
             put("familyId", id);
             put("thumbnail", ((getThumbnail) ? Helper.getInstance().createSharedLink(thumbnail) : thumbnail));
@@ -105,8 +120,8 @@ public class Family {
         }};
     }
 
-    public HashMap<String, Object> getJson(String thumbnailRedirected){
-        return new HashMap<>(){{
+    public HashMap<String, Object> getJson(String thumbnailRedirected) {
+        return new HashMap<>() {{
             put("familyName", familyName);
             put("familyId", id);
             put("thumbnail", ((thumbnailRedirected == null) ? thumbnail : thumbnailRedirected));
@@ -114,8 +129,8 @@ public class Family {
         }};
     }
 
-    public HashMap<String, Object> getJsonInDetail(boolean getThumbnail){
-        return new HashMap<>(){{
+    public HashMap<String, Object> getJsonInDetail(boolean getThumbnail) {
+        return new HashMap<>() {{
             put("familyName", familyName);
             put("familyId", id);
             put("thumbnail", ((getThumbnail) ? Helper.getInstance().createSharedLink(thumbnail) : thumbnail));

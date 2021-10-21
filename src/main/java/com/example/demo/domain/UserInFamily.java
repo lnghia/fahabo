@@ -48,6 +48,7 @@ public class UserInFamily implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+        this.userId = user.getId();
     }
 
     public Family getFamily() {
@@ -56,6 +57,7 @@ public class UserInFamily implements Serializable {
 
     public void setFamily(Family family) {
         this.family = family;
+        this.familyId = family.getId();
     }
 
     public int getUserId() {
