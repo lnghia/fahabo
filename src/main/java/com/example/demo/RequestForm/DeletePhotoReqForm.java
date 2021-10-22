@@ -5,5 +5,5 @@ import com.example.demo.Validators.PhotoId.PhotoIdExists;
 import java.util.ArrayList;
 
 public class DeletePhotoReqForm {
-    public ArrayList<Integer> photoId;
+    public ArrayList<Integer> photoIds;
 }

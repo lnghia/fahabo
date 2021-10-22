@@ -55,10 +55,10 @@ public class PhotoController {
     public ResponseEntity<Response> deletePhoto(@Valid @RequestBody DeletePhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if(requestBody.photoId == null)
+        if(requestBody.photoIds == null)
             return ResponseEntity.ok(new Response("no data to delete.", new ArrayList<>()));
 
-        for (int photoId : requestBody.photoId) {
+        for (int photoId : requestBody.photoIds) {
             if (photoService.checkIfPhotoExistById(photoId) && userPhotoHelper.canUserUpdatePhoto(user, photoId)) {
                 Photo photo = photoService.getById(photoId);
                 AlbumsPhotos albumsPhotos = albumsPhotosService.getByPhotoId(photoId);
