@@ -59,7 +59,7 @@ public class PhotoController {
             return ResponseEntity.ok(new Response("no data to delete.", new ArrayList<>()));
 
         for (int photoId : requestBody.photoId) {
-            if (userPhotoHelper.canUserUpdatePhoto(user, photoId)) {
+            if (photoService.checkIfPhotoExistById(photoId) && userPhotoHelper.canUserUpdatePhoto(user, photoId)) {
                 Photo photo = photoService.getById(photoId);
                 AlbumsPhotos albumsPhotos = albumsPhotosService.getByPhotoId(photoId);
 

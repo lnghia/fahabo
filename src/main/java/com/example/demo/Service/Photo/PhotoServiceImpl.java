@@ -26,4 +26,9 @@ public class PhotoServiceImpl implements PhotoService {
     public Photo getById(int id) {
         return photoRepo.getById(id);
     }
+
+    @Override
+    public boolean checkIfPhotoExistById(int photoId) {
+        return photoRepo.checkIfPhotoExistById(photoId).isPresent();
+    }
 }
