@@ -104,8 +104,10 @@ public class AlbumController {
         UserInFamily userInFamily = userInFamilyService.findByUserIdAndFamilyId(user.getId(), album.getFamily().getId());
 
         if (userInFamily != null) {
-            if (!albumFamilyHelper.isAlbumTitleUniqueInFamily(album.getFamily().getId(), requestBody.title)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.albumTitleExists"))));
+            if(requestBody.title != null && !requestBody.title.isEmpty() && !requestBody.title.isBlank()){
+                if (!albumFamilyHelper.isAlbumTitleUniqueInFamily(album.getFamily().getId(), requestBody.title)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.albumTitleExists"))));
+                }
             }
 
             Date now = new Date();
