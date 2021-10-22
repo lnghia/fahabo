@@ -104,19 +104,19 @@ public class AlbumController {
         UserInFamily userInFamily = userInFamilyService.findByUserIdAndFamilyId(user.getId(), album.getFamily().getId());
 
         if (userInFamily != null) {
-            if(requestBody.title != null && !requestBody.title.isEmpty() && !requestBody.title.isBlank()){
+            Date now = new Date();
+
+            if(requestBody.title != null && !requestBody.title.isEmpty() && !requestBody.title.isBlank() && !album.getTitle().equals(requestBody.title)){
                 if (!albumFamilyHelper.isAlbumTitleUniqueInFamily(album.getFamily().getId(), requestBody.title)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.albumTitleExists"))));
                 }
+                album.setTitle(requestBody.title);
             }
 
-            Date now = new Date();
-
-            album.setUpdatedAt(now);
-            album.setTitle(requestBody.title);
             if (requestBody.description != null && !requestBody.description.isBlank() && !requestBody.description.isEmpty()) {
                 album.setDescription(requestBody.description);
             }
+            album.setUpdatedAt(now);
             albumService.saveAlbum(album);
 
             return ResponseEntity.ok(new Response(albumHelper.getJson(album), new ArrayList<>()));
