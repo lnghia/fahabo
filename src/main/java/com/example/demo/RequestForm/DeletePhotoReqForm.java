@@ -2,7 +2,9 @@ package com.example.demo.RequestForm;
 
 import com.example.demo.Validators.PhotoId.PhotoIdExists;
 
+import java.util.ArrayList;
+
 public class DeletePhotoReqForm {
     @PhotoIdExists
-    public int photoId;
+    public ArrayList<Integer> photoId;
 }

@@ -55,19 +55,24 @@ public class PhotoController {
     public ResponseEntity<Response> deletePhoto(@Valid @RequestBody DeletePhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if (userPhotoHelper.canUserUpdatePhoto(user, requestBody.photoId)) {
-            Photo photo = photoService.getById(requestBody.photoId);
-            AlbumsPhotos albumsPhotos = albumsPhotosService.getByPhotoId(requestBody.photoId);
+        if(requestBody.photoId == null)
+            return ResponseEntity.ok(new Response("no data to delete.", new ArrayList<>()));
 
-            albumsPhotos.setDeleted(true);
-            photo.setDeleted(true);
-            albumsPhotosService.saveAlbumsPhotos(albumsPhotos);
-            photoService.savePhoto(photo);
+        for (int photoId : requestBody.photoId) {
+            if (userPhotoHelper.canUserUpdatePhoto(user, photoId)) {
+                Photo photo = photoService.getById(photoId);
+                AlbumsPhotos albumsPhotos = albumsPhotosService.getByPhotoId(photoId);
 
-            return ResponseEntity.ok(new Response("deleted successfully.", new ArrayList<>()));
+                albumsPhotos.setDeleted(true);
+                photo.setDeleted(true);
+                albumsPhotosService.saveAlbumsPhotos(albumsPhotos);
+                photoService.savePhoto(photo);
+
+//                return ResponseEntity.ok(new Response("deleted successfully.", new ArrayList<>()));
+            }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.ok(new Response("deleted successfully", new ArrayList<>()));
     }
 
     @PostMapping
