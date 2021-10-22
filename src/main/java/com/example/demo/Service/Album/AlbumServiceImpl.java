@@ -2,10 +2,17 @@ package com.example.demo.Service.Album;
 
 import com.example.demo.Repo.AlbumRepo;
 import com.example.demo.domain.Album;
+import com.example.demo.domain.Photo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class AlbumServiceImpl implements AlbumService{
     @Autowired
     private AlbumRepo albumRepo;
@@ -30,5 +37,29 @@ public class AlbumServiceImpl implements AlbumService{
         int tmp = albumRepo.countByAlbumIdAndFamilyId(albumId, familyId);
 
         return (albumRepo.countByAlbumIdAndFamilyId(albumId, familyId) > 0);
+    }
+
+    @Override
+    public int countAllByAlbum(int albumId) {
+        return albumRepo.countAllByAlbum(albumId);
+    }
+
+    @Override
+    public int getFamilyIdByAlbumId(int albumId) {
+        return albumRepo.getFamilyIdByAlbumId(albumId);
+    }
+
+    @Override
+    public List<Album> findAllByFamilyIdWithPagination(int familyId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return albumRepo.findAllByFamilyIdWithPagination(familyId, pageable);
+    }
+
+    @Override
+    public List<Integer> findAllPhotoIdsByAlbumIdWithPagination(int albumId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return albumRepo.getPhotoIdsByAlbumIdWithPagination(albumId, pageable);
     }
 }

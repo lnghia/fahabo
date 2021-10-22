@@ -69,30 +69,28 @@ public class Album {
         this.title = title;
     }
 
-    public Date getCreatedAt() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    public String getCreatedAtAsString() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
-        try{
-            return formatter.parse(createdAt.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return createdAt;
-        }
+        return formatter.format(createdAt);
+    }
+
+    public String getUpdatedAtAsString() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.format(updatedAt);
     }
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    public Date getCreatedAt() {
+        return createdAt;
+    }
 
-        try{
-            return formatter.parse(updatedAt.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return updatedAt;
-        }
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
     public void setUpdatedAt(Date updatedAt) {
@@ -135,12 +133,12 @@ public class Album {
         photosInAlbum.add(albumsPhotos);
     }
 
-    public HashMap<String, Object> getJson(){
-        return new HashMap<>(){{
-           put("id", id);
-           put("title", title);
-           put("description", description);
-           put("totalPhotos", photosInAlbum.size());
+    public HashMap<String, Object> getJson() {
+        return new HashMap<>() {{
+            put("id", id);
+            put("title", title);
+            put("description", description);
+            put("totalPhotos", photosInAlbum.size());
         }};
     }
 }

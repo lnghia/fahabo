@@ -28,6 +28,9 @@ public class AlbumsPhotos {
     @JoinColumn(name = "photos", referencedColumnName = "id")
     private Photo photo;
 
+    public AlbumsPhotos() {
+    }
+
     public AlbumsPhotos(Album album, Photo photo) {
         this.album = album;
         this.photo = photo;

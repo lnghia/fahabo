@@ -1,23 +1,43 @@
 package com.example.demo.Repo;
 
 import com.example.demo.domain.Album;
+import com.example.demo.domain.Photo;
+import jdk.dynalink.linker.LinkerServices;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface AlbumRepo extends JpaRepository<Album, Integer> {
     @Query(value = "SELECT * FROM albums WHERE id=:id AND is_deleted=false", nativeQuery = true)
     Album getById(@Param("id") int id);
 
-    @Query(value = "SELECT * FROM albums WHERE family_id=:family_id AND title=:title AND is_deleted=false", nativeQuery = true)
+    @Query(value = "SELECT * FROM albums WHERE family_id=:family_id AND title=:title AND is_deleted=FALSE", nativeQuery = true)
     Album findByFamilyIdAndTitle(@Param("family_id") int familyId,
                                  @Param("title") String title);
 
-    @Query(value = "SELECT COUNT(DISTINCT id) FROM albums WHERE id=:album_id AND family_id=:family_id AND is_deleted=false", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT id) FROM albums WHERE id=:album_id AND family_id=:family_id AND is_deleted=FALSE", nativeQuery = true)
     int countByAlbumIdAndFamilyId(@Param("album_id") int albumId,
                                   @Param("family_id") int familyId);
+
+    @Query(value = "SELECT COUNT(DISTINCT photo_id) FROM photos_in_albums WHERE album_id=:albumId AND is_deleted=FALSE", nativeQuery = true)
+    int countAllByAlbum(@Param("albumId") int albumId);
+
+    @Query(value = "SELECT family_id FROM albums WHERE id=:id AND is_deleted=FALSE", nativeQuery = true)
+    Integer getFamilyIdByAlbumId(@Param("id") int id);
+
+    @Query(value = "SELECT * FROM albums WHERE family_id=:familyId AND is_deleted=FALSE", nativeQuery = true,
+            countQuery = "SELECT COUNT(DISTINCT id) FROM albums WHERE family_id=:familyId AND is_deleted=FALSE")
+    List<Album> findAllByFamilyIdWithPagination(@Param("familyId") int familyId, Pageable pageable);
+
+    @Query(value = "SELECT DISTINCT photo_id FROM photos_in_albums WHERE album_id=:albumId AND is_deleted=FALSE",
+            countQuery = "SELECT COUNT(DISTINCT photo_id) FROM photos_in_albums WHERE album_id=:albumId AND is_deleted=FALSE",
+            nativeQuery = true)
+    List<Integer> getPhotoIdsByAlbumIdWithPagination(@Param("albumId") int albumId, Pageable pageable);
 
 //    @Query(value = "SELECT COUNT(DISTINCT user_id) " +
 //            "FROM (SELECT user_id, albums.family_id, albums.id AS album_id FROM albums INNER JOIN users_in_families ON albums.family_id=users_in_families.family_id) AS tmp " +

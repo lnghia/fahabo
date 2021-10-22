@@ -1,22 +1,31 @@
 package com.example.demo.domain;
 
+import com.example.demo.Helpers.Helper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "photos")
+@Slf4j
 public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     private String uri;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "created_at")
     @CreatedDate
@@ -33,7 +42,7 @@ public class Photo {
 ////    @CreatedBy
 //    private User createdBy;
 
-    @OneToMany(mappedBy = "photo")
+    @OneToMany(mappedBy = "photo", cascade = {CascadeType.PERSIST})
     private Set<AlbumsPhotos> photoInAlbums = new HashSet<>();
 
     @Column(name = "description")
@@ -52,7 +61,15 @@ public class Photo {
         this.updatedAt = updatedAt;
     }
 
-//    public Photo(String uri, User createdBy) {
+    public Photo(String uri, String name, Date createdAt, Date updatedAt, String description) {
+        this.uri = uri;
+        this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.description = description;
+    }
+
+    //    public Photo(String uri, User createdBy) {
 //        this.uri = uri;
 //        this.createdBy = createdBy;
 //    }
@@ -75,16 +92,28 @@ public class Photo {
         this.uri = uri;
     }
 
+    public String getCreatedAtAsString() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.format(createdAt);
+    }
+
+    public String getUpdatedAtAsString() {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.format(updatedAt);
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Date getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setUpdatedAt(Date updatedAt) {
@@ -119,6 +148,14 @@ public class Photo {
         this.description = description;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     //    public User getCreatedBy() {
 //        return createdBy;
 //    }
@@ -126,4 +163,13 @@ public class Photo {
 //    public void setCreatedBy(User createdBy) {
 //        this.createdBy = createdBy;
 //    }
+
+    public HashMap<String, Object> getJson(String redirectedUri){
+        return new HashMap<>(){{
+           put("id", id);
+           put("uri", (redirectedUri == null) ? uri : Helper.getInstance().createSharedLink(uri));
+           put("createdAt", getCreatedAtAsString());
+           put("updatedAt", getUpdatedAtAsString());
+        }};
+    }
 }

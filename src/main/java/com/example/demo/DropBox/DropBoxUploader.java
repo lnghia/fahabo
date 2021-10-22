@@ -83,6 +83,7 @@ public class DropBoxUploader implements AutoCloseable{
                 creationQueue.add(byteUploadResult);
             }
             else{
+//                log.info(byteUploadResult.getError().getMessage());
                 log.error(byteUploadResult.getName(), byteUploadResult.getError());
                 failedUploads.put(byteUploadResult.name, byteUploadResult);
             }

@@ -2,6 +2,7 @@ package com.example.demo.Helpers;
 
 import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.domain.Image;
+import com.example.demo.domain.Photo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.mail.imap.protocol.Item;
@@ -93,6 +94,25 @@ public class Helper {
         ItemToUpload[] rs = new ItemToUpload[images.size()];
 
         for (int i = 0; i < images.size(); ++i) {
+            rs[i] = new ItemToUpload(images.get(i).getName(), images.get(i).getBase64Data());
+        }
+
+        return rs;
+    }
+
+    public String generatePhotoNameToUploadToAlbum(int familyId, int albumId, int photoId){
+        return String.format("%d_%d_%d_%d.jpg", familyId, albumId, photoId, new Date().getTime());
+    }
+
+    public ItemToUpload[] listOfImagesToArrOfItemToUploadWithGeneratedName(List<Image> images, List<Photo> photos, int albumId, int familyId){
+        ItemToUpload[] rs = new ItemToUpload[images.size()];
+
+        for (int i = 0; i < images.size(); ++i) {
+            int photoId = photos.get(i).getId();
+            String name = generatePhotoNameToUploadToAlbum(familyId, albumId, photoId);
+
+            photos.get(i).setName(name);
+            images.get(i).setName(name);
             rs[i] = new ItemToUpload(images.get(i).getName(), images.get(i).getBase64Data());
         }
 
