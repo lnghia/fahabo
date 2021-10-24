@@ -70,4 +70,12 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add_default_album_table_families" author="nghia">
+        <addColumn tableName="families">
+            <column name="default_album" type="int">
+                <constraints foreignKeyName="fk_families_default_table" references="albums(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

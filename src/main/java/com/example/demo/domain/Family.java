@@ -26,6 +26,10 @@ public class Family {
     @OneToMany(mappedBy = "family", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Album> albums = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "default_album", referencedColumnName = "id")
+    private Album defaultAlbum;
+
 //    @ManyToMany(mappedBy = "families")
 //    private Set<Role> roles;
 
@@ -109,6 +113,14 @@ public class Family {
 
     public void addAlbum(Album album) {
         albums.add(album);
+    }
+
+    public Album getDefaultAlbum() {
+        return defaultAlbum;
+    }
+
+    public void setDefaultAlbum(Album defaultAlbum) {
+        this.defaultAlbum = defaultAlbum;
     }
 
     public HashMap<String, Object> getJson(boolean getThumbnail) {

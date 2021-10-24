@@ -1,10 +1,7 @@
 package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
-import com.example.demo.DropBox.DropBoxAuthenticator;
-import com.example.demo.DropBox.DropBoxUploader;
-import com.example.demo.DropBox.ItemToUpload;
-import com.example.demo.DropBox.UploadExecutionResult;
+import com.example.demo.DropBox.*;
 import com.example.demo.Helpers.AlbumFamilyHelper;
 import com.example.demo.Helpers.AlbumHelper;
 import com.example.demo.Helpers.Helper;
@@ -17,16 +14,14 @@ import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.domain.*;
+import liquibase.pro.packaged.A;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -106,7 +101,7 @@ public class AlbumController {
         if (userInFamily != null) {
             Date now = new Date();
 
-            if(requestBody.title != null && !requestBody.title.isEmpty() && !requestBody.title.isBlank() && !album.getTitle().equals(requestBody.title)){
+            if (requestBody.title != null && !requestBody.title.isEmpty() && !requestBody.title.isBlank() && !album.getTitle().equals(requestBody.title)) {
                 if (!albumFamilyHelper.isAlbumTitleUniqueInFamily(album.getFamily().getId(), requestBody.title)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.albumTitleExists"))));
                 }
@@ -233,14 +228,62 @@ public class AlbumController {
     @PostMapping
     public ResponseEntity<Response> getAlbums(@RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
                                               @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
-                                              @Valid @RequestBody GetAlbumsReqForm requestBody){
+                                              @Valid @RequestBody GetAlbumsReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if(family.checkIfUserExist(user)){
-            List<Album> albums = albumService.findAllByFamilyIdWithPagination(family.getId(), page, size);
+        if (family.checkIfUserExist(user)) {
+            List<Album> albums = new ArrayList<>();
+            if(page == 0){
+                albums.add(family.getDefaultAlbum());
+            }
+            albums.addAll(albumService.findAllByFamilyIdWithPagination(family.getId(), family.getDefaultAlbum().getId(), page, (page == 0) ? size - 1 : size));
 
             return ResponseEntity.ok(new Response(albums.stream().map(album -> albumHelper.getJson(album)).collect(Collectors.toList()), new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @GetMapping("/preview_album")
+    public ResponseEntity<Response> previewDefaultAlbum(@Valid @RequestBody PreviewDefaultAlbumReqForm requestBody) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(requestBody.familyId);
+        int defaultAlbumId = family.getDefaultAlbum().getId();
+
+        if (family.checkIfUserExist(user)) {
+            List<Integer> photoIds = albumService.get9LatestPhotosFromAlbum(defaultAlbumId);
+            List<Photo> photos = photoIds.stream().map(photoId -> {
+                return photoService.getById(photoId);
+            }).collect(Collectors.toList());
+            ArrayList<HashMap<String, Object>> data;
+
+            try {
+                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+                DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+
+                GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(photos.stream().map(photo -> {
+                    return new Image(photo.getName(), photo.getUri());
+                }).collect(Collectors.toList())));
+
+                if (executionResult != null) {
+                    data = new ArrayList<>(photos.stream()
+                            .map(photo -> {
+                                return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
+                                        photo.getJson(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
+                            }).collect(Collectors.toList()));
+
+                    return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+                }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));

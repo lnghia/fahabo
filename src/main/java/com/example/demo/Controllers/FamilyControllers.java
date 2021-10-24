@@ -7,6 +7,7 @@ import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
+import com.example.demo.Service.Album.AlbumService;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.Role.RoleService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -32,6 +34,9 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "api/v1/families")
 @Slf4j
 public class FamilyControllers {
+    @Autowired
+    private AlbumService albumService;
+
     @Autowired
     private UserService userService;
 
@@ -56,8 +61,19 @@ public class FamilyControllers {
     @PostMapping("/new_family")
     public ResponseEntity<Response> createFamily(@Valid @RequestBody CreateFamilyReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Date now = new Date();
 
         Family family = new Family(requestBody.familyName);
+        familyService.saveFamily(family);
+
+        Album newAlbum = new Album("Default album");
+        newAlbum.setFamily(family);
+        newAlbum.setCreatedAt(now);
+        newAlbum.setUpdatedAt(now);
+        albumService.saveAlbum(newAlbum);
+
+        family.addAlbum(newAlbum);
+        family.setDefaultAlbum(newAlbum);
         familyService.saveFamily(family);
 
         if (requestBody.ids != null) {

@@ -50,10 +50,10 @@ public class AlbumServiceImpl implements AlbumService{
     }
 
     @Override
-    public List<Album> findAllByFamilyIdWithPagination(int familyId, int page, int size) {
+    public List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return albumRepo.findAllByFamilyIdWithPagination(familyId, pageable);
+        return albumRepo.findAllByFamilyIdWithPagination(familyId, defaultAlbumId, pageable);
     }
 
     @Override
@@ -61,5 +61,10 @@ public class AlbumServiceImpl implements AlbumService{
         Pageable pageable = PageRequest.of(page, size);
 
         return albumRepo.getPhotoIdsByAlbumIdWithPagination(albumId, pageable);
+    }
+
+    @Override
+    public List<Integer> get9LatestPhotosFromAlbum(int albumId) {
+        return albumRepo.get9LatestPhotosFromAlbum(albumId);
     }
 }
