@@ -99,6 +99,43 @@ public class DropBoxUploader implements AutoCloseable{
         return new UploadExecutionResult(itemCreationResults);
     }
 
+//    public UploadExecutionResult uploadItemsWithoutCreatingSharableLinks(ItemToUpload[] items) throws InterruptedException, ExecutionException {
+//        if(dbxClientV2 == null){
+//            log.error("Dropbox client was not initialized.");
+//            return null;
+//        }
+//
+//        successfulUploads = new HashMap<>(items.length);
+//
+//        scheduleUploadItemBytes(items);
+//
+//        log.info("All byte uploads tasks have been scheduled.");
+//
+//        for(int finished = 0; finished < items.length; ++finished){
+//            Future<ByteUploadTask.ByteUploadResult> resultFuture = uploadService.take();
+//            ByteUploadTask.ByteUploadResult byteUploadResult = resultFuture.get();
+//
+//            if(byteUploadResult.isOk()){
+//                successfulUploads.put(byteUploadResult.name, byteUploadResult);
+//                creationQueue.add(byteUploadResult);
+//            }
+//            else{
+////                log.info(byteUploadResult.getError().getMessage());
+//                log.error(byteUploadResult.getName(), byteUploadResult.getError());
+//                failedUploads.put(byteUploadResult.name, byteUploadResult);
+//            }
+//        }
+//
+////        if(creationQueue.size() >= 40 || successfulUploads.size() + failedUploads.size() >= items.length){
+////            log.info("Starting getSharedLink call.");
+////            createSharedLinks();
+////        }
+//
+//        log.info("Execution complete.");
+//
+//        return new UploadExecutionResult(itemCreationResults);
+//    }
+
     public String createSharedLink(String uri){
         if(uri == null || uri.isEmpty() || uri.isBlank()){
             log.info("No item to create.");

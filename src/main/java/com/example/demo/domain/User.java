@@ -69,6 +69,9 @@ public class User {
     @JoinColumn(name = "social_account_type", referencedColumnName = "id")
     private SocialAccountType socialAccountType;
 
+    @OneToMany(mappedBy = "reporter", fetch = FetchType.EAGER)
+    private Set<Chore> chores = new HashSet<>();
+
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
 
@@ -90,6 +93,9 @@ public class User {
 
     @Column(name = "reset_pw_otp_issued_at")
     private Date resetPasswordOTPIssuedAt;
+
+    @OneToMany(mappedBy = "assignee")
+    private Set<ChoresAssignUsers> choresAssignUsers = new HashSet<>();
 
     public int getId() {
         return id;
@@ -236,6 +242,14 @@ public class User {
         this.userInFamilies = userInFamilies;
     }
 
+    public Set<Chore> getChores() {
+        return chores;
+    }
+
+    public void setChores(Set<Chore> chores) {
+        this.chores = chores;
+    }
+
     public User() {
     }
 
@@ -342,5 +356,13 @@ public class User {
         rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
 
         return rs;
+    }
+
+    public Set<ChoresAssignUsers> getChoresAssignUsers() {
+        return choresAssignUsers;
+    }
+
+    public void setChoresAssignUsers(Set<ChoresAssignUsers> choresAssignUsers) {
+        this.choresAssignUsers = choresAssignUsers;
     }
 }

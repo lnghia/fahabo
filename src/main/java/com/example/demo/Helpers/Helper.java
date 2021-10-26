@@ -1,12 +1,16 @@
 package com.example.demo.Helpers;
 
+import com.example.demo.DropBox.DropBoxRedirectedLinkGetter;
+import com.example.demo.DropBox.GetRedirectedLinkExecutionResult;
 import com.example.demo.DropBox.ItemToUpload;
+import com.example.demo.ResponseFormat.Response;
 import com.example.demo.domain.Image;
 import com.example.demo.domain.Photo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.mail.imap.protocol.Item;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +19,9 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Helper {
@@ -100,11 +105,11 @@ public class Helper {
         return rs;
     }
 
-    public String generatePhotoNameToUploadToAlbum(int familyId, int albumId, int photoId){
+    public String generatePhotoNameToUploadToAlbum(int familyId, int albumId, int photoId) {
         return String.format("%d_%d_%d_%d.jpg", familyId, albumId, photoId, new Date().getTime());
     }
 
-    public ItemToUpload[] listOfImagesToArrOfItemToUploadWithGeneratedName(List<Image> images, List<Photo> photos, int albumId, int familyId){
+    public ItemToUpload[] listOfImagesToArrOfItemToUploadWithGeneratedName(List<Image> images, List<Photo> photos, int albumId, int familyId) {
         ItemToUpload[] rs = new ItemToUpload[images.size()];
 
         for (int i = 0; i < images.size(); ++i) {
@@ -119,7 +124,7 @@ public class Helper {
         return rs;
     }
 
-    public ItemToUpload[] convertAImgToParaForUploadImgs(Image img){
+    public ItemToUpload[] convertAImgToParaForUploadImgs(Image img) {
         ItemToUpload[] rs = new ItemToUpload[1];
 
         rs[0] = new ItemToUpload(img.getName(), img.getBase64Data());
@@ -138,8 +143,8 @@ public class Helper {
         }
     }
 
-    public String createSharedLink(String uri){
-        if(uri == null || uri.isEmpty() || uri.isBlank()){
+    public String createSharedLink(String uri) {
+        if (uri == null || uri.isEmpty() || uri.isBlank()) {
             log.info("No item to create.");
             return null;
         }
@@ -158,5 +163,64 @@ public class Helper {
         }
 
         return uri;
+    }
+
+    public String formatDate(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.format(date);
+    }
+
+    public Date formatDate(String date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.parse(date);
+    }
+
+    public Date formatDateWithoutTime(String datetime) throws ParseException{
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        return formatter.parse(datetime);
+    }
+
+    public HashMap<String, String> redirectImageLinks(Photo[] photos) {
+        DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+        HashMap<String, String> rs = new HashMap<>();
+
+        GetRedirectedLinkExecutionResult executionResult = null;
+        try {
+            executionResult = getter.getRedirectedLinks(new ArrayList<>(Arrays.stream(photos).map(photo -> {
+                return new Image(photo.getName(), photo.getUri());
+            }).collect(Collectors.toList())));
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Couldn't retrieve redirected links", e.getMessage());
+            e.printStackTrace();
+        }
+
+        if (executionResult != null) {
+            for (var photo : photos) {
+                rs.put(photo.getName(), executionResult.getSuccessfulResults().containsKey(photo.getName()) ?
+                        executionResult.getSuccessfulResults().get(photo.getName()).getUri() : photo.getUri());
+            }
+        }
+
+        return rs;
+    }
+
+    public Calendar dateToCalendar(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
+    }
+
+    public String formatDateForQuery(Date date) throws ParseException {
+        if(date == null){
+            return null;
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        return formatter.format(date);
     }
 }

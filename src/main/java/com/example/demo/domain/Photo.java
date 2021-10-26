@@ -50,6 +50,11 @@ public class Photo {
 
     public Photo(){}
 
+    public Photo(String name, String uri) {
+        this.uri = uri;
+        this.name = name;
+    }
+
     public Photo(Date createdAt, Date updatedAt) {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

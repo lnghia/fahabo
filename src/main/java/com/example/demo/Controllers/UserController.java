@@ -326,11 +326,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("family.kickMemberFailure"))));
     }
 
-    @GetMapping("/get_families")
+    @PostMapping("/get_families")
     public ResponseEntity<Response> getFamilies(@RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                                @RequestParam(name = "size", required = false, defaultValue = "5") Integer size) {
+                                                @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
+                                                @RequestBody GetFamiliesReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(), page, size);
+        List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(), requestBody.searchText, page, size);
 //        List<Family> families = user.getUserInFamilies().stream().map(UserInFamily::getFamily).collect(Collectors.toList());
         List<Family> families = userInFamilies.stream().map(UserInFamily::getFamily).collect(Collectors.toList());
 

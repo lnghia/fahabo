@@ -30,6 +30,9 @@ public class Family {
     @JoinColumn(name = "default_album", referencedColumnName = "id")
     private Album defaultAlbum;
 
+    @OneToMany(mappedBy = "family")
+    private Set<Chore> chores = new HashSet<>();
+
 //    @ManyToMany(mappedBy = "families")
 //    private Set<Role> roles;
 
@@ -75,6 +78,14 @@ public class Family {
 
     public void setUsersInFamily(Set<UserInFamily> usersInFamily) {
         this.usersInFamily = usersInFamily;
+    }
+
+    public Set<Chore> getChores() {
+        return chores;
+    }
+
+    public void setChores(Set<Chore> chores) {
+        this.chores = chores;
     }
 
     public void addUser(UserInFamily userInFamily) {

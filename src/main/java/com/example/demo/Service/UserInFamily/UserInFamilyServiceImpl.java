@@ -82,9 +82,9 @@ public class UserInFamilyServiceImpl implements UserInFamilyService{
     }
 
     @Override
-    public List<UserInFamily> findAllByUserIdWithPagination(int userId, int page, int size) {
+    public List<UserInFamily> findAllByUserIdWithPagination(int userId, String searchText, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return userInFamilyRepo.findAllByUserIdWithPagination(userId, pageable);
+        return userInFamilyRepo.findAllByUserIdWithPagination(userId, searchText, pageable);
     }
 }

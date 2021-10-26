@@ -16,5 +16,5 @@ public interface UserInFamilyService {
     List<Integer> getUserIdsInFamily(int familyId, int page, int size);
     List<User> getUsersInFamily(int familyId, int page, int size);
     List<UserInFamily> findAllByUserId(int userId);
-    List<UserInFamily> findAllByUserIdWithPagination(int userId, int page, int size);
+    List<UserInFamily> findAllByUserIdWithPagination(int userId, String searchText, int page, int size);
 }

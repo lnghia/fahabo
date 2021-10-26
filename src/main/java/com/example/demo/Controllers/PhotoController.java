@@ -90,7 +90,7 @@ public class PhotoController {
             ArrayList<HashMap<String, Object>> data;
 
             try {
-                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+//                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
                 DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
 
                 GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(photos.stream().map(photo -> {

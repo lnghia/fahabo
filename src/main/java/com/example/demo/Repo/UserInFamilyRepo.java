@@ -22,7 +22,7 @@ public interface UserInFamilyRepo extends JpaRepository<UserInFamily, Integer> {
     UserInFamily findByUserIdAndFamilyId(@Param("userId") int userId,
                                          @Param("familyId") int familyId);
 
-//    ORDER BY :#{#pageable}
+    //    ORDER BY :#{#pageable}
     @Query(value = "SELECT DISTINCT users from users_in_families WHERE families=:familyId",
             countQuery = "SELECT count(DISTINCT users) FROM users_in_families WHERE families=:familyId",
             nativeQuery = true)
@@ -36,10 +36,15 @@ public interface UserInFamilyRepo extends JpaRepository<UserInFamily, Integer> {
 
     List<UserInFamily> findAllByUserId(int userId);
 
-    @Query(value = "SELECT DISTINCT * FROM users_in_families WHERE users=:userId",
-            countQuery = "SELECT count(DISTINCT users) FROM users_in_families WHERE users=:userId",
+    @Query(value = "SELECT DISTINCT * FROM users_in_families " +
+            "WHERE family_id IN (SELECT a.family_id FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
+            " WHERE a.user_id=:userId AND (:searchText IS NULL OR :searchText='' OR b.name LIKE %:searchText%))",
+            countQuery = "SELECT count(DISTINCT users) FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
+                    " WHERE a.user_id=:userId AND (:searchText is NULL OR :searchText='' OR b.name LIKE %:searchText%)",
             nativeQuery = true)
-    List<UserInFamily> findAllByUserIdWithPagination(@Param("userId") int userId, Pageable pageable);
+    List<UserInFamily> findAllByUserIdWithPagination(@Param("userId") int userId,
+                                                     @Param("searchText") String searchText,
+                                                     Pageable pageable);
 }
 
 //SELECT DISTINCT(*) FROM users WHERE id IN (SELECT DISTINCT users FROM users INNER JOIN users_in_families ON users.id = users_in_families.users)
