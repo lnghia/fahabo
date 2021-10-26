@@ -73,6 +73,9 @@ public class ChoreController {
             if (requestBody.title != null && !requestBody.title.isBlank() && !requestBody.title.isEmpty()) {
                 chore.setTitle(requestBody.title);
             }
+            if(requestBody.repeatType != null && !requestBody.repeatType.isBlank() && !requestBody.repeatType.isEmpty()){
+                chore.setRepeatType(requestBody.repeatType);
+            }
             if (requestBody.description != null && !requestBody.description.isEmpty() && !requestBody.description.isBlank()) {
                 chore.setDescription(requestBody.description);
             }
@@ -202,6 +205,9 @@ public class ChoreController {
             }
             if (requestBody.description != null && !requestBody.description.isBlank() && !requestBody.description.isEmpty()) {
                 chore.setDescription(requestBody.description);
+            }
+            if(requestBody.repeatType != null){
+                chore.setRepeatType(requestBody.repeatType);
             }
             if (requestBody.deadline != null && !requestBody.deadline.isEmpty() && !requestBody.deadline.isBlank()) {
                 chore.setDeadline(Helper.getInstance().formatDate(requestBody.deadline));

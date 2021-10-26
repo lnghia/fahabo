@@ -190,6 +190,7 @@ public class Chore {
             put("description", description);
             put("status", status);
             put("deadline", getDeadLineAsString());
+            put("repeatType", repeatType);
         }};
 
         User[] assignees = choresAssignUsers.stream().map(choresAssignUsers1 -> {

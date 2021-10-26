@@ -16,4 +16,6 @@ public class UpdateChoreReqForm {
     public int[] assigneeIds;
 
     public String[] photos;
+
+    public String repeatType;
 }
