@@ -136,12 +136,12 @@ public class ChoreController {
             ArrayList<Chore> chores = null;
             try {
                 chores = choreService.findAll(
-                        users,
+                        (requestBody.assigneeIds != null) ? users : List.of(),
                         family,
-                        requestBody.statuses,
-                        requestBody.searchText,
+                        (requestBody.statuses != null) ? requestBody.statuses : List.of(),
+                        (requestBody.searchText != null) ? requestBody.searchText : "",
 //                        (requestBody.sortBy.equals("deadline")),
-                        requestBody.sortBy.equals("deadline"),
+                        (requestBody.sortBy != null) && requestBody.sortBy.equals("deadline"),
                         (requestBody.from != null) ? Helper.getInstance().formatDateWithoutTime(requestBody.from) : null,
                         (requestBody.to != null) ? Helper.getInstance().formatDateWithoutTime(requestBody.to) : null,
                         page,
