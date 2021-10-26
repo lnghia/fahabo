@@ -79,7 +79,7 @@ public class ChoreController {
             if (requestBody.deadline != null && !requestBody.deadline.isBlank() && !requestBody.deadline.isEmpty()) {
                 chore.setDeadline(Helper.getInstance().formatDateWithoutTime(requestBody.deadline));
             }
-            if (requestBody.assigneeIds != null || requestBody.assigneeIds.length == 0) {
+            if (requestBody.assigneeIds != null && requestBody.assigneeIds.length != 0) {
                 choreHelper.assignUser(requestBody.assigneeIds, chore);
             } else {
                 choreHelper.assignUser(new int[]{user.getId()}, chore);
