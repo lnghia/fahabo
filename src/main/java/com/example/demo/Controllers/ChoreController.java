@@ -79,7 +79,7 @@ public class ChoreController {
             if (requestBody.deadline != null && !requestBody.deadline.isBlank() && !requestBody.deadline.isEmpty()) {
                 chore.setDeadline(Helper.getInstance().formatDateWithoutTime(requestBody.deadline));
             }
-            if (requestBody.assigneeIds != null) {
+            if (requestBody.assigneeIds != null || requestBody.assigneeIds.length == 0) {
                 choreHelper.assignUser(requestBody.assigneeIds, chore);
             } else {
                 choreHelper.assignUser(new int[]{user.getId()}, chore);
@@ -87,7 +87,7 @@ public class ChoreController {
             chore.setCreatedAt(now);
             chore.setUpdatedAt(now);
 
-            if (requestBody.photos != null) {
+            if (requestBody.photos != null && requestBody.photos.length !=0) {
                 ChoreAlbum choreAlbum = new ChoreAlbum();
                 choreAlbum.setChore(chore);
                 choreAlbumService.saveChoreAlbum(choreAlbum);
