@@ -166,6 +166,8 @@ public class Helper {
     }
 
     public String formatDate(Date date) {
+        if(date == null) return "";
+
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
         return formatter.format(date);
