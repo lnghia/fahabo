@@ -274,7 +274,7 @@ public class UserController {
                     return userInFamily1.getUser().getId() != user.getId();
                 }).findAny().orElse(null);
 
-                if(newHost != null){
+                if (newHost != null) {
                     Role role = roleService.findByName("HOST");
                     User _user = userService.getUserById(newHost.getUserId());
 
@@ -331,7 +331,10 @@ public class UserController {
                                                 @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
                                                 @RequestBody GetFamiliesReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(), requestBody.searchText, page, size);
+        List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(),
+                (requestBody.searchText != null) ? requestBody.searchText : "",
+                page, size
+        );
 //        List<Family> families = user.getUserInFamilies().stream().map(UserInFamily::getFamily).collect(Collectors.toList());
         List<Family> families = userInFamilies.stream().map(UserInFamily::getFamily).collect(Collectors.toList());
 
