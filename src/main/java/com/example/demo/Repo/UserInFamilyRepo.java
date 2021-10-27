@@ -43,9 +43,10 @@ public interface UserInFamilyRepo extends JpaRepository<UserInFamily, Integer> {
     List<UserInFamily> findAllByUserId(int userId);
 
     @Query(value = "SELECT DISTINCT * FROM users_in_families " +
-            "WHERE family_id IN (SELECT a.family_id FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
-            " WHERE a.user_id=:userId AND (:searchText IS NULL OR :searchText='' OR b.name LIKE %:searchText%))",
-            countQuery = "SELECT count(DISTINCT users) FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
+            "WHERE family_id IN (SELECT DISTINCT family_id FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
+            " WHERE a.user_id=:userId AND (:searchText IS NULL OR :searchText='' OR b.name LIKE %:searchText%))" +
+            "AND user_id=:userId",
+            countQuery = "SELECT count(DISTINCT family_id) FROM users_in_families AS a INNER JOIN families AS b ON a.family_id=b.id" +
                     " WHERE a.user_id=:userId AND (:searchText is NULL OR :searchText='' OR b.name LIKE %:searchText%)",
             nativeQuery = true)
     List<UserInFamily> findAllByUserIdWithPagination(@Param("userId") int userId,
