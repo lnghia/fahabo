@@ -14,7 +14,7 @@ public interface AlbumService {
     boolean checkIfAlbumExistsInFamily(int albumId, int familyId);
     int countAllByAlbum(int albumId);
     int getFamilyIdByAlbumId(int albumId);
-    List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, int page, int size);
+    List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, String searchText, int page, int size);
     List<Integer> findAllPhotoIdsByAlbumIdWithPagination(int albumId, int page, int size);
     List<Integer> get9LatestPhotosFromAlbum(int albumId);
 }

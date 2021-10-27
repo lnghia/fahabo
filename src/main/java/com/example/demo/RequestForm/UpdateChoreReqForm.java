@@ -17,5 +17,7 @@ public class UpdateChoreReqForm {
 
     public String[] photos;
 
+    public int[] deletePhotos;
+
     public String repeatType;
 }

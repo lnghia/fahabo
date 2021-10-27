@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 @Component
 public class ChoreHelper {
@@ -35,6 +37,24 @@ public class ChoreHelper {
         }
     }
 
+    public Date getNewDeadline(Date deadline, String repeatType){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(deadline);
+
+        switch (repeatType){
+            case "DAILY":
+                calendar.add(Calendar.DATE, 1);
+                break;
+            case "WEEKLY":
+                calendar.add(Calendar.DATE, 7);
+                break;
+            case "MONTHLY":
+                calendar.add(Calendar.MONTH, 1);
+                break;
+        }
+
+        return calendar.getTime();
+    }
 //    public Chore[] findWithFilterSortedBy(User user, Family family, String[] status, String title, String sortedBy, int page, int size){
 //        ArrayList<Chore> chores = choreService.findAllByFamilyId(family.getId());
 //

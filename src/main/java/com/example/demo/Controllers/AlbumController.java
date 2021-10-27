@@ -15,15 +15,21 @@ import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.domain.*;
 import liquibase.pro.packaged.A;
+import liquibase.util.file.FilenameUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.*;
 import javax.validation.Valid;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -233,11 +239,12 @@ public class AlbumController {
         Family family = familyService.findById(requestBody.familyId);
 
         if (family.checkIfUserExist(user)) {
+            String searchText = (requestBody.searchText != null) ? requestBody.searchText : "";
             List<Album> albums = new ArrayList<>();
             if(page == 0){
                 albums.add(family.getDefaultAlbum());
             }
-            albums.addAll(albumService.findAllByFamilyIdWithPagination(family.getId(), family.getDefaultAlbum().getId(), page, (page == 0) ? size - 1 : size));
+            albums.addAll(albumService.findAllByFamilyIdWithPagination(family.getId(), family.getDefaultAlbum().getId(), searchText, page, (page == 0) ? size - 1 : size));
 
             return ResponseEntity.ok(new Response(albums.stream().map(album -> albumHelper.getJson(album)).collect(Collectors.toList()), new ArrayList<>()));
         }
@@ -287,5 +294,80 @@ public class AlbumController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @PostMapping(value = "/add_video", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<Response> uploadVideo(@RequestPart("file") MultipartFile file) throws IOException {
+        DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+
+        try {
+            Date now = new Date();
+            DropBoxUploader uploader = new DropBoxUploader(clientV2);
+
+            String uploadRootPath = "/home/nghiale/Downloads";
+            File uploadRootDir = new File(uploadRootPath);
+            // Tạo thư mục gốc upload nếu nó không tồn tại.
+            if (!uploadRootDir.exists()) {
+                uploadRootDir.mkdirs();
+            }
+
+            String name = file.getOriginalFilename();
+            log.info(name);
+            if (name != null && name.length() > 0) {
+                try {
+                    // Tạo file tại Server.
+//                    File serverFile = new File(uploadRootDir.getAbsolutePath() + File.separator + name+".jpg");
+//                    BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+//                    stream.write(file.getBytes());
+//                    stream.close();
+
+//                    InputStream inputStream = new FileInputStream(serverFile);
+
+                    InputStream inputStream = new BufferedInputStream(file.getInputStream());
+
+                    ItemToUpload[] itemsToUpload = new ItemToUpload[1];
+                    itemsToUpload[0] = new ItemToUpload(name+"1.jpg", inputStream);
+
+                    UploadExecutionResult result = uploader.uploadItems(itemsToUpload);
+
+                    if (result == null) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                    }
+
+//                HashMap<String, Object> data = new HashMap<>();
+                    ArrayList<Image> successUploads = new ArrayList<>();
+                    ArrayList<Image> failUploads = new ArrayList<>();
+
+                    result.getCreationResults().forEach((k, v) -> {
+                        if (v.isOk()) {
+                            successUploads.add(new Image(k, v.metadata, v.uri.get()));
+                        } else {
+                            failUploads.add(new Image(k, v.metadata));
+                        }
+                    });
+
+                    if (successUploads.isEmpty()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                    }
+
+                    return ResponseEntity.ok(new Response(successUploads.get(0).getUri(), new ArrayList<>()));
+                } catch (ExecutionException | InterruptedException e) {
+                    log.error("Error creating threads to execute upload images " + e.getMessage());
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+                }
+            }
+
+//            File file =
+//            InputStream inputStream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
+//            InputStream inputStream = new BufferedInputStream(file.getInputStream());
+
+            return ResponseEntity.ok(new Response(null, null));
+        }
+        catch (Exception e){
+
+        }
+
+        return ResponseEntity.ok(new Response(null, null));
     }
 }

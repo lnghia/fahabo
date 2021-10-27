@@ -63,10 +63,10 @@ public class UserInFamilyServiceImpl implements UserInFamilyService{
     }
 
     @Override
-    public List<Integer> getUserIdsInFamily(int familyId, int page, int size) {
+    public List<Integer> getUserIdsInFamily(int familyId, String searchText, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return userInFamilyRepo.getUserIdsInFamily(familyId, pageable);
+        return userInFamilyRepo.getUserIdsInFamily(familyId, searchText, pageable);
     }
 
     @Override

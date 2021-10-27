@@ -13,7 +13,7 @@ public interface UserInFamilyService {
     UserInFamily findByUserIdAndFamilyId(int userId, int familyId);
     void setRoleForUserInFamily(User user, Family family, Role role);
     boolean hasRole(User user, Family family, String roleName);
-    List<Integer> getUserIdsInFamily(int familyId, int page, int size);
+    List<Integer> getUserIdsInFamily(int familyId, String searchText, int page, int size);
     List<User> getUsersInFamily(int familyId, int page, int size);
     List<UserInFamily> findAllByUserId(int userId);
     List<UserInFamily> findAllByUserIdWithPagination(int userId, String searchText, int page, int size);

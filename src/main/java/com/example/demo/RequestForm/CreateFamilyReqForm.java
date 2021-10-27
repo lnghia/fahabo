@@ -13,4 +13,6 @@ public class CreateFamilyReqForm {
     public Image thumbnail;
 
     public List<Integer> ids;
+
+    public String timezone;
 }

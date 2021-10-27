@@ -24,6 +24,9 @@ public class PhotoInChore {
     @JoinColumn(name = "chore_albums", referencedColumnName = "id")
     private ChoreAlbum album;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     public PhotoInChore() {
     }
 
@@ -32,6 +35,14 @@ public class PhotoInChore {
         this.choreAlbumId = choreAlbumId;
         this.photo = photo;
         this.album = album;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public int getPhotoId() {

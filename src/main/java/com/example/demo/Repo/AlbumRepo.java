@@ -3,6 +3,7 @@ package com.example.demo.Repo;
 import com.example.demo.domain.Album;
 import com.example.demo.domain.Photo;
 import jdk.dynalink.linker.LinkerServices;
+import liquibase.pro.packaged.A;
 import liquibase.pro.packaged.I;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,9 +32,21 @@ public interface AlbumRepo extends JpaRepository<Album, Integer> {
     @Query(value = "SELECT family_id FROM albums WHERE id=:id AND is_deleted=FALSE", nativeQuery = true)
     Integer getFamilyIdByAlbumId(@Param("id") int id);
 
-    @Query(value = "SELECT DISTINCT * FROM albums WHERE family_id=:familyId AND NOT id=:defaultAlbumId AND is_deleted=FALSE ORDER BY created_at DESC", nativeQuery = true,
-            countQuery = "SELECT COUNT(DISTINCT id) FROM albums WHERE family_id=:familyId AND is_deleted=FALSE")
-    List<Album> findAllByFamilyIdWithPagination(@Param("familyId") int familyId, @Param("defaultAlbumId") int defaultAlbumId, Pageable pageable);
+    @Query(value = "SELECT DISTINCT * FROM albums " +
+            "WHERE is_deleted=FALSE " +
+            "AND family_id=:familyId " +
+            "AND NOT id=:defaultAlbumId " +
+            "AND (:searchText IS NULL OR :searchText='' OR title LIKE %:searchText%) " +
+            "ORDER BY created_at DESC", nativeQuery = true,
+            countQuery = "SELECT COUNT(DISTINCT id) FROM albums " +
+                    "AND is_deleted=FALSE " +
+                    "WHERE family_id=:familyId " +
+                    "AND NOT id=:defaultAlbumId " +
+                    "AND (:searchText IS NULL OR :searchText='' OR title LIKE %:searchText%)")
+    List<Album> findAllByFamilyIdWithPagination(@Param("familyId") int familyId,
+                                                @Param("defaultAlbumId") int defaultAlbumId,
+                                                @Param("searchText") String searchText,
+                                                Pageable pageable);
 
     @Query(value = "SELECT photo_id FROM (SELECT DISTINCT (photo_id), b.is_deleted, created_at, album_id FROM photos_in_albums AS a INNER JOIN photos AS b ON a.photo_id=b.id) AS C" +
             " WHERE album_id=:albumId AND is_deleted=FALSE ORDER BY created_at DESC",

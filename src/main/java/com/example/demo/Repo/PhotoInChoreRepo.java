@@ -14,4 +14,11 @@ import java.util.ArrayList;
 public interface PhotoInChoreRepo extends JpaRepository<PhotoInChore, Integer> {
     @Query(value = "SELECT * FROM photos_in_chore_albums WHERE is_deleted=FALSE AND chore_album_id=:choreAlbumId", nativeQuery = true)
     ArrayList<PhotoInChore> findAllByChoreAlbumId(@Param("choreAlbumId") int albumId, Pageable pageable);
+
+    @Query(value = "SELECT * FROM photos_in_chore_albums WHERE is_deleted=FALSE AND chore_album_id=:choreAlbumId", nativeQuery = true)
+    ArrayList<PhotoInChore> findAllByChoreAlbumId(@Param("choreAlbumId") int albumId);
+
+    @Query(value = "SELECT * FROM photos_in_chore_albums WHERE is_deleted=FALSE AND chore_album_id=:choreAlbumId AND photo_id=:photoId", nativeQuery = true)
+    PhotoInChore getPhotoInChoreByAlbumIdAndPhotoId(@Param("choreAlbumId") int choreAlbumId,
+                                                    @Param("photoId") int photoId);
 }

@@ -72,6 +72,7 @@ public class FamilyControllers {
         newAlbum.setUpdatedAt(now);
         albumService.saveAlbum(newAlbum);
 
+        family.setTimezone(requestBody.timezone);
         family.addAlbum(newAlbum);
         family.setDefaultAlbum(newAlbum);
         familyService.saveFamily(family);
@@ -180,7 +181,8 @@ public class FamilyControllers {
         Family family = familyService.findById(requestBody.familyId);
 
         if (family.checkIfUserExist(user)) {
-            List<Integer> userIds = userInFamilyService.getUserIdsInFamily(family.getId(), page, size);
+            String searchText = (requestBody.searchText != null) ? requestBody.searchText : "";
+            List<Integer> userIds = userInFamilyService.getUserIdsInFamily(family.getId(), searchText, page, size);
             List<User> users = userIds.stream().map(id -> {
                 return userService.getUserById(id);
             }).collect(Collectors.toList());

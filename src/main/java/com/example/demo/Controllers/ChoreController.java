@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.Time;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -151,6 +152,15 @@ public class ChoreController {
                         size
                 );
 
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(family.getTimezone()));
+
+                for(var chore : chores){
+                    if(chore.getDeadline().before(calendar.getTime())){
+                        chore.setStatus("EXPIRED");
+                        choreService.saveChore(chore);
+                    }
+                }
+
                 return ResponseEntity.ok(new Response(chores.stream().map(chore -> {
                     return chore.getJson();
                 }).collect(Collectors.toList()), new ArrayList<>()));
@@ -199,6 +209,41 @@ public class ChoreController {
         if (chore.getFamily().checkIfUserExist(user)) {
             if (requestBody.status != null && !requestBody.status.isEmpty() && !requestBody.status.isBlank()) {
                 chore.setStatus(requestBody.status);
+                String repeat = chore.getRepeatType();
+                if(repeat != null && !repeat.isBlank() && !repeat.isEmpty() && requestBody.status.equals("DONE")){
+                    Chore repeatChore = new Chore(
+                            chore.getFamily(),
+                            "IN_PROGRESS",
+                            chore.getTitle(),
+                            chore.getDescription(),
+                            choreHelper.getNewDeadline(chore.getDeadline(), chore.getRepeatType()),
+                            chore.getReporter(),
+                            chore.getRepeatType(),
+                            false);
+                    repeatChore.setCreatedAt(chore.getCreatedAtAsDate());
+                    repeatChore.setUpdatedAt(chore.getUpdatedAtAsDate());
+                    choreService.saveChore(repeatChore);
+                    int[] ids = new int[chore.getChoresAssignUsers().size()];
+                    Iterator<ChoresAssignUsers> iterator = chore.getChoresAssignUsers().iterator();
+                    for(int i=0; i<chore.getChoresAssignUsers().size(); ++i){
+                        ids[i] = iterator.next().getAssignee().getId();
+                    }
+                    choreHelper.assignUser(ids, repeatChore);
+
+                    if(!chore.getChoreAlbumSet().isEmpty()){
+                        ChoreAlbum choreAlbum = new ChoreAlbum(repeatChore);
+                        choreAlbumService.saveChoreAlbum(choreAlbum);
+                        ArrayList<PhotoInChore> photoInChore = photoInChoreService.findAllByChoreAlbumId(chore.getChoreAlbumSet().iterator().next().getId());
+                        for(var item : photoInChore){
+                            PhotoInChore newOne = new PhotoInChore();
+                            newOne.setAlbum(choreAlbum);
+                            newOne.setPhoto(item.getPhoto());
+                            photoInChoreService.savePhotoInChore(newOne);
+                        }
+                        repeatChore.getChoreAlbumSet().add(choreAlbum);
+                        choreService.saveChore(repeatChore);
+                    }
+                }
             }
             if (requestBody.title != null && !requestBody.title.isBlank() && !requestBody.status.isBlank()) {
                 chore.setTitle(requestBody.title);
@@ -211,6 +256,12 @@ public class ChoreController {
             }
             if (requestBody.deadline != null && !requestBody.deadline.isEmpty() && !requestBody.deadline.isBlank()) {
                 chore.setDeadline(Helper.getInstance().formatDate(requestBody.deadline));
+                chore.setStatus("IN_PROGRESS");
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeZone(TimeZone.getTimeZone(chore.getFamily().getTimezone()));
+                if(Helper.getInstance().formatDate(requestBody.deadline).before(calendar.getTime())){
+                    chore.setStatus("EXPIRED");
+                }
             }
             if (requestBody.assigneeIds != null) {
                 chore.getChoresAssignUsers().forEach(choresAssignUsers -> {
@@ -227,7 +278,7 @@ public class ChoreController {
 
             ArrayList<String> uris = new ArrayList<>();
 
-            if (requestBody.photos != null) {
+            if (requestBody.photos != null && requestBody.photos.length > 0) {
                 ChoreAlbum choreAlbum;
                 boolean hasNoAlbum = chore.getChoreAlbumSet().isEmpty();
                 if (hasNoAlbum) {
@@ -257,7 +308,21 @@ public class ChoreController {
                     uris.add(image.getUri());
                 });
             }
-            chore.setUpdatedAt(new Date());
+            if(requestBody.deletePhotos != null && requestBody.deletePhotos.length > 0){
+                ChoreAlbum choreAlbum = chore.getChoreAlbumSet().iterator().next();
+                for(var id : requestBody.deletePhotos){
+                    Photo photo = photoService.getById(id);
+                    PhotoInChore photoInChore = photoInChoreService.getPhotoInChoreByAlbumIdAndPhotoId(choreAlbum.getId(), id);
+                    photoInChore.setDeleted(true);
+                    photo.setDeleted(true);
+                    photoInChoreService.savePhotoInChore(photoInChore);
+                    photoService.savePhoto(photo);
+                }
+            }
+            String timezone = chore.getFamily().getTimezone();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone(timezone));
+            chore.setUpdatedAt(calendar.getTime());
             choreService.saveChore(chore);
 
             HashMap<String, Object> data = chore.getJson();

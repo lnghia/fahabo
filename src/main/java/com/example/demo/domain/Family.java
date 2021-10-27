@@ -14,6 +14,9 @@ public class Family {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+    @Column(name = "timezone")
+    private String timezone;
+
     @Column(name = "name")
     private String familyName;
 
@@ -132,6 +135,14 @@ public class Family {
 
     public void setDefaultAlbum(Album defaultAlbum) {
         this.defaultAlbum = defaultAlbum;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
     }
 
     public HashMap<String, Object> getJson(boolean getThumbnail) {

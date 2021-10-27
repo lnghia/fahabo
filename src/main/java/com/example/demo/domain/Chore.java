@@ -167,6 +167,14 @@ public class Chore {
         return choreAlbumSet;
     }
 
+    public Date getCreatedAtAsDate(){
+        return createdAt;
+    }
+
+    public Date getUpdatedAtAsDate(){
+        return updatedAt;
+    }
+
     public void setChoreAlbumSet(Set<ChoreAlbum> choreAlbumSet) {
         this.choreAlbumSet = choreAlbumSet;
     }
@@ -193,7 +201,7 @@ public class Chore {
             put("repeatType", repeatType);
         }};
 
-        User[] assignees = choresAssignUsers.stream().map(choresAssignUsers1 -> {
+        User[] assignees = choresAssignUsers.stream().filter(choresAssignUsers1 -> !choresAssignUsers1.isDeleted()).map(choresAssignUsers1 -> {
             return choresAssignUsers1.getAssignee();
         }).toArray(size -> new User[size]);
         Photo[] photos = Arrays.stream(assignees).map(user -> {

@@ -24,7 +24,6 @@ import static com.example.demo.Specifications.ChoreSpecification.hasAssignee;
 //import static com.example.demo.Specifications.ChoreSpecification.hasStatus;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ChoreService {
     @Autowired
     private ChoreRepo choreRepo;

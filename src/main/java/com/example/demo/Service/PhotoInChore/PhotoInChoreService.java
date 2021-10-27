@@ -23,4 +23,12 @@ public class PhotoInChoreService {
 
         return photoInChoreRepo.findAllByChoreAlbumId(albumId, pageable);
     }
+
+    public ArrayList<PhotoInChore> findAllByChoreAlbumId(int albumId){
+        return photoInChoreRepo.findAllByChoreAlbumId(albumId);
+    }
+
+    public PhotoInChore getPhotoInChoreByAlbumIdAndPhotoId(int choreAlbumId, int photoId){
+        return photoInChoreRepo.getPhotoInChoreByAlbumIdAndPhotoId(choreAlbumId, photoId);
+    }
 }

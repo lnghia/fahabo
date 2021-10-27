@@ -71,4 +71,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="add_timezone_to_table_family" author="nghia">
+        <addColumn tableName="families">
+            <column name="timezone" type="varchar"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

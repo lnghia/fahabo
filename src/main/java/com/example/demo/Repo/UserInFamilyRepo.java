@@ -23,10 +23,16 @@ public interface UserInFamilyRepo extends JpaRepository<UserInFamily, Integer> {
                                          @Param("familyId") int familyId);
 
     //    ORDER BY :#{#pageable}
-    @Query(value = "SELECT DISTINCT users from users_in_families WHERE families=:familyId",
-            countQuery = "SELECT count(DISTINCT users) FROM users_in_families WHERE families=:familyId",
+    @Query(value = "SELECT DISTINCT users " +
+            "from (users_in_families AS a INNER JOIN users AS b ON a.users=b.id)" +
+            "WHERE families=:familyId AND (:searchText IS NULL OR :searchText='' OR b.name LIKE %:searchText%)",
+            countQuery = "SELECT count(DISTINCT users) " +
+                    "FROM (users_in_families AS a INNER JOIN users AS b ON a.users=b.id) " +
+                    "WHERE families=:familyId AND (:searchText IS NULL OR :searchText='' OR b.name LIKE %:searchText%)",
             nativeQuery = true)
-    List<Integer> getUserIdsInFamily(@Param("familyId") int familyId, Pageable pageable);
+    List<Integer> getUserIdsInFamily(@Param("familyId") int familyId,
+                                     @Param("searchText") String searchText,
+                                     Pageable pageable);
 
     @Query(value = "SELECT id, name, avatar, phone_number FROM users " +
             "WHERE id IN (SELECT DISTINCT user_id FROM users_in_families WHERE family_id=:familyId)",

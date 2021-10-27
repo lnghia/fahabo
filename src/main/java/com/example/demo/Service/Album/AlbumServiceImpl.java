@@ -50,10 +50,10 @@ public class AlbumServiceImpl implements AlbumService{
     }
 
     @Override
-    public List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, int page, int size) {
+    public List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, String searchText, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return albumRepo.findAllByFamilyIdWithPagination(familyId, defaultAlbumId, pageable);
+        return albumRepo.findAllByFamilyIdWithPagination(familyId, defaultAlbumId, searchText, pageable);
     }
 
     @Override
