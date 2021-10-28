@@ -31,13 +31,13 @@ public class DropBoxHelper {
         }).toArray(size -> new ItemToUpload[size]);
     }
 
-    public UploadResult uploadImages(String[] images, int albumId, int albumType) throws ExecutionException, InterruptedException {
-        ItemToUpload[] itemToUploads = arrayOfBase64StrToArrayOfItemsToUpload(images, albumId, albumType);
+    public UploadResult uploadImages(ItemToUpload[] images, int albumId, int albumType) throws ExecutionException, InterruptedException {
+//        ItemToUpload[] itemToUploads = arrayOfBase64StrToArrayOfItemsToUpload(images, albumId, albumType);
 
         DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
         DropBoxUploader uploader = new DropBoxUploader(clientV2);
 
-        UploadExecutionResult executionResult = uploader.uploadItems(itemToUploads);
+        UploadExecutionResult executionResult = uploader.uploadItems(images);
 
         ArrayList<Image> successUploads = new ArrayList<>();
         ArrayList<Image> failUploads = new ArrayList<>();

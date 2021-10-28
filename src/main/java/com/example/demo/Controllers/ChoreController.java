@@ -97,21 +97,38 @@ public class ChoreController {
                 choreAlbumService.saveChoreAlbum(choreAlbum);
                 chore.getChoreAlbumSet().add(choreAlbum);
 
-                UploadResult result = dropBoxHelper.uploadImages(requestBody.photos, choreAlbum.getId(), 1);
+                ItemToUpload[] items = new ItemToUpload[requestBody.photos.length];
+                HashMap<String, Photo> newPhotos = new HashMap<>();
 
-                result.successUploads.forEach(image -> {
+                for(int i = 0; i < requestBody.photos.length; ++i){
                     Photo photo = new Photo();
                     PhotoInChore photoInChore = new PhotoInChore();
 
-                    photo.setName(image.getName());
-                    photo.setUri(image.getMetadata().getUrl());
                     photo.setCreatedAt(now);
                     photo.setUpdatedAt(now);
+
                     photoService.savePhoto(photo);
                     photoInChore.setPhoto(photo);
                     photoInChore.setAlbum(choreAlbum);
                     photoInChoreService.savePhotoInChore(photoInChore);
-                });
+                    photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
+                            chore.getFamily().getId(),
+                            choreAlbum.getId(),
+                            photo.getId()));
+                    photoService.savePhoto(photo);
+                    newPhotos.put(photo.getName(), photo);
+
+                    items[i] = new ItemToUpload(photo.getName(), requestBody.photos[i]);
+                }
+
+                UploadResult result = dropBoxHelper.uploadImages(items, choreAlbum.getId(), 1);
+                ArrayList<Image> success = result.successUploads;
+
+                for(var image : success){
+                    Photo photo = newPhotos.get(image.getName());
+                    photo.setUri(image.getMetadata().getUrl());
+                    photoService.savePhoto(photo);
+                }
             }
             family.getChores().add(chore);
             chore.setFamily(family);
@@ -290,23 +307,39 @@ public class ChoreController {
                     choreAlbum = chore.getChoreAlbumSet().iterator().next();
                 }
                 Date now = new Date();
-                UploadResult result = dropBoxHelper.uploadImages(requestBody.photos, choreAlbum.getId(), 1);
+                ItemToUpload[] items = new ItemToUpload[requestBody.photos.length];
+                HashMap<String, Photo> newPhotos = new HashMap<>();
 
-                result.successUploads.forEach(image -> {
+                for(int i = 0; i < requestBody.photos.length; ++i){
                     Photo photo = new Photo();
                     PhotoInChore photoInChore = new PhotoInChore();
 
-                    photo.setName(image.getName());
-                    photo.setUri(image.getMetadata().getUrl());
                     photo.setCreatedAt(now);
                     photo.setUpdatedAt(now);
+
                     photoService.savePhoto(photo);
                     photoInChore.setPhoto(photo);
                     photoInChore.setAlbum(choreAlbum);
                     photoInChoreService.savePhotoInChore(photoInChore);
+                    photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
+                            chore.getFamily().getId(),
+                            choreAlbum.getId(),
+                            photo.getId()));
+                    photoService.savePhoto(photo);
+                    newPhotos.put(photo.getName(), photo);
 
+                    items[i] = new ItemToUpload(photo.getName(), requestBody.photos[i]);
+                }
+
+                UploadResult result = dropBoxHelper.uploadImages(items, choreAlbum.getId(), 1);
+                ArrayList<Image> success = result.successUploads;
+
+                for(var image : success){
+                    Photo photo = newPhotos.get(image.getName());
+                    photo.setUri(image.getMetadata().getUrl());
+                    photoService.savePhoto(photo);
                     uris.add(image.getUri());
-                });
+                }
             }
             if(requestBody.deletePhotos != null && requestBody.deletePhotos.length > 0){
                 ChoreAlbum choreAlbum = chore.getChoreAlbumSet().iterator().next();

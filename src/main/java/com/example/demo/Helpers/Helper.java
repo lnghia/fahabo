@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Slf4j
 public class Helper {
@@ -224,5 +225,9 @@ public class Helper {
 //        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
         return formatter.format(date);
+    }
+
+    public String generateUUID(){
+        return UUID.randomUUID().toString();
     }
 }
