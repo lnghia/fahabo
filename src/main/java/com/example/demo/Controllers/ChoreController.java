@@ -112,7 +112,7 @@ public class ChoreController {
                     photoInChore.setAlbum(choreAlbum);
                     photoInChoreService.savePhotoInChore(photoInChore);
                     photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
-                            chore.getFamily().getId(),
+                            family.getId(),
                             choreAlbum.getId(),
                             photo.getId()));
                     photoService.savePhoto(photo);
