@@ -272,11 +272,11 @@ public class ChoreController {
                 chore.setRepeatType(requestBody.repeatType);
             }
             if (requestBody.deadline != null && !requestBody.deadline.isEmpty() && !requestBody.deadline.isBlank()) {
-                chore.setDeadline(Helper.getInstance().formatDate(requestBody.deadline));
+                chore.setDeadline(Helper.getInstance().formatDateWithoutTime(requestBody.deadline));
                 chore.setStatus("IN_PROGRESS");
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeZone(TimeZone.getTimeZone(chore.getFamily().getTimezone()));
-                if(Helper.getInstance().formatDate(requestBody.deadline).before(calendar.getTime())){
+                if(Helper.getInstance().formatDateWithoutTime(requestBody.deadline).before(calendar.getTime())){
                     chore.setStatus("EXPIRED");
                 }
             }
