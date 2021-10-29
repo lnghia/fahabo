@@ -170,7 +170,7 @@ public class ChoreController {
                 );
 
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(family.getTimezone()));
-
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
                 for(var chore : chores){
                     if(chore.getDeadline().before(calendar.getTime())){
                         chore.setStatus("EXPIRED");
@@ -276,6 +276,7 @@ public class ChoreController {
                 chore.setStatus("IN_PROGRESS");
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeZone(TimeZone.getTimeZone(chore.getFamily().getTimezone()));
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
                 if(Helper.getInstance().formatDateWithoutTime(requestBody.deadline).before(calendar.getTime())){
                     chore.setStatus("EXPIRED");
                 }
@@ -380,9 +381,7 @@ public class ChoreController {
 
         if (chore.getFamily().checkIfUserExist(user)) {
             if (chore.getChoreAlbumSet().isEmpty()) {
-                return ResponseEntity.ok(new Response(new HashMap<String, Object>() {{
-                    put("photos", List.of());
-                }}, new ArrayList<>()));
+                return ResponseEntity.ok(new Response(List.of(), new ArrayList<>()));
             }
             ChoreAlbum choreAlbum = chore.getChoreAlbumSet().iterator().next();
             ArrayList<PhotoInChore> photoInChores = photoInChoreService.findAllByChoreAlbumId(choreAlbum.getId(), page, size);

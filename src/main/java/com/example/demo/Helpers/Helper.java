@@ -189,12 +189,15 @@ public class Helper {
     public HashMap<String, String> redirectImageLinks(Photo[] photos) {
         DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
         HashMap<String, String> rs = new HashMap<>();
+        ArrayList<Image> images = new ArrayList<>();
+
+        for(var photo : photos){
+            images.add(new Image(photo.getName(), photo.getUri()));
+        }
 
         GetRedirectedLinkExecutionResult executionResult = null;
         try {
-            executionResult = getter.getRedirectedLinks(new ArrayList<>(Arrays.stream(photos).map(photo -> {
-                return new Image(photo.getName(), photo.getUri());
-            }).collect(Collectors.toList())));
+            executionResult = getter.getRedirectedLinks(images);
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't retrieve redirected links", e.getMessage());
             e.printStackTrace();
@@ -229,5 +232,9 @@ public class Helper {
 
     public String generateUUID(){
         return UUID.randomUUID().toString();
+    }
+
+    public boolean isDropboxUri(String uri){
+        return uri.contains("dropbox");
     }
 }
