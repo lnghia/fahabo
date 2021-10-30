@@ -294,7 +294,7 @@ public class AlbumController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
-    @GetMapping("/preview_album")
+    @PostMapping("/preview_album")
     public ResponseEntity<Response> previewDefaultAlbum(@Valid @RequestBody PreviewDefaultAlbumReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
