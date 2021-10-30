@@ -2,6 +2,7 @@ package com.example.demo.Service.Album;
 
 import com.example.demo.Repo.AlbumRepo;
 import com.example.demo.Repo.AlbumsPhotosRepo;
+import com.example.demo.Service.AlbumsPhotos.AlbumsPhotosService;
 import com.example.demo.domain.Album;
 import com.example.demo.domain.Photo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,6 @@ import java.util.List;
 public class AlbumServiceImpl implements AlbumService{
     @Autowired
     private AlbumRepo albumRepo;
-
-    @Autowired
-    private AlbumsPhotosRepo albumsPhotosRepo;
 
     @Override
     public Album saveAlbum(Album album) {
@@ -74,8 +72,6 @@ public class AlbumServiceImpl implements AlbumService{
 
     @Override
     public void deleteAlbumsInFamily(int familyId) {
-        albumsPhotosRepo.deletePhotosAlbumsRelationByFamilyId(familyId);
-        albumsPhotosRepo.deletePhotosInFamilyAlbums(familyId);
         albumRepo.deleteAlbumsInFamily(familyId);
     }
 

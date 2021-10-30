@@ -16,7 +16,7 @@ public interface AlbumsPhotosRepo extends JpaRepository<AlbumsPhotos, Integer> {
 
     @Query(value = "UPDATE photos_in_albums SET is_deleted=TRUE " +
             "WHERE is_deleted=FALSE " +
-            "AND album_id IN (SELECT a.id FROM albums WHERE family_id=:family_id)", nativeQuery = true)
+            "AND album_id IN (SELECT id FROM albums WHERE family_id=:familyId)", nativeQuery = true)
     void deletePhotosAlbumsRelationByFamilyId(@Param("familyId") int familyId);
 
     @Query(value = "UPDATE photos SET is_delete=TRUE " +

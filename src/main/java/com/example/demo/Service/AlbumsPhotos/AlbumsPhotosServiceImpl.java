@@ -26,4 +26,14 @@ public class AlbumsPhotosServiceImpl implements AlbumsPhotosService {
     public AlbumsPhotos getByPhotoId(int photoId) {
         return albumsPhotosRepo.getByPhotoId(photoId);
     }
+
+    @Override
+    public void deletePhotosAlbumsRelationByFamilyId(int familyId) {
+        albumsPhotosRepo.deletePhotosAlbumsRelationByFamilyId(familyId);
+    }
+
+    @Override
+    public void deletePhotosInFamilyAlbums(int familyId) {
+        albumsPhotosRepo.deletePhotosInFamilyAlbums(familyId);
+    }
 }

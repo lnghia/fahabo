@@ -30,6 +30,8 @@ public class AlbumHelper {
     }
 
     public void deleteAlbumsInFamily(int familyId){
+        albumsPhotosService.deletePhotosAlbumsRelationByFamilyId(familyId);
+        albumsPhotosService.deletePhotosInFamilyAlbums(familyId);
         albumService.deleteAlbumsInFamily(familyId);
     }
 }
