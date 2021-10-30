@@ -61,7 +61,7 @@ public interface AlbumRepo extends JpaRepository<Album, Integer> {
     @Query(value = "UPDATE albums SET is_deleted=TRUE WHERE is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
     void deleteAlbumsInFamily(@Param("familyId") int familyId);
 
-    @Query(value = "SELECT uri FROM photos WHERE id IN (SELECT photos FROM photos_in_albums WHERE albums=:albumId) ORDER BY created_at TOP 1", nativeQuery = true)
+    @Query(value = "SELECT TOP 1 uri FROM photos WHERE id IN (SELECT photos FROM photos_in_albums WHERE albums=:albumId) ORDER BY created_at", nativeQuery = true)
     String getMostRecentImageUriInAlbum(@Param("albumId") int albumId);
 
 //    @Query(value = "SELECT COUNT(DISTINCT user_id) " +
