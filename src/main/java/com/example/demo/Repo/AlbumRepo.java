@@ -58,6 +58,12 @@ public interface AlbumRepo extends JpaRepository<Album, Integer> {
             " WHERE c.album_id=:albumId AND c.is_deleted=FALSE ORDER BY c.created_at DESC LIMIT 9", nativeQuery = true)
     List<Integer> get9LatestPhotosFromAlbum(@Param("albumId") int albumId);
 
+    @Query(value = "UPDATE albums SET is_deleted=TRUE WHERE is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
+    void deleteAlbumsInFamily(@Param("familyId") int familyId);
+
+    @Query(value = "SELECT uri FROM photos WHERE id IN (SELECT photos FROM photos_in_albums WHERE albums=:albumId) ORDER BY created_at TOP 1", nativeQuery = true)
+    String getMostRecentImageUriInAlbum(@Param("albumId") int albumId);
+
 //    @Query(value = "SELECT COUNT(DISTINCT user_id) " +
 //            "FROM (SELECT user_id, albums.family_id, albums.id AS album_id FROM albums INNER JOIN users_in_families ON albums.family_id=users_in_families.family_id) AS tmp " +
 //            "WHERE tmp.user_id=:userId AND album_id=:albumId", nativeQuery = true)

@@ -179,7 +179,7 @@ public class ChoreController {
                 }
 
                 return ResponseEntity.ok(new Response(chores.stream().map(chore -> {
-                    return chore.getJson();
+                    return choreHelper.getJson(family.getId(), chore);
                 }).collect(Collectors.toList()), new ArrayList<>()));
             } catch (ParseException e) {
                 log.error("Couldn't parse date in /chores.", e.getMessage());

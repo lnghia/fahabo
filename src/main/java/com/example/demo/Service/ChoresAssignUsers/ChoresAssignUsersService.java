@@ -24,4 +24,8 @@ public class ChoresAssignUsersService {
 //        Specification conditions = Specification.where(hasAssignee(user, family));
         return choresAssignUsersRepo.findChoreIdsByFamilyId(family.getId());
     }
+
+    public void deleteChoreUserRelationByFamilyId(int familyId){
+        choresAssignUsersRepo.deleteChoreUserRelationByFamilyId(familyId);
+    }
 }

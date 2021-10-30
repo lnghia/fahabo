@@ -2,6 +2,7 @@ package com.example.demo.Service.Family;
 
 import com.example.demo.Repo.FamilyRepo;
 import com.example.demo.RequestForm.CreateFamilyReqForm;
+import com.example.demo.Service.Chore.ChoreService;
 import com.example.demo.domain.Family;
 import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +38,16 @@ public class FamilyServiceImpl implements FamilyService{
     @Override
     public Family findByName(String name) {
         return familyRepo.findByFamilyName(name);
+    }
+
+    @Override
+    public void deleteFamilyById(int familyId) {
+        Family family = familyRepo.getById(familyId);
+        familyRepo.delete(family);
+    }
+
+    @Override
+    public boolean isHostInFamily(int userId, int familyId) {
+        return familyRepo.isHostInFamily(userId, familyId) > 0;
     }
 }

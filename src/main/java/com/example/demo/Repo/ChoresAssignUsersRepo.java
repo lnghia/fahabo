@@ -13,4 +13,7 @@ public interface ChoresAssignUsersRepo extends JpaRepository<ChoresAssignUsers, 
     @Query(value = "SELECT chored_id FROM (SELECT b.is_deleted, b.family_id, a.chore_id FROM chores_assign_users as a INNER JOIN chores as b ON a.chore_id=b.id) as c " +
             "WHERE c.is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
     int[] findChoreIdsByFamilyId(@Param("familyId") int familyId);
+
+    @Query(value = "UPDATE chores_assign_users SET is_deleted=TRUE WHERE is_deleted=FALSE AND chore_id IN (SELECT id FROM chores WHERE family_id=:familyId)", nativeQuery = true)
+    void deleteChoreUserRelationByFamilyId(@Param("familyId") int familyId);
 }

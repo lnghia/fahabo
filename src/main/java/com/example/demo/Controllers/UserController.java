@@ -7,7 +7,9 @@ import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
+import com.example.demo.Service.Album.AlbumService;
 import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.Role.RoleService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.Service.UserService;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -49,6 +52,15 @@ public class UserController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private FamilyHelper familyHelper;
+
+    @Autowired
+    private AlbumService albumService;
+
+    @Autowired
+    private PhotoService photoService;
 
     @GetMapping
     private ResponseEntity<Response> getUsers() {
@@ -132,38 +144,37 @@ public class UserController {
         return ResponseEntity.ok(new Response(userHelper.UserToJson(user), new ArrayList<>()));
     }
 
-    @GetMapping("/preview_images")
-    public ResponseEntity<Response> getPreviewImages() {
+    @PostMapping("/preview_images")
+    public ResponseEntity<Response> getPreviewImages(@Valid @RequestBody GetPreviewImagesReqForm requestBody) {
+        Family family = familyService.findById(requestBody.familyId);
+        int id = family.getDefaultAlbum().getId();
+        List<Integer> itemIds = albumService.get9LatestPhotosFromAlbum(id);
+        ArrayList<Photo> photos = new ArrayList<>();
+        ArrayList<Image> images = new ArrayList<>();
 
-        HashMap<String, Object> i1 = new HashMap<>() {{
-            put("uri", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLPjPYsrtUfxX0XgfwkMgiS-blYlIe4tyIRg&usqp=CAU");
-        }};
-        HashMap<String, Object> i2 = new HashMap<>() {{
-            put("uri", "https://truyenhinh.fpt.vn/wp-content/uploads/575.jpg");
-        }};
-        HashMap<String, Object> i3 = new HashMap<>() {{
-            put("uri", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9XG3cRUCoISQMWH8abr4aFRjkyvX6jecILmMwXbMQUZmBWdDYSnZecaZZg3STAcW2rwc&usqp=CAU");
-        }};
-        HashMap<String, Object> i4 = new HashMap<>() {{
-            put("uri", "https://songmoi.vn/public/upload_editor/posts/images/anh-dong-vat-hoang-da-2019-1.jpg");
-        }};
-        HashMap<String, Object> i5 = new HashMap<>() {{
-            put("uri", "https://lh3.googleusercontent.com/proxy/SJkOfQVHbu5fOYRPBwXff72DXcGbajxUwaFLfFXHBMm2rX5nFf5BXLZLCAzFIFrGDeGYzq9dx5pCM9eLCingXNzQGJtiyNcCiDHrCKvReeZoVPpZPmDpsraBpuii18K-YW4Z");
-        }};
-        HashMap<String, Object> i6 = new HashMap<>() {{
-            put("uri", "https://lh3.googleusercontent.com/proxy/rhOnJmrhm582ZYEJhcv002SNScrd1sDDGFfUl9Y_7GPnPcoY4DaxYpkdhMi0GTDVFwjGj1eMocch0mYI7wYWjVkYxiPx70rPH7pbdk2PXNVgTkB2GbBlzpHlJq6MfS9RvbvDUq1zps8");
-        }};
-        HashMap<String, Object> i7 = new HashMap<>() {{
-            put("uri", "https://khoahocphattrien.vn/Images/Uploaded/Share/2016/09/19/122.jpg");
-        }};
-        HashMap<String, Object> i8 = new HashMap<>() {{
-            put("uri", "https://www.nepalitimes.com/wp-content/uploads/2019/08/page-12.jpg");
-        }};
-        HashMap<String, Object> i9 = new HashMap<>() {{
-            put("uri", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTomc9c6mwRxduhj3ryOVXVoBNIO2AwGlZyHA&usqp=CAU");
-        }};
+        for(var item : itemIds){
+            Photo photo = photoService.getById(item);
+            images.add(new Image(photo.getName(), photo.getUri()));
+        }
+        DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+        try {
+            GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
+            return ResponseEntity.ok(new Response(
+                    photos.stream().map(photo -> {
+                            String uri = result.getSuccessfulResults().containsKey(photo.getName()) ? result.getSuccessfulResults().get(photo.getName()).getUri() : photo.getUri();
+                            return new HashMap<String, String>(){{
+                                put("uri", uri);
+                            }};
+                    }).collect(Collectors.toList()),
+                    new ArrayList<>())
+            );
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
-        return ResponseEntity.ok(new Response(new ArrayList<>(List.of(i1, i2, i3, i4, i5, i6, i7, i8, i9)), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(new ArrayList<>(List.of()), new ArrayList<>()));
     }
 
     @GetMapping("/avatar")
@@ -268,7 +279,11 @@ public class UserController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
 
-        if (family.checkIfUserExist(user) && family.getUsersInFamily().size() > 1) {
+        if (family.checkIfUserExist(user)) {
+            if(family.getUsersInFamily().size() == 1){
+                familyHelper.deleteFamilyById(requestBody.familyId);
+                return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
+            }
             if (userInFamilyService.hasRole(user, family, "HOST")) {
                 UserInFamily newHost = family.getUsersInFamily().stream().filter(userInFamily1 -> {
                     return userInFamily1.getUser().getId() != user.getId();

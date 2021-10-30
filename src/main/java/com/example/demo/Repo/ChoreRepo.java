@@ -72,4 +72,6 @@ public interface ChoreRepo extends JpaRepository<Chore, Integer>, JpaSpecificati
                                                                                        @Param("to") String to,
                                                                                        Pageable pageable);
 
+    @Query(value = "UPDATE chores SET is_deleted=TRUE WHERE is_deleted=FALSE AND id IN family_id=:familyId", nativeQuery = true)
+    void deleteChoresInFamily(@Param("familyId") int familyId);
 }

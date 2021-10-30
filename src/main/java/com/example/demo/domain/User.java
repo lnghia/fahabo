@@ -358,6 +358,18 @@ public class User {
         return rs;
     }
 
+    public HashMap<String, Object> getShortJsonWithHost(String avatarUrl, boolean isHost){
+        HashMap<String, Object> rs = new HashMap<>();
+
+        rs.put("id", id);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+        rs.put("isHost", isHost);
+
+        return rs;
+    }
+
     public Set<ChoresAssignUsers> getChoresAssignUsers() {
         return choresAssignUsers;
     }
