@@ -110,4 +110,14 @@ public class ChoreHelper {
 
         return rs;
     }
+
+    public boolean isPhotoNumExceedLimitChore(int num, Chore chore){
+        if(chore == null){
+            return num > Helper.getInstance().CHORE_PHOTO_MAX_NUM;
+        }
+
+        int choreAlbumId = chore.getChoreAlbumSet().iterator().next().getId();
+
+        return photoInChoreService.countPhotosNumInChore(choreAlbumId) + num > Helper.getInstance().CHORE_PHOTO_MAX_NUM;
+    }
 }

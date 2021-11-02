@@ -27,4 +27,7 @@ public interface PhotoInChoreRepo extends JpaRepository<PhotoInChore, Integer> {
             "AND chore_albums IN (SELECT a.id FROM (SELECT a.id, a.is_deleted chore_album AS a INNER JOIN chores AS b ON a.chore_id=b.id) WHERE is_deleted=FALSE AND family_id=:familyId)",
             nativeQuery = true)
     void deletePhotosINChoreAlbumByFamilyId(@Param("familyId") int familyId);
+
+    @Query(value = "SELECT COUNT(photos) FROM photos_in_chore_albums WHERE is_deleted=FALSE AND chore_album_id=:choreAlbumId", nativeQuery = true)
+    int countPhotosNumInChore(@Param("choreAlbumId") int choreAlbumId);
 }

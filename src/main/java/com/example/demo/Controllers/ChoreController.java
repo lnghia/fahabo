@@ -67,10 +67,16 @@ public class ChoreController {
         Family family = familyService.findById(requestBody.familyId);
 
         if (family.checkIfUserExist(user)) {
+            int photosNum = (requestBody.photos != null) ? requestBody.photos.length : 0;
+            if(choreHelper.isPhotoNumExceedLimitChore(photosNum, null)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.photosNumInChoreExceeded"))));
+            }
+
             Chore chore = new Chore();
             choreService.saveChore(chore);
             chore.setStatus(requestBody.status);
             chore.setReporter(user);
+
             if (requestBody.title != null && !requestBody.title.isBlank() && !requestBody.title.isEmpty()) {
                 chore.setTitle(requestBody.title);
             }
@@ -172,7 +178,7 @@ public class ChoreController {
                 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(family.getTimezone()));
                 calendar.set(Calendar.HOUR_OF_DAY, 0);
                 for(var chore : chores){
-                    if(chore.getDeadline().before(calendar.getTime())){
+                    if(!chore.getStatus().equals("DONE") && chore.getDeadline().before(calendar.getTime())){
                         chore.setStatus("EXPIRED");
                         choreService.saveChore(chore);
                     }
@@ -222,18 +228,22 @@ public class ChoreController {
         if (chore == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.choreIdNotExist"))));
         }
+        int photosNum = (requestBody.photos != null) ? requestBody.photos.length : 0;
+        if(choreHelper.isPhotoNumExceedLimitChore(photosNum, null)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.photosNumInChoreExceeded"))));
+        }
+
 
         if (chore.getFamily().checkIfUserExist(user)) {
             if (requestBody.status != null && !requestBody.status.isEmpty() && !requestBody.status.isBlank()) {
-                chore.setStatus(requestBody.status);
                 String repeat = chore.getRepeatType();
-                if(repeat != null && !repeat.isBlank() && !repeat.isEmpty() && requestBody.status.equals("DONE")){
+                if(repeat != null && !repeat.isBlank() && !repeat.isEmpty() && requestBody.status.equals("DONE") && !chore.getStatus().equals("DONE")){
                     Chore repeatChore = new Chore(
                             chore.getFamily(),
                             "IN_PROGRESS",
                             chore.getTitle(),
                             chore.getDescription(),
-                            choreHelper.getNewDeadline(chore.getDeadline(), chore.getRepeatType()),
+                            choreHelper.getNewDeadline(new Date(), chore.getRepeatType()),
                             chore.getReporter(),
                             chore.getRepeatType(),
                             false);
@@ -261,6 +271,7 @@ public class ChoreController {
                         choreService.saveChore(repeatChore);
                     }
                 }
+                chore.setStatus(requestBody.status);
             }
             if (requestBody.title != null && !requestBody.title.isBlank() && !requestBody.status.isBlank()) {
                 chore.setTitle(requestBody.title);

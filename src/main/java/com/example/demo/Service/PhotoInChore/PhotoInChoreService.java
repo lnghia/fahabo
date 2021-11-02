@@ -35,4 +35,8 @@ public class PhotoInChoreService {
     public void deletePhotosInChoreAlbumByFamilyId(int familyId){
         photoInChoreRepo.deletePhotosINChoreAlbumByFamilyId(familyId);
     }
+
+    public int countPhotosNumInChore(int choreAlbumId){
+        return photoInChoreRepo.countPhotosNumInChore(choreAlbumId);
+    }
 }

@@ -28,6 +28,8 @@ import java.util.UUID;
 public class Helper {
     private static Helper instance;
 
+    public final int CHORE_PHOTO_MAX_NUM = 20;
+
     ArrayList<Integer> dateNumInMonths = new ArrayList<>(List.of(
             0,
             31,
