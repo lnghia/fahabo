@@ -17,4 +17,6 @@ public interface AlbumService {
     List<Album> findAllByFamilyIdWithPagination(int familyId, int defaultAlbumId, String searchText, int page, int size);
     List<Integer> findAllPhotoIdsByAlbumIdWithPagination(int albumId, int page, int size);
     List<Integer> get9LatestPhotosFromAlbum(int albumId);
+    void deleteAlbumsInFamily(int familyId);
+    String getMostRecentImageUriInAlbum(int albumId);
 }

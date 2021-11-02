@@ -2,6 +2,10 @@ package com.example.demo.Service.Chore;
 
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Repo.ChoreRepo;
+import com.example.demo.Service.ChoreAlbum.ChoreAlbumService;
+import com.example.demo.Service.ChoresAssignUsers.ChoresAssignUsersService;
+import com.example.demo.Service.Photo.PhotoService;
+import com.example.demo.Service.PhotoInChore.PhotoInChoreService;
 import com.example.demo.domain.Chore;
 import com.example.demo.domain.Family;
 import com.example.demo.domain.User;
@@ -27,6 +31,19 @@ import static com.example.demo.Specifications.ChoreSpecification.hasAssignee;
 public class ChoreService {
     @Autowired
     private ChoreRepo choreRepo;
+
+    @Autowired
+    private ChoresAssignUsersService choresAssignUsersService;
+
+    @Autowired
+    private ChoreAlbumService choreAlbumService;
+
+    @Autowired
+    private PhotoInChoreService photoInChoreService;
+
+    @Autowired
+    private PhotoService photoService;
+
 
     public Chore saveChore(Chore chore) {
         return choreRepo.save(chore);
@@ -67,5 +84,9 @@ public class ChoreService {
         );
 
         return chores;
+    }
+
+    public void deleteChoresInFamily(int familyId){
+        choreRepo.deleteChoresInFamily(familyId);
     }
 }

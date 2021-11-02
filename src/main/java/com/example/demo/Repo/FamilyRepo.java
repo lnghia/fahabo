@@ -44,4 +44,8 @@ public interface FamilyRepo extends JpaRepository<Family, Integer> {
 
     Family findById(int id);
     Family findByFamilyName(String name);
+
+    @Query(value = "SELECT COUNT(*) FROM users_in_families WHERE users=:userId AND families=:familyId AND roles=0", nativeQuery = true)
+    int isHostInFamily(@Param("userId") int userId,
+                       @Param("familyId") int familyId);
 }

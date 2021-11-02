@@ -92,7 +92,7 @@ public class AlbumController {
             family.addAlbum(newAlbum);
             familyService.saveFamily(family);
 
-            return ResponseEntity.ok(new Response(albumHelper.getJson(newAlbum), new ArrayList<>()));
+            return ResponseEntity.ok(new Response(albumHelper.getJson(newAlbum, null), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
@@ -120,7 +120,23 @@ public class AlbumController {
             album.setUpdatedAt(now);
             albumService.saveAlbum(album);
 
-            return ResponseEntity.ok(new Response(albumHelper.getJson(album), new ArrayList<>()));
+            String uri = albumService.getMostRecentImageUriInAlbum(album.getId());
+            ArrayList<Image> images = new ArrayList<>();
+            images.add(new Image(album.getTitle(), uri));
+            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+            try {
+                GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
+                return ResponseEntity.ok(new Response(
+                        albumHelper.getJson(album, result.getSuccessfulResults().containsKey(album.getTitle()) ? result.getSuccessfulResults().get(album.getTitle()).getUri() : null),
+                        new ArrayList<>())
+                );
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            return ResponseEntity.ok(new Response(albumHelper.getJson(album, null), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
@@ -140,7 +156,7 @@ public class AlbumController {
             album.setDeleted(true);
             albumService.saveAlbum(album);
 
-            return ResponseEntity.ok(new Response(albumHelper.getJson(album), new ArrayList<>()));
+            return ResponseEntity.ok(new Response(albumHelper.getJson(album, null), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
@@ -246,13 +262,39 @@ public class AlbumController {
             }
             albums.addAll(albumService.findAllByFamilyIdWithPagination(family.getId(), family.getDefaultAlbum().getId(), searchText, page, (page == 0) ? size - 1 : size));
 
-            return ResponseEntity.ok(new Response(albums.stream().map(album -> albumHelper.getJson(album)).collect(Collectors.toList()), new ArrayList<>()));
+            HashMap<String, String> uris = new HashMap<>();
+            ArrayList<Image> images = new ArrayList<>();
+            for(var album : albums){
+                String uri = albumService.getMostRecentImageUriInAlbum(album.getId());
+                images.add(new Image(Integer.toString(album.getId()), uri));
+            }
+            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+            try {
+                GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
+
+                return ResponseEntity.ok(new Response(albums.stream().map(
+                        album -> {
+                            String uri = result.getSuccessfulResults().containsKey(Integer.toString(album.getId())) ? result.getSuccessfulResults().get(Integer.toString(album.getId())).getUri() : null;
+                            return albumHelper.getJson(album, uri);
+                        }).collect(Collectors.toList()
+                ), new ArrayList<>()));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            return ResponseEntity.ok(new Response(albums.stream().map(
+                    album -> {
+                        return albumHelper.getJson(album, null);
+                    }).collect(Collectors.toList()
+            ), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
-    @GetMapping("/preview_album")
+    @PostMapping("/preview_album")
     public ResponseEntity<Response> previewDefaultAlbum(@Valid @RequestBody PreviewDefaultAlbumReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);

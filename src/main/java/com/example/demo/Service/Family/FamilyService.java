@@ -11,4 +11,6 @@ public interface FamilyService {
     Family findById(int id);
     String generateImgUploadId(int familyId);
     Family findByName(String name);
+    void deleteFamilyById(int familyId);
+    boolean isHostInFamily(int userId, int familyId);
 }

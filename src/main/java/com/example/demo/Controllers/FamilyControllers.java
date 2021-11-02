@@ -48,9 +48,6 @@ public class FamilyControllers {
 
     @Autowired
     private UserHelper userHelper;
-//
-//    @Autowired
-//    private FamilyService familyService;
 
     @Autowired
     private DropBoxAuthenticator dropBoxAuthenticator;
@@ -199,7 +196,9 @@ public class FamilyControllers {
                 if (result != null) {
                     data = new ArrayList<>(users.stream()
                             .map(user1 -> {
-                                return (result.getSuccessfulResults().containsKey(user1.getName())) ? user1.getShortJson(result.getSuccessfulResults().get(user1.getName()).getUri()) : user1.getShortJson(null);
+                                return (result.getSuccessfulResults().containsKey(user1.getName())) ?
+                                        user1.getShortJsonWithHost(result.getSuccessfulResults().get(user1.getName()).getUri(), familyService.isHostInFamily(user1.getId(), family.getId())) :
+                                        user1.getShortJsonWithHost(null, familyService.isHostInFamily(user1.getId(), family.getId()));
                             }).collect(Collectors.toList()));
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -209,7 +208,8 @@ public class FamilyControllers {
             } catch (ExecutionException | InterruptedException e) {
                 log.error("Couldn't retrieve redirected url, unknown error.");
                 e.printStackTrace();
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(users.stream().map(user1 -> user1.getShortJson(null)).collect(Collectors.toList()),
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(
+                        users.stream().map(user1 -> user1.getShortJsonWithHost(null, familyService.isHostInFamily(user1.getId(), family.getId()))).collect(Collectors.toList()),
                         new ArrayList<>(List.of("avatar.unavailable"))));
             }
         }

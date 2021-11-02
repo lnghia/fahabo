@@ -1,6 +1,8 @@
 package com.example.demo.Service.Album;
 
 import com.example.demo.Repo.AlbumRepo;
+import com.example.demo.Repo.AlbumsPhotosRepo;
+import com.example.demo.Service.AlbumsPhotos.AlbumsPhotosService;
 import com.example.demo.domain.Album;
 import com.example.demo.domain.Photo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,4 +69,16 @@ public class AlbumServiceImpl implements AlbumService{
     public List<Integer> get9LatestPhotosFromAlbum(int albumId) {
         return albumRepo.get9LatestPhotosFromAlbum(albumId);
     }
+
+    @Override
+    public void deleteAlbumsInFamily(int familyId) {
+        albumRepo.deleteAlbumsInFamily(familyId);
+    }
+
+    @Override
+    public String getMostRecentImageUriInAlbum(int albumId) {
+        return albumRepo.getMostRecentImageUriInAlbum(albumId);
+    }
+
+
 }

@@ -13,4 +13,8 @@ public class ChoreAlbumService {
     public ChoreAlbum saveChoreAlbum(ChoreAlbum choreAlbum){
         return choreAlbumRepo.save(choreAlbum);
     }
+
+    public void deleteChoreAlbumByFamilyId(int familyId){
+        choreAlbumRepo.deleteChoreAlbumByFamily(familyId);
+    }
 }
