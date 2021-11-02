@@ -4,7 +4,9 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.DropBoxAuthenticator;
 import com.example.demo.DropBox.DropBoxUploader;
 import com.example.demo.Helpers.UserHelper;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Repository;
@@ -12,8 +14,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import static javax.persistence.GenerationType.AUTO;
 
@@ -52,10 +53,24 @@ public class User {
 
     private String avatar;
 
+//    @ManyToMany(fetch = FetchType.EAGER)
+//    @JoinTable(
+//            name = "users_roles",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id")
+//    )
+//    private Collection<Role> roles;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<UserInFamily> userInFamilies = new HashSet<>();
+
     //    @Column(name = "social_account_type")
     @ManyToOne
     @JoinColumn(name = "social_account_type", referencedColumnName = "id")
     private SocialAccountType socialAccountType;
+
+    @OneToMany(mappedBy = "reporter", fetch = FetchType.EAGER)
+    private Set<Chore> chores = new HashSet<>();
 
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
@@ -78,6 +93,9 @@ public class User {
 
     @Column(name = "reset_pw_otp_issued_at")
     private Date resetPasswordOTPIssuedAt;
+
+    @OneToMany(mappedBy = "assignee")
+    private Set<ChoresAssignUsers> choresAssignUsers = new HashSet<>();
 
     public int getId() {
         return id;
@@ -208,6 +226,30 @@ public class User {
         this.socialAccountType = socialAccountType;
     }
 
+//    public Collection<Role> getRoles() {
+//        return roles;
+//    }
+//
+//    public void setRoles(Collection<Role> roles) {
+//        this.roles = roles;
+//    }
+
+    public Set<UserInFamily> getUserInFamilies() {
+        return userInFamilies;
+    }
+
+    public void setUserInFamilies(Set<UserInFamily> userInFamilies) {
+        this.userInFamilies = userInFamilies;
+    }
+
+    public Set<Chore> getChores() {
+        return chores;
+    }
+
+    public void setChores(Set<Chore> chores) {
+        this.chores = chores;
+    }
+
     public User() {
     }
 
@@ -216,6 +258,33 @@ public class User {
         this.birthday = birthday;
         this.languageCode = languageCode;
         this.password = password;
+    }
+
+    public User(int id, String name, String avatar, String phoneNumber){
+        this.id = id;
+        this.name = name;
+        this.avatar = avatar;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void addFamily(UserInFamily userInFamily){
+        userInFamilies.add(userInFamily);
+    }
+
+    public UserInFamily deleteFamily(Family family){
+        UserInFamily userInFamily = userInFamilies.stream().filter(userInFamily1 ->
+            userInFamily1.getFamilyId() == family.getId()
+        ).findFirst().orElse(null);
+
+        if(userInFamily != null){
+            userInFamilies.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
+        }
+
+        return userInFamily;
+    }
+
+    public void deleteFamily(UserInFamily userInFamily){
+        userInFamilies.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
     }
 
     public String toString() {
@@ -252,7 +321,60 @@ public class User {
         rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
         rs.put("authType", socialAccountType.getJson());
         rs.put("avatar", getAvatar());
+        rs.put("familyNum", userInFamilies.size());
 
         return rs;
+    }
+
+    public HashMap<String, Object> getJson(String avatarUrl) {
+        HashMap<String, Object> rs = new HashMap<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        rs.put("id", id);
+        rs.put("username", username);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("email", email);
+        rs.put("isValidEmail", isValidEmail);
+        rs.put("isValidPhoneNumber", isValidPhoneNumber);
+        rs.put("birthday", (birthday != null) ? formatter.format(birthday) : "");
+        rs.put("contactId", contactId);
+        rs.put("languageCode", (languageCode == null) ? null : languageCode.trim());
+        rs.put("authType", socialAccountType.getJson());
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+        rs.put("familyNum", userInFamilies.size());
+
+        return rs;
+    }
+
+    public HashMap<String, Object> getShortJson(String avatarUrl){
+        HashMap<String, Object> rs = new HashMap<>();
+
+        rs.put("id", id);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+
+        return rs;
+    }
+
+    public HashMap<String, Object> getShortJsonWithHost(String avatarUrl, boolean isHost){
+        HashMap<String, Object> rs = new HashMap<>();
+
+        rs.put("id", id);
+        rs.put("name", name);
+        rs.put("phoneNumber", phoneNumber);
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+        rs.put("isHost", isHost);
+
+        return rs;
+    }
+
+    public Set<ChoresAssignUsers> getChoresAssignUsers() {
+        return choresAssignUsers;
+    }
+
+    public void setChoresAssignUsers(Set<ChoresAssignUsers> choresAssignUsers) {
+        this.choresAssignUsers = choresAssignUsers;
     }
 }

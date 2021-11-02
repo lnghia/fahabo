@@ -15,6 +15,8 @@ import java.util.HashMap;
 public class UserHelper {
     private DropBoxAuthenticator dropBoxAuthenticator;
 
+    public String DEFAULT_AVATAR = "https://thumbs.dreamstime.com/b/default-avatar-profile-trendy-style-social-media-user-icon-187599373.jpg";
+
     @Autowired
     public UserHelper(DropBoxAuthenticator dropBoxAuthenticator) {
         this.dropBoxAuthenticator = dropBoxAuthenticator;
@@ -31,6 +33,8 @@ public class UserHelper {
         HashMap<String, Object> rs = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
+        String avatarUri = createShareLink(user.getAvatar());
+
         rs.put("id", user.getId());
         rs.put("username", user.getUsername());
         rs.put("name", user.getName());
@@ -42,7 +46,8 @@ public class UserHelper {
         rs.put("contactId", user.getContactId());
         rs.put("languageCode", (user.getLanguageCode() == null) ? null : user.getLanguageCode().trim());
         rs.put("authType", user.getSocialAccountType().getJson());
-        rs.put("avatar", createShareLink(user.getAvatar()));
+        rs.put("avatar", (avatarUri != null) ? avatarUri : user.getAvatar());
+        rs.put("familyNum", user.getUserInFamilies().size());
 
         return rs;
     }

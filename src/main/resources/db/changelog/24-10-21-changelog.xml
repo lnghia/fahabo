@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="add_table_chores" author="nghia">
+        <createTable tableName="chores">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chores"/>
+            </column>
+            <column name="family_id" type="int">
+                <constraints foreignKeyName="fk_chores_families" references="families(id)"/>
+            </column>
+            <column name="status" type="nvarchar"></column>
+            <column name="title" type="nvarchar"></column>
+            <column name="description" type="nvarchar"></column>
+            <column name="deadline" type="date"></column>
+            <column name="reporter" type="int">
+                <constraints foreignKeyName="fk_chores_user" references="users(id)"/>
+            </column>
+            <column name="repeat_type" type="varchar"></column>
+            <column name="is_deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime"></column>
+            <column name="updated_at" type="datetime"></column>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="add_table_chore_album" author="nghia">
+        <createTable tableName="chore_album">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_chore_album"/>
+            </column>
+            <column name="chore_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_chore_album_chore" references="chores(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="add_table_photos_chore_albums" author="nghia">
+        <createTable tableName="photos_in_chore_albums">
+            <column name="photo_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_photos_in_chore_albums_photos" references="photos(id)"/>
+            </column>
+            <column name="chore_album_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_photos_in_chore_albums_chores" references="chore_album(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+
+        <addPrimaryKey tableName="photos_in_chore_albums" columnNames="photo_id, chore_album_id" constraintName="pk_photos_in_chore_albums"/>
+    </changeSet>
+
+    <changeSet id="add_table_chore_assign_user" author="nghia">
+        <createTable tableName="chores_assign_users">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_chores_assign_users_users" references="users(id)"/>
+            </column>
+            <column name="chore_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_chores_assign_users_chores" references="chores(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_timezone_to_table_family" author="nghia">
+        <addColumn tableName="families">
+            <column name="timezone" type="varchar"></column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

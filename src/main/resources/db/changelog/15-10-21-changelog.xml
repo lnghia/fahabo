@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="add_album_thumbnail_table_families" author="nghia">
+        <addColumn tableName="families">
+            <column name="thumbnail" type="varchar" defaultValue="https://media.istockphoto.com/vectors/large-happy-family-is-standing-and-hugging-several-generations-with-vector-id1221390042?b=1&amp;k=20&amp;m=1221390042&amp;s=612x612&amp;w=0&amp;h=DIY35-8Q2jZe8LMLdwXETf54sKwQL3_F6OCtXdTnB44="></column>
+        </addColumn>
+        <addColumn tableName="families">
+            <column name="name" type="varchar"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_table_roles" author="nghia">
+        <createTable tableName="roles">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_roles"></constraints>
+            </column>
+            <column name="role_name" type="varchar"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="default_roles" author="nghia">
+        <insert tableName="roles">
+            <column name="id" value="0"/>
+            <column name="role_name" value="HOST"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="id" value="1"/>
+            <column name="role_name" value="MEMBER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="add_table_users_roles" author="nghia">
+        <createTable tableName="users_roles">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_user_id_users_roles" references="users(id)"/>
+            </column>
+            <column name="role_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_role_id_users_roles" references="roles(id)"/>
+            </column>
+            <column name="family_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_family_id_users_roles" references="families(id)"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="users_roles" columnNames="user_id, role_id, family_id" constraintName="pk_users_roles"/>
+
+    </changeSet>
+
+</databaseChangeLog>

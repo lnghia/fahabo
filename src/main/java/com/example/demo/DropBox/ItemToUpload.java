@@ -18,4 +18,9 @@ public class ItemToUpload {
 //        this.inputStream = new ByteArrayInputStream(byteData.getBytes(StandardCharsets.UTF_8));
         this.inputStream = new ByteArrayInputStream(Helper.getInstance().base64ToBytes(byteData));
     }
+
+    public ItemToUpload(String name, InputStream inputStream){
+        this.name = name;
+        this.inputStream = inputStream;
+    }
 }
