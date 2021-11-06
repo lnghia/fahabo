@@ -23,7 +23,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
             "AND family_id=:familyId " +
             "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
             "AND (:title IS NULL OR :title='' OR title LIKE %:title%) " +
-            "AND (:from='' OR :to='' OR (cast(created_at as VARCHAR) >= :from AND cast(created_at as VARCHAR) <= :to)))) " +
+            "AND (:from='' OR :to='' OR (cast(from_time as VARCHAR) >= :from AND cast(from_time as VARCHAR) <= :to)))) " +
             "ORDER BY :sortByDeadline" +
             ", CASE WHEN :sortByDeadline THEN from_time END DESC " +
             ", CASE WHEN NOT :sortByDeadline THEN from_time END DESC",
