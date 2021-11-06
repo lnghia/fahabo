@@ -25,7 +25,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
             "AND (:title IS NULL OR :title='' OR title LIKE %:title%) " +
             "AND (:from='' OR :to='' OR (cast(from_time as VARCHAR) >= :from AND cast(from_time as VARCHAR) <= :to)" +
                                     "OR (cast(to_time as VARCHAR) >= :from AND cast(to_time as VARCHAR) <= :to) " +
-                                    "OR (cast(from_time as VARCHAR) <= :from AND cast(to_time as VARCHAR) >= :to)) " +
+                                    "OR (cast(from_time as VARCHAR) <= :from AND cast(to_time as VARCHAR) >= :to))) " +
             "ORDER BY :sortByDeadline" +
             ", CASE WHEN :sortByDeadline THEN from_time END DESC " +
             ", CASE WHEN NOT :sortByDeadline THEN from_time END DESC",
