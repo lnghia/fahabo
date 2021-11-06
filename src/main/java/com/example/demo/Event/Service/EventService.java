@@ -54,8 +54,8 @@ public class EventService {
 //                sb.toString(),
                 title,
                 sortByDeadLine,
-                (from != null) ? Helper.getInstance().formatDateWithTime(from) : "",
-                (to != null) ? Helper.getInstance().formatDateWithTime(to) : "",
+                (from != null) ? Helper.getInstance().formatDateWithTimeForQuery(from) : "",
+                (to != null) ? Helper.getInstance().formatDateWithTimeForQuery(to) : "",
                 pageable
         );
 

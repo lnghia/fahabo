@@ -243,6 +243,16 @@ public class Helper {
         return formatter.format(date);
     }
 
+    public String formatDateWithTimeForQuery(Date date){
+        if(date == null){
+            return null;
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        return formatter.format(date);
+    }
+
     public String generateUUID(){
         return UUID.randomUUID().toString();
     }
