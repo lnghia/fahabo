@@ -8,6 +8,7 @@ import com.example.demo.domain.Image;
 import com.example.demo.domain.Photo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import liquibase.pro.packaged.C;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -232,11 +233,50 @@ public class Helper {
         return formatter.format(date);
     }
 
+    public String formatDateWithTime(Date date){
+        if(date == null){
+            return null;
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        return formatter.format(date);
+    }
+
     public String generateUUID(){
         return UUID.randomUUID().toString();
     }
 
     public boolean isDropboxUri(String uri){
         return uri.contains("dropbox");
+    }
+
+    public Date getNowAsTimeZone(String timezone){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone(timezone));
+        return calendar.getTime();
+    }
+
+    public Date getNewDateAfterOccurrences(Date date, String timezone, String repeatType, int occurrences){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone(timezone));
+        calendar.setTime(date);
+
+        switch (repeatType){
+            case "DAILY":
+                calendar.add(Calendar.DATE, occurrences);
+                return calendar.getTime();
+            case "WEEKLY":
+                calendar.add(Calendar.DATE, 7 * occurrences);
+                return calendar.getTime();
+            case "MONTHLY":
+                calendar.add(Calendar.MONTH, occurrences);
+                return calendar.getTime();
+            case "YEARLY":
+                calendar.add(Calendar.YEAR, occurrences);
+                return calendar.getTime();
+        }
+
+        return null;
     }
 }

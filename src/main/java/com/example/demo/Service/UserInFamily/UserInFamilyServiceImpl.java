@@ -1,9 +1,8 @@
 package com.example.demo.Service.UserInFamily;
 
 import com.example.demo.Repo.UserInFamilyRepo;
-import com.example.demo.Repo.UserRepo;
 import com.example.demo.Service.Role.RoleService;
-import com.example.demo.domain.Family;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Role;
 import com.example.demo.domain.User;
 import com.example.demo.domain.UserInFamily;

@@ -1,6 +1,6 @@
 package com.example.demo.Service.UserInFamily;
 
-import com.example.demo.domain.Family;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Role;
 import com.example.demo.domain.User;
 import com.example.demo.domain.UserInFamily;

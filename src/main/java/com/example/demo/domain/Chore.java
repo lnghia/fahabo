@@ -1,11 +1,11 @@
 package com.example.demo.domain;
 
 import com.example.demo.Helpers.Helper;
+import com.example.demo.domain.Family.Family;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 @Entity
 @Table(name = "chores")

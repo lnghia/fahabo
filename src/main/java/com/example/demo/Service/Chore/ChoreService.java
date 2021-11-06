@@ -7,24 +7,18 @@ import com.example.demo.Service.ChoresAssignUsers.ChoresAssignUsersService;
 import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.PhotoInChore.PhotoInChoreService;
 import com.example.demo.domain.Chore;
-import com.example.demo.domain.Family;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.example.demo.Specifications.ChoreSpecification.hasAssignee;
 //import static com.example.demo.Specifications.ChoreSpecification.hasStatus;
 
 @Service

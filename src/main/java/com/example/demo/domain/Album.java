@@ -1,10 +1,10 @@
 package com.example.demo.domain;
 
+import com.example.demo.domain.Family.Family;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;

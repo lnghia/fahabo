@@ -1,10 +1,6 @@
 package com.example.demo.Service.Family;
 
-import com.example.demo.RequestForm.CreateFamilyReqForm;
-import com.example.demo.domain.Family;
-import com.example.demo.domain.User;
-
-import java.util.ArrayList;
+import com.example.demo.domain.Family.Family;
 
 public interface FamilyService {
     public Family saveFamily(Family family);

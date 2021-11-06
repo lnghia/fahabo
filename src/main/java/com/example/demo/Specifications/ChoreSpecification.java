@@ -3,7 +3,7 @@ package com.example.demo.Specifications;
 import com.example.demo.MetaModel.ChoresAssignUsers_;
 import com.example.demo.domain.Chore;
 import com.example.demo.domain.ChoresAssignUsers;
-import com.example.demo.domain.Family;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.User;
 import org.springframework.data.jpa.domain.Specification;
 

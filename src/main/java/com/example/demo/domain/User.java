@@ -1,15 +1,8 @@
 package com.example.demo.domain;
 
-import com.dropbox.core.v2.DbxClientV2;
-import com.example.demo.DropBox.DropBoxAuthenticator;
-import com.example.demo.DropBox.DropBoxUploader;
-import com.example.demo.Helpers.UserHelper;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Reference;
-import org.springframework.stereotype.Repository;
+import com.example.demo.Event.Entity.Event;
+import com.example.demo.Event.Entity.EventAssignUser;
+import com.example.demo.domain.Family.Family;
 
 import javax.persistence.*;
 
@@ -72,6 +65,9 @@ public class User {
     @OneToMany(mappedBy = "reporter", fetch = FetchType.EAGER)
     private Set<Chore> chores = new HashSet<>();
 
+    @OneToMany(mappedBy = "reporter")
+    private Set<Event> events = new HashSet<>();
+
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
 
@@ -96,6 +92,9 @@ public class User {
 
     @OneToMany(mappedBy = "assignee")
     private Set<ChoresAssignUsers> choresAssignUsers = new HashSet<>();
+
+    @OneToMany(mappedBy = "assignee")
+    private Set<EventAssignUser> eventAssignUsers = new HashSet<>();
 
     public int getId() {
         return id;
@@ -248,6 +247,22 @@ public class User {
 
     public void setChores(Set<Chore> chores) {
         this.chores = chores;
+    }
+
+    public Set<EventAssignUser> getEventAssignUsers() {
+        return eventAssignUsers;
+    }
+
+    public void setEventAssignUsers(Set<EventAssignUser> eventAssignUsers) {
+        this.eventAssignUsers = eventAssignUsers;
+    }
+
+    public Set<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Set<Event> events) {
+        this.events = events;
     }
 
     public User() {

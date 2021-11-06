@@ -5,12 +5,10 @@ import com.example.demo.Service.AlbumsPhotos.AlbumsPhotosService;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.UserService;
-import com.example.demo.domain.Family;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.persistence.Column;
 
 @Component
 public class UserPhotoHelper {

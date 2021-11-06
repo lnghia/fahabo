@@ -25,7 +25,7 @@ public class PhotoInChore {
     private ChoreAlbum album;
 
     @Column(name = "is_deleted")
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     public PhotoInChore() {
     }

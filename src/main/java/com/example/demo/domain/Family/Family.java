@@ -1,6 +1,11 @@
-package com.example.demo.domain;
+package com.example.demo.domain.Family;
 
+import com.example.demo.Event.Entity.Event;
 import com.example.demo.Helpers.Helper;
+import com.example.demo.domain.Album;
+import com.example.demo.domain.Chore;
+import com.example.demo.domain.User;
+import com.example.demo.domain.UserInFamily;
 
 import javax.persistence.*;
 import java.util.*;
@@ -35,6 +40,9 @@ public class Family {
 
     @OneToMany(mappedBy = "family")
     private Set<Chore> chores = new HashSet<>();
+
+    @OneToMany(mappedBy = "family")
+    private Set<Event> events = new HashSet<>();
 
 //    @ManyToMany(mappedBy = "families")
 //    private Set<Role> roles;
@@ -143,6 +151,14 @@ public class Family {
 
     public void setTimezone(String timezone) {
         this.timezone = timezone;
+    }
+
+    public Set<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Set<Event> events) {
+        this.events = events;
     }
 
     public HashMap<String, Object> getJson(boolean getThumbnail) {

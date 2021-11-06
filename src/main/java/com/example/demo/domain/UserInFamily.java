@@ -1,5 +1,6 @@
 package com.example.demo.domain;
 
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.IdClasses.UserInFamilyIdClass;
 
 import javax.persistence.*;
