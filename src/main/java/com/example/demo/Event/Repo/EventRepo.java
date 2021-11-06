@@ -32,7 +32,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
                     "AND family_id=:familyId " +
                     "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
                     "AND (:title IS NULL OR :title='' OR a.title LIKE %:title%)" +
-                    "AND (:from='' OR :to='' OR (cast(created_at as VARCHAR) >= :from AND cast(created_at as VARCHAR) <= :to)))",
+                    "AND (:from='' OR :to='' OR (cast(from_time as VARCHAR) >= :from AND cast(from_time as VARCHAR) <= :to)))",
             nativeQuery = true)
     ArrayList<Event> findAlLFilteredByUserAndStatusAndTitleSortedByCreatedAtOrDeadLine(@Param("familyId") int familyId,
                                                                                        @Param("userId") List<String> userId,
