@@ -97,5 +97,13 @@
             <column name="repeat_occurrences" type="int"></column>
         </addColumn>
     </changeSet>
+    
+    <changeSet id="add_column_sub_event_id_table_events_albums" author="nghia">
+        <addColumn tableName="events_albums">
+            <column name="sub_event_id" type="int">
+                <constraints foreignKeyName="fk_events_albums_events" references="events(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

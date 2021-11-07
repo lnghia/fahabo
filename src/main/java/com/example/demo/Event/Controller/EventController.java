@@ -1,6 +1,7 @@
 package com.example.demo.Event.Controller;
 
 import com.example.demo.Event.Entity.Event;
+import com.example.demo.Event.Entity.GroupEvent;
 import com.example.demo.Event.Entity.PhotoInEvent;
 import com.example.demo.Event.Helper.EventHelper;
 import com.example.demo.Event.RequestBody.CreateEventReqBody;
@@ -66,7 +67,9 @@ public class EventController {
 
         try {
             if(reqBody.repeatType == null || reqBody.repeatType.isEmpty() || reqBody.repeatType.isBlank()){
-                events.add(eventHelper.createEvent(reqBody, user));
+                Event event = eventHelper.createEvent(reqBody, user);
+                events.add(event);
+                GroupEvent headGroupEvent = groupEventService.createGroupEvent(event, event);
             }
             else{
                 events.add(eventHelper.createRepeatEvent(reqBody, user).get(0));
