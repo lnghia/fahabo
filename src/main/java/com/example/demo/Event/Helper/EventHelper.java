@@ -269,6 +269,16 @@ public class EventHelper {
         return calendar.getTime();
     }
 
+    public void deletePhotosInEvent(int eventId){
+        photoInEventService.deletePhotosInEvent(eventId);
+    }
+
+    public void deletePhotosInEventByPhotoId(int eventId, int[] photoIds){
+        for(var id : photoIds){
+            photoInEventService.deletePhotosInEventByPhotoId(eventId, id);
+        }
+    }
+
     public ArrayList<HashMap<String, Object>> getPhotos(Event event, int page, int size) throws ExecutionException, InterruptedException {
         EventAlbum eventAlbum = event.getEventAlbumSet().iterator().next();
         ArrayList<PhotoInEvent> photoInEvents = photoInEventService.getAllPhotos(eventAlbum.getId(), page, size);
@@ -526,6 +536,12 @@ public class EventHelper {
             updateEvent(tmp.getSubEvent(), user, reqBody);
         }
 //        }
+
+        if(reqBody.deletePhotos != null && reqBody.deletePhotos.length > 0){
+            for(var tmp : events){
+                deletePhotosInEventByPhotoId(tmp.getSubEventId(), reqBody.deletePhotos);
+            }
+        }
 
         ArrayList<Image> rs = new ArrayList<>();
         if (updatePhotos) {

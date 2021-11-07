@@ -22,4 +22,6 @@ public class UpdateEventReqBody {
     public Boolean updateAll;
 
     public Integer occurrences;
+
+    public int[] deletePhotos;
 }

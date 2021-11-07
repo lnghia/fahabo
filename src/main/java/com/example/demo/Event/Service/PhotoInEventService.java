@@ -39,4 +39,8 @@ public class PhotoInEventService {
     public ArrayList<Integer> getAllPhotoIdsInEvent(int eventAlbumId){
         return photoInEventRepo.findAllByEventAlbumId(eventAlbumId);
     }
+
+    public int deletePhotosInEventByPhotoId(int eventId, int photoId){
+        return photoInEventRepo.deletePhotosInEventByPhotoId(eventId, photoId);
+    }
 }

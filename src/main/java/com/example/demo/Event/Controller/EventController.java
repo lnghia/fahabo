@@ -119,6 +119,9 @@ public class EventController {
                 if(reqBody.updateAll == null || !reqBody.updateAll){
                     images = eventHelper.updateASingleEvent(event, user, reqBody);
                     eventService.saveEvent(event);
+                    if(reqBody.deletePhotos != null && reqBody.deletePhotos.length > 0){
+                        eventHelper.deletePhotosInEventByPhotoId(event.getId(), reqBody.deletePhotos);
+                    }
                 }
                 else{
                     images = eventHelper.updateAllEventsInGroup(event, user, reqBody, true);
