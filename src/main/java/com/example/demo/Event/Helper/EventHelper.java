@@ -7,7 +7,6 @@ import com.example.demo.Event.RequestBody.UpdateEventReqBody;
 import com.example.demo.Event.Service.*;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
-import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.UserService;
@@ -15,10 +14,7 @@ import com.example.demo.domain.*;
 import com.example.demo.domain.Family.Family;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.text.ParseException;
 import java.util.*;
@@ -112,7 +108,7 @@ public class EventHelper {
         }
     }
 
-    public ArrayList<Image> addPhotosToEvent(String[] photos, Event event, Family family) throws ExecutionException, InterruptedException {
+    public ArrayList<Image> addPhotosToEventByHeadEvent(String[] photos, Event event, Family family) throws ExecutionException, InterruptedException {
         if (photos != null && photos.length != 0) {
             Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
             int headEventId = groupEventService.findHeadEventId(event.getId());
@@ -162,9 +158,97 @@ public class EventHelper {
             }
 
             return success;
+        } else if (event.getEventAlbumSet().isEmpty()) {
+            EventAlbum eventAlbum = new EventAlbum();
+            eventAlbum.setEvent(event);
+            eventAlbumService.saveEventAlbum(eventAlbum);
+            event.getEventAlbumSet().add(eventAlbum);
         }
 
         return new ArrayList<>();
+    }
+
+    public ArrayList<Image> addPhotoToEvent(String[] photos, Event event, Family family) throws ExecutionException, InterruptedException {
+        if (photos != null && photos.length != 0) {
+            Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+
+            EventAlbum eventAlbum;
+            if (event.getEventAlbumSet().isEmpty()) {
+                eventAlbum = new EventAlbum();
+                eventAlbum.setEvent(event);
+                eventAlbumService.saveEventAlbum(eventAlbum);
+                event.getEventAlbumSet().add(eventAlbum);
+            } else {
+                eventAlbum = event.getEventAlbumSet().iterator().next();
+            }
+
+            ItemToUpload[] items = new ItemToUpload[photos.length];
+            HashMap<String, Photo> newPhotos = new HashMap<>();
+
+            for (int i = 0; i < photos.length; ++i) {
+                Photo photo = new Photo();
+                PhotoInEvent photoInEvent = new PhotoInEvent();
+
+                photo.setCreatedAt(now);
+                photo.setUpdatedAt(now);
+
+                photoService.savePhoto(photo);
+                photoInEvent.setPhoto(photo);
+                photoInEvent.setAlbum(eventAlbum);
+                photoInEventService.savePhotoInEvent(photoInEvent);
+                photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
+                        family.getId(),
+                        eventAlbum.getId(),
+                        photo.getId()));
+                photoService.savePhoto(photo);
+                newPhotos.put(photo.getName(), photo);
+
+                items[i] = new ItemToUpload(photo.getName(), photos[i]);
+            }
+
+            UploadResult result = dropBoxHelper.uploadImages(items, eventAlbum.getId(), 1);
+            ArrayList<Image> success = result.successUploads;
+
+            for (var image : success) {
+                Photo photo = newPhotos.get(image.getName());
+                photo.setUri(image.getMetadata().getUrl());
+                photoService.savePhoto(photo);
+            }
+
+            return success;
+        } else if (event.getEventAlbumSet().isEmpty()) {
+            EventAlbum eventAlbum = new EventAlbum();
+            eventAlbum.setEvent(event);
+            eventAlbumService.saveEventAlbum(eventAlbum);
+            event.getEventAlbumSet().add(eventAlbum);
+        }
+
+        return new ArrayList<>();
+    }
+
+    public void addPhotosToSubEvents(List<Photo> photos, ArrayList<Event> subEvents, int headEventId){
+        for(var subEvent : subEvents){
+            if(subEvent.getId() == headEventId) continue;
+
+            EventAlbum tmp;
+
+            if(subEvent.getEventAlbumSet().isEmpty()){
+                tmp = new EventAlbum();
+                tmp.setEvent(subEvent);
+                eventAlbumService.saveEventAlbum(tmp);
+                subEvent.getEventAlbumSet().add(tmp);
+            }
+            else{
+                tmp = subEvent.getEventAlbumSet().iterator().next();
+            }
+
+            for(var photo : photos){
+                PhotoInEvent photoInEvent = new PhotoInEvent();
+                photoInEvent.setPhoto(photo);
+                photoInEvent.setAlbum(tmp);
+                photoInEventService.savePhotoInEvent(photoInEvent);
+            }
+        }
     }
 
     public Date getNewDeadline(Date deadline, String repeatType) {
@@ -261,7 +345,7 @@ public class EventHelper {
     }
 
     public void deleteEvent(Event event, int headEventId, boolean deleteImagesAndAlbums) {
-        if (event.getId() == headEventId && deleteImagesAndAlbums) {
+        if (deleteImagesAndAlbums) {
             photoInEventService.deletePhotosInEvent(event.getId());
             eventAlbumService.deleteEventAlbumInEvent(event.getId());
         }
@@ -345,6 +429,34 @@ public class EventHelper {
         }
     }
 
+    public ArrayList<Image> updateASingleEvent(Event event, User user, UpdateEventReqBody reqBody) throws ExecutionException, InterruptedException, ParseException {
+        if (reqBody.title != null && !reqBody.title.isBlank() && !reqBody.title.isEmpty()) {
+            event.setTitle(reqBody.title);
+        }
+        if (reqBody.description != null && !reqBody.description.isBlank() && !reqBody.description.isEmpty()) {
+            event.setDescription(reqBody.description);
+        }
+        if(!reqBody.from.equals(event.getFromAsString())){
+            event.setFrom(Helper.getInstance().formatDate(reqBody.from));
+        }
+        if(!reqBody.to.equals(event.getToAsString())){
+            event.setTo(Helper.getInstance().formatDate(reqBody.to));
+        }
+//        if (reqBody.occurrences != event.getRepeatOccurrences()) {
+//            event.setRepeatOccurrences(reqBody.occurrences);
+//        }
+//        if (!reqBody.repeatType.equals(event.getRepeatType())) {
+//            event.setRepeatType(reqBody.repeatType);
+//        }
+
+        ArrayList<Image> images = addPhotoToEvent(reqBody.photos, event, event.getFamily());
+
+        event.setUpdatedAt(Helper.getInstance().getNowAsTimeZone(event.getFamily().getTimezone()));
+        eventService.saveEvent(event);
+
+        return images;
+    }
+
     public void updateEvent(Event event, User user, UpdateEventReqBody reqBody) throws ParseException {
         if (reqBody.title != null && !reqBody.title.isBlank() && !reqBody.title.isEmpty()) {
             event.setTitle(reqBody.title);
@@ -358,6 +470,12 @@ public class EventHelper {
         if (!reqBody.repeatType.equals(event.getRepeatType())) {
             event.setRepeatType(reqBody.repeatType);
         }
+        if(!reqBody.from.equals(event.getFromAsString())){
+            event.setFrom(Helper.getInstance().formatDate(reqBody.from));
+        }
+        if(!reqBody.to.equals(event.getToAsString())){
+            event.setTo(Helper.getInstance().formatDate(reqBody.to));
+        }
 //        try {
 //            if (reqBody.from != null && !reqBody.from.isEmpty() && !reqBody.to.isBlank()) {
 //                event.setFrom(Helper.getInstance().formatDate(reqBody.from));
@@ -368,8 +486,8 @@ public class EventHelper {
 //        } catch (ParseException e) {
 //            throw new ParseException("Couldn't parse from and to", 0);
 //        }
-        cancelAssignUsers(event);
-        assignUsers(reqBody.assigneeIds, event);
+//        cancelAssignUsers(event);
+//        assignUsers(reqBody.assigneeIds, event);
         event.setUpdatedAt(Helper.getInstance().getNowAsTimeZone(event.getFamily().getTimezone()));
 
         eventService.saveEvent(event);
@@ -380,8 +498,14 @@ public class EventHelper {
         Event headEvent = eventService.getById(headEventId);
         String firstRepeatType = headEvent.getRepeatType();
         int firstOccurrences = headEvent.getRepeatOccurrences();
+        ArrayList<GroupEvent> events = new ArrayList<>();
 
-        // update headEvent
+        int occurrences = Helper.getInstance().getOccurrencesBetween(headEvent.getFrom(), event.getFrom(), headEvent.getRepeatType());
+        Date newFrom = Helper.getInstance().getHeadEventFromOrTo(reqBody.from, reqBody.repeatType, occurrences);
+        Date newTo = Helper.getInstance().getHeadEventFromOrTo(reqBody.to, reqBody.repeatType, occurrences);
+        reqBody.from = Helper.getInstance().formatDateWithTime(newFrom);
+        reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
+
         updateEvent(headEvent, user, reqBody);
         if (!firstRepeatType.equals(reqBody.repeatType)) {
             updateRepeatType(event, headEvent, user, reqBody);
@@ -389,9 +513,15 @@ public class EventHelper {
             updateOccurrences(event, headEvent, user, reqBody);
         } else {
 
-            ArrayList<GroupEvent> events = groupEventService.findAllEventsByHeadEventId(headEventId);
+            events = groupEventService.findAllEventsByHeadEventId(headEventId);
+            int i = 0;
 
             for (var tmp : events) {
+                if(tmp.getSubEventId() == headEventId) continue;
+                newFrom = Helper.getInstance().getNewDateAfterOccurrences(newFrom, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
+                newTo = Helper.getInstance().getNewDateAfterOccurrences(newTo, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
+                reqBody.from = Helper.getInstance().formatDateWithTime(newFrom);
+                reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
                 updateEvent(tmp.getSubEvent(), user, reqBody);
             }
         }
@@ -399,7 +529,15 @@ public class EventHelper {
         ArrayList<Image> rs = new ArrayList<>();
         if (updatePhotos) {
             if (reqBody.photos != null && reqBody.photos.length > 0) {
-                rs = addPhotosToEvent(reqBody.photos, headEvent, event.getFamily());
+                rs = addPhotosToEventByHeadEvent(reqBody.photos, headEvent, event.getFamily());
+                List<Integer> photoIds = photoInEventService.getAllPhotoIdsInEvent(headEvent.getEventAlbumSet().iterator().next().getId());
+                List<Photo> photos = photoIds.stream().map(id -> {
+                    return photoService.getById(id);
+                }).collect(Collectors.toList());
+                ArrayList<Event> tmp = new ArrayList<>(events.stream().map(groupEvent -> {
+                    return groupEvent.getSubEvent();
+                }).collect(Collectors.toList()));
+                addPhotosToSubEvents(photos, tmp, headEventId);
             }
         }
 
@@ -413,7 +551,7 @@ public class EventHelper {
 
         for (var groupEvent : events) {
             if (groupEvent.getSubEvent().getId() != headEventId) {
-                deleteEvent(groupEvent.getSubEvent(), headEventId, false);
+                deleteEvent(groupEvent.getSubEvent(), headEventId, true);
             }
         }
     }

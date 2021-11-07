@@ -30,7 +30,7 @@
     <changeSet id="add_table_event_album" author="nghia">
         <createTable tableName="events_albums">
             <column name="id" type="int">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_event_album"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events_albums"/>
             </column>
             <column name="event_id" type="int">
                 <constraints nullable="false" foreignKeyName="fk_event_album_event" references="events(id)"/>
@@ -90,20 +90,6 @@
             <column name="is_deleted" type="boolean" defaultValue="false"></column>
         </createTable>
         <addPrimaryKey tableName="group_event" columnNames="head_event_id, sub_event_id" constraintName="pk_group_event"/>
-    </changeSet>
-
-    <changeSet id="add_column_occurrences_table_events" author="nghia">
-        <addColumn tableName="events">
-            <column name="repeat_occurrences" type="int"></column>
-        </addColumn>
-    </changeSet>
-    
-    <changeSet id="add_column_sub_event_id_table_events_albums" author="nghia">
-        <addColumn tableName="events_albums">
-            <column name="sub_event_id" type="int">
-                <constraints foreignKeyName="fk_events_albums_events" references="events(id)"/>
-            </column>
-        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

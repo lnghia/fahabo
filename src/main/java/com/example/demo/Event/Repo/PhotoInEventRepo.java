@@ -34,4 +34,7 @@ public interface PhotoInEventRepo extends JpaRepository<PhotoInEvent, PhotoInEve
 
     @Query(value = "SELECT * FROM photos_in_events WHERE is_deleted=FALSE AND event_album_id=:eventAlbumId", nativeQuery = true)
     ArrayList<PhotoInEvent> findAllByEventAlbumId(@Param("eventAlbumId") int albumId, Pageable pageable);
+
+    @Query(value = "SELECT photo_id FROM photos_in_events WHERE is_deleted=FALSE AND event_album_id=:eventAlbumId", nativeQuery = true)
+    ArrayList<Integer> findAllByEventAlbumId(@Param("eventAlbumId") int albumId);
 }

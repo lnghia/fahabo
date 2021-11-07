@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import liquibase.pro.packaged.C;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -20,6 +21,10 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -241,6 +246,52 @@ public class Helper {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
         return formatter.format(date);
+    }
+
+    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
+    }
+
+    public Date getHeadEventFromOrTo(String date, String repeatType, int occurrences) throws ParseException {
+        Date dateToSubtract = formatDate(date);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateToSubtract);
+
+        switch (repeatType){
+            case "DAILY":
+                calendar.add(Calendar.DATE, occurrences * -1);
+                return calendar.getTime();
+            case "WEEKLY":
+                calendar.add(Calendar.DATE, occurrences * 7 * -1);
+                return calendar.getTime();
+            case "MONTHLY":
+                calendar.add(Calendar.MONTH, occurrences * -1);
+                return calendar.getTime();
+            case "YEARLY":
+                calendar.add(Calendar.YEAR, occurrences * -1);
+                return calendar.getTime();
+        }
+
+        return null;
+    }
+
+    public int getOccurrencesBetween(Date from, Date to, String repeatType){
+        LocalDate toCal = convertToLocalDateViaInstant(to);
+        LocalDate fromCal = convertToLocalDateViaInstant(from);
+        Period period = Period.between(fromCal, toCal);
+
+        switch (repeatType){
+            case "DAILY":
+                return period.getDays();
+            case "WEEKLY":
+                return period.getDays() * 7;
+            case "MONTHLY":
+                return period.getMonths();
+            case "YEARLY":
+                return period.getYears();
+        }
+
+        return 0;
     }
 
     public String formatDateWithTimeForQuery(Date date){

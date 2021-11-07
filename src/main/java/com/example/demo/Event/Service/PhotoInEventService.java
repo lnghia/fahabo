@@ -35,4 +35,8 @@ public class PhotoInEventService {
 
         return photoInEventRepo.findAllByEventAlbumId(eventAlbumId, pageable);
     }
+
+    public ArrayList<Integer> getAllPhotoIdsInEvent(int eventAlbumId){
+        return photoInEventRepo.findAllByEventAlbumId(eventAlbumId);
+    }
 }

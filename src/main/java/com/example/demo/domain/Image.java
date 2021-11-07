@@ -13,6 +13,7 @@ public class Image {
     private String base64Data;
     private String uri;
     private PathLinkMetadata metadata;
+    public int id;
 
     public Image(){}
 

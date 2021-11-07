@@ -2,7 +2,6 @@ package com.example.demo.Event.Controller;
 
 import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Entity.GroupEvent;
-import com.example.demo.Event.Entity.PhotoInEvent;
 import com.example.demo.Event.Helper.EventHelper;
 import com.example.demo.Event.RequestBody.CreateEventReqBody;
 import com.example.demo.Event.RequestBody.DeleteEventReqBody;
@@ -10,13 +9,14 @@ import com.example.demo.Event.RequestBody.GetEventPhotoReqBody;
 import com.example.demo.Event.RequestBody.UpdateEventReqBody;
 import com.example.demo.Event.Service.*;
 import com.example.demo.Helpers.Helper;
-import com.example.demo.RequestForm.GetChorePhotoReqForm;
 import com.example.demo.RequestForm.GetChoresReqForm;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Image;
+import com.example.demo.domain.Photo;
 import com.example.demo.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -59,6 +58,9 @@ public class EventController {
     @Autowired
     private GroupEventService groupEventService;
 
+    @Autowired
+    private PhotoService photoService;
+
     @PostMapping("/new_event")
     public ResponseEntity<Response> createEvent(@Valid @RequestBody CreateEventReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
@@ -72,9 +74,14 @@ public class EventController {
                 GroupEvent headGroupEvent = groupEventService.createGroupEvent(event, event);
             }
             else{
-                events.add(eventHelper.createRepeatEvent(reqBody, user).get(0));
+                events.addAll(eventHelper.createRepeatEvent(reqBody, user));
             }
-            ArrayList<Image> success = eventHelper.addPhotosToEvent(reqBody.photos, events.get(0), events.get(0).getFamily());
+            ArrayList<Image> success = eventHelper.addPhotosToEventByHeadEvent(reqBody.photos, events.get(0), events.get(0).getFamily());
+            List<Integer> photoIds = photoInEventService.getAllPhotoIdsInEvent(events.get(0).getEventAlbumSet().iterator().next().getId());
+            List<Photo> photos = photoIds.stream().map(id -> {
+                return photoService.getById(id);
+            }).collect(Collectors.toList());
+            eventHelper.addPhotosToSubEvents(photos, events, events.get(0).getId());
             for(var event : events){
                 family.getEvents().add(event);
                 event.setFamily(family);
@@ -108,14 +115,14 @@ public class EventController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(""))));
             }
             try {
-                ArrayList<Image> images = eventHelper.updateAllEventsInGroup(event, user, reqBody, true);
-//                if(reqBody.updateAll != null && !reqBody.updateAll){
-//                    images = eventHelper.updateAllEventsInGroup(event, user, reqBody, true);
-//                    eventService.saveEvent(event);
-//                }
-//                else{
-//                    images = eventHelper.updateAllEventsInGroup(event, user, reqBody);
-//                }
+                ArrayList<Image> images = new ArrayList<>();
+                if(reqBody.updateAll == null || !reqBody.updateAll){
+                    images = eventHelper.updateASingleEvent(event, user, reqBody);
+                    eventService.saveEvent(event);
+                }
+                else{
+                    images = eventHelper.updateAllEventsInGroup(event, user, reqBody, true);
+                }
 
                 HashMap<String, Object> data = event.getJson();
                 data.put("photos", images.stream().map(s -> {
@@ -152,7 +159,7 @@ public class EventController {
         }
         if (event.getReporter().getId() == user.getId()) {
             if(reqBody.deleteAll == null || !reqBody.deleteAll){
-                eventHelper.deleteEvent(event, headEventId, false);
+                eventHelper.deleteEvent(event, headEventId, true);
             }
             else{
                 eventHelper.deleteAllEventsInGroup(event);
@@ -207,12 +214,13 @@ public class EventController {
                                                     @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
                                                     @Valid @RequestBody GetEventPhotoReqBody reqBody){
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        int headEventId = groupEventService.findHeadEventId(reqBody.eventId);
-        Event headEvent = eventService.getById(headEventId);
+//        int headEventId = groupEventService.findHeadEventId(reqBody.eventId);
+//        Event headEvent = eventService.getById(headEventId);
+        Event event = eventService.getById(reqBody.eventId);
 
-        if(headEvent.getFamily().checkIfUserExist(user)){
+        if(event.getFamily().checkIfUserExist(user)){
             try {
-                ArrayList<HashMap<String, Object>> data = eventHelper.getPhotos(headEvent, page, size);
+                ArrayList<HashMap<String, Object>> data = eventHelper.getPhotos(event, page, size);
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
             } catch (ExecutionException | InterruptedException e) {
