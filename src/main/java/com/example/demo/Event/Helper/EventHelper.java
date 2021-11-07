@@ -450,6 +450,8 @@ public class EventHelper {
 
         ArrayList<Image> images = addPhotoToEvent(reqBody.photos, event, event.getFamily());
 
+        cancelAssignUsers(event);
+        assignUsers(reqBody.assigneeIds, event);
         event.setUpdatedAt(Helper.getInstance().getNowAsTimeZone(event.getFamily().getTimezone()));
         eventService.saveEvent(event);
 
@@ -485,8 +487,8 @@ public class EventHelper {
 //        } catch (ParseException e) {
 //            throw new ParseException("Couldn't parse from and to", 0);
 //        }
-//        cancelAssignUsers(event);
-//        assignUsers(reqBody.assigneeIds, event);
+        cancelAssignUsers(event);
+        assignUsers(reqBody.assigneeIds, event);
         event.setUpdatedAt(Helper.getInstance().getNowAsTimeZone(event.getFamily().getTimezone()));
 
         eventService.saveEvent(event);
