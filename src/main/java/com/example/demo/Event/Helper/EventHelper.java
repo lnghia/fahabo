@@ -226,23 +226,22 @@ public class EventHelper {
         return new ArrayList<>();
     }
 
-    public void addPhotosToSubEvents(List<Photo> photos, ArrayList<Event> subEvents, int headEventId){
-        for(var subEvent : subEvents){
-            if(subEvent.getId() == headEventId) continue;
+    public void addPhotosToSubEvents(List<Photo> photos, ArrayList<Event> subEvents, int headEventId) {
+        for (var subEvent : subEvents) {
+            if (subEvent.getId() == headEventId) continue;
 
             EventAlbum tmp;
 
-            if(subEvent.getEventAlbumSet().isEmpty()){
+            if (subEvent.getEventAlbumSet().isEmpty()) {
                 tmp = new EventAlbum();
                 tmp.setEvent(subEvent);
                 eventAlbumService.saveEventAlbum(tmp);
                 subEvent.getEventAlbumSet().add(tmp);
-            }
-            else{
+            } else {
                 tmp = subEvent.getEventAlbumSet().iterator().next();
             }
 
-            for(var photo : photos){
+            for (var photo : photos) {
                 PhotoInEvent photoInEvent = new PhotoInEvent();
                 photoInEvent.setPhoto(photo);
                 photoInEvent.setAlbum(tmp);
@@ -436,10 +435,10 @@ public class EventHelper {
         if (reqBody.description != null && !reqBody.description.isBlank() && !reqBody.description.isEmpty()) {
             event.setDescription(reqBody.description);
         }
-        if(!reqBody.from.equals(event.getFromAsString())){
+        if (!reqBody.from.equals(event.getFromAsString())) {
             event.setFrom(Helper.getInstance().formatDate(reqBody.from));
         }
-        if(!reqBody.to.equals(event.getToAsString())){
+        if (!reqBody.to.equals(event.getToAsString())) {
             event.setTo(Helper.getInstance().formatDate(reqBody.to));
         }
 //        if (reqBody.occurrences != event.getRepeatOccurrences()) {
@@ -470,10 +469,10 @@ public class EventHelper {
         if (!reqBody.repeatType.equals(event.getRepeatType())) {
             event.setRepeatType(reqBody.repeatType);
         }
-        if(!reqBody.from.equals(event.getFromAsString())){
+        if (!reqBody.from.equals(event.getFromAsString())) {
             event.setFrom(Helper.getInstance().formatDate(reqBody.from));
         }
-        if(!reqBody.to.equals(event.getToAsString())){
+        if (!reqBody.to.equals(event.getToAsString())) {
             event.setTo(Helper.getInstance().formatDate(reqBody.to));
         }
 //        try {
@@ -507,24 +506,24 @@ public class EventHelper {
         reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
 
         updateEvent(headEvent, user, reqBody);
-        if (!firstRepeatType.equals(reqBody.repeatType)) {
-            updateRepeatType(event, headEvent, user, reqBody);
-        } else if (firstOccurrences != reqBody.occurrences) {
-            updateOccurrences(event, headEvent, user, reqBody);
-        } else {
+//        if (!firstRepeatType.equals(reqBody.repeatType)) {
+//            updateRepeatType(event, headEvent, user, reqBody);
+//        } else if (firstOccurrences != reqBody.occurrences) {
+//            updateOccurrences(event, headEvent, user, reqBody);
+//        } else {
 
-            events = groupEventService.findAllEventsByHeadEventId(headEventId);
-            int i = 0;
+        events = groupEventService.findAllEventsByHeadEventId(headEventId);
+        int i = 0;
 
-            for (var tmp : events) {
-                if(tmp.getSubEventId() == headEventId) continue;
-                newFrom = Helper.getInstance().getNewDateAfterOccurrences(newFrom, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
-                newTo = Helper.getInstance().getNewDateAfterOccurrences(newTo, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
-                reqBody.from = Helper.getInstance().formatDateWithTime(newFrom);
-                reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
-                updateEvent(tmp.getSubEvent(), user, reqBody);
-            }
+        for (var tmp : events) {
+            if (tmp.getSubEventId() == headEventId) continue;
+            newFrom = Helper.getInstance().getNewDateAfterOccurrences(newFrom, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
+            newTo = Helper.getInstance().getNewDateAfterOccurrences(newTo, tmp.getSubEvent().getFamily().getTimezone(), headEvent.getRepeatType(), 1);
+            reqBody.from = Helper.getInstance().formatDateWithTime(newFrom);
+            reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
+            updateEvent(tmp.getSubEvent(), user, reqBody);
         }
+//        }
 
         ArrayList<Image> rs = new ArrayList<>();
         if (updatePhotos) {
