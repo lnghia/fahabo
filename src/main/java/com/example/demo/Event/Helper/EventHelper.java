@@ -463,12 +463,12 @@ public class EventHelper {
         if (reqBody.description != null && !reqBody.description.isBlank() && !reqBody.description.isEmpty()) {
             event.setDescription(reqBody.description);
         }
-        if (reqBody.occurrences != event.getRepeatOccurrences()) {
-            event.setRepeatOccurrences(reqBody.occurrences);
-        }
-        if (!reqBody.repeatType.equals(event.getRepeatType())) {
-            event.setRepeatType(reqBody.repeatType);
-        }
+//        if (reqBody.occurrences != event.getRepeatOccurrences()) {
+//            event.setRepeatOccurrences(reqBody.occurrences);
+//        }
+//        if (!reqBody.repeatType.equals(event.getRepeatType())) {
+//            event.setRepeatType(reqBody.repeatType);
+//        }
         if (!reqBody.from.equals(event.getFromAsString())) {
             event.setFrom(Helper.getInstance().formatDate(reqBody.from));
         }
@@ -500,8 +500,8 @@ public class EventHelper {
         ArrayList<GroupEvent> events = new ArrayList<>();
 
         int occurrences = Helper.getInstance().getOccurrencesBetween(headEvent.getFrom(), event.getFrom(), headEvent.getRepeatType());
-        Date newFrom = Helper.getInstance().getHeadEventFromOrTo(reqBody.from, reqBody.repeatType, occurrences);
-        Date newTo = Helper.getInstance().getHeadEventFromOrTo(reqBody.to, reqBody.repeatType, occurrences);
+        Date newFrom = Helper.getInstance().getHeadEventFromOrTo(reqBody.from, headEvent.getRepeatType(), occurrences);
+        Date newTo = Helper.getInstance().getHeadEventFromOrTo(reqBody.to, headEvent.getRepeatType(), occurrences);
         reqBody.from = Helper.getInstance().formatDateWithTime(newFrom);
         reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
 
