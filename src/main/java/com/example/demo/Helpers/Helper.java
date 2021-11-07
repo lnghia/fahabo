@@ -284,7 +284,7 @@ public class Helper {
             case "DAILY":
                 return period.getDays();
             case "WEEKLY":
-                return period.getDays() * 7;
+                return period.getDays() / 7;
             case "MONTHLY":
                 return period.getMonths();
             case "YEARLY":
