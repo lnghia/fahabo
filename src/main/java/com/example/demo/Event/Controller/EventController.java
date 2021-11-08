@@ -182,9 +182,12 @@ public class EventController {
     @PostMapping
     public ResponseEntity<Response> getAll(@RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
                                            @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
-                                           @Valid @RequestBody GetChoresReqForm requestBody) {
+                                           @Valid @RequestBody GetChoresReqForm requestBody,
+                                           @RequestHeader("User-Agent") String userAgent) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
+
+        log.info("Device:", userAgent);
 
         if (family.checkIfUserExist(user)) {
             try {
