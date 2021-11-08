@@ -227,7 +227,7 @@ public class ChoreController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.choreIdNotExist"))));
         }
         int photosNum = (requestBody.photos != null) ? requestBody.photos.length : 0;
-        if(choreHelper.isPhotoNumExceedLimitChore(photosNum, null)){
+        if(choreHelper.isPhotoNumExceedLimitChore(photosNum, chore)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.photosNumInChoreExceeded"))));
         }
 

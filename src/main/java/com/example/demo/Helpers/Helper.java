@@ -182,6 +182,14 @@ public class Helper {
         return formatter.format(date);
     }
 
+    public String formatDateWithoutTime(Date date){
+        if(date == null) return "";
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        return formatter.format(date);
+    }
+
     public Date formatDate(String date) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 

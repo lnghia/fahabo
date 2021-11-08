@@ -22,7 +22,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
             "WHERE (a.is_deleted=FALSE " +
             "AND family_id=:familyId " +
             "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
-            "AND (:title IS NULL OR :title='' OR title LIKE %:title%) " +
+            "AND (:title IS NULL OR :title='' OR LOWER(title) LIKE %:title%) " +
             "AND (:from='' OR :to='' OR (cast(from_time as VARCHAR) >= :from AND cast(from_time as VARCHAR) <= :to)" +
                                     "OR (cast(to_time as VARCHAR) >= :from AND cast(to_time as VARCHAR) <= :to) " +
                                     "OR (cast(from_time as VARCHAR) <= :from AND cast(to_time as VARCHAR) >= :to)))) " +
@@ -33,7 +33,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
                     "WHERE events.is_deleted=FALSE " +
                     "AND family_id=:familyId " +
                     "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
-                    "AND (:title IS NULL OR :title='' OR a.title LIKE %:title%)" +
+                    "AND (:title IS NULL OR :title='' OR LOWER(a.title) LIKE %:title%)" +
                     "AND (:from='' OR :to='' OR (cast(from_time as VARCHAR) >= :from AND cast(from_time as VARCHAR) <= :to) " +
                                             "OR (cast(to_time as VARCHAR) >= :from AND cast(to_time as VARCHAR) <= :to) " +
                                             "OR (cast(from_time as VARCHAR) <= :from AND cast(to_time as VARCHAR) >= :to))",
@@ -45,5 +45,8 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
                                                                                        @Param("from") String from,
                                                                                        @Param("to") String to,
                                                                                        Pageable pageable);
+
+    @Query(value = "SELECT id FROM events WHERE is_deleted=FALSE AND cast(date(from_time) as VARCHAR) <= :date AND cast(date(to_time) as VARCHAR) >= :date LIMIT 1", nativeQuery = true)
+    Integer findAnEventIdOnDate(@Param("date") String date);
 }
 

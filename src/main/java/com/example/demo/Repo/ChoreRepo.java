@@ -30,7 +30,7 @@ public interface ChoreRepo extends JpaRepository<Chore, Integer>, JpaSpecificati
             "AND family_id=:familyId " +
             "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
             "AND (COALESCE(:status) IS NULL OR (a.status IN (:status))) " +
-            "AND (:title IS NULL OR :title='' OR title LIKE %:title%) " +
+            "AND (:title IS NULL OR :title='' OR LOWER(title) LIKE %:title%) " +
             "AND (:from='' OR :to='' OR (cast(created_at as VARCHAR) >= :from AND cast(created_at as VARCHAR) <= :to)))) " +
             "ORDER BY :sortByDeadline" +
             ", CASE WHEN :sortByDeadline THEN deadline END DESC " +
@@ -40,7 +40,7 @@ public interface ChoreRepo extends JpaRepository<Chore, Integer>, JpaSpecificati
                     "AND family_id=:familyId " +
                     "AND (COALESCE(:userId) IS NULL OR (cast(b.user_id as VARCHAR) IN (:userId))) " +
                     "AND (COALESCE(:status) IS NULL OR (a.status IN (:status))) " +
-                    "AND (:title IS NULL OR :title='' OR a.title LIKE %:title%)" +
+                    "AND (:title IS NULL OR :title='' OR LOWER(a.title) LIKE %:title%)" +
                     "AND (:from='' OR :to='' OR (cast(created_at as VARCHAR) >= :from AND cast(created_at as VARCHAR) <= :to)))",
             nativeQuery = true)
 //@Query(value = "SELECT DISTINCT * " +

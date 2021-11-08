@@ -63,9 +63,11 @@ public class UserController {
     private PhotoService photoService;
 
     @GetMapping
-    private ResponseEntity<Response> getUsers() {
+    private ResponseEntity<Response> getUsers(@RequestHeader("User-Agent") String userAgent) {
         List<User> users = userService.getUsers();
         List<Object> data = users.stream().map(user -> userHelper.UserToJson(user)).collect(Collectors.toList());
+
+        log.info(userAgent);
 
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }

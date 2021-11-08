@@ -3,10 +3,7 @@ package com.example.demo.Event.Controller;
 import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Entity.GroupEvent;
 import com.example.demo.Event.Helper.EventHelper;
-import com.example.demo.Event.RequestBody.CreateEventReqBody;
-import com.example.demo.Event.RequestBody.DeleteEventReqBody;
-import com.example.demo.Event.RequestBody.GetEventPhotoReqBody;
-import com.example.demo.Event.RequestBody.UpdateEventReqBody;
+import com.example.demo.Event.RequestBody.*;
 import com.example.demo.Event.Service.*;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.RequestForm.GetChoresReqForm;
@@ -75,6 +72,9 @@ public class EventController {
             }
             else{
                 events.addAll(eventHelper.createRepeatEvent(reqBody, user));
+            }
+            if (eventHelper.isPhotoNumExceedLimitChore(reqBody.photos.length, null)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(""))));
             }
             ArrayList<Image> success = eventHelper.addPhotosToEventByHeadEvent(reqBody.photos, events.get(0), events.get(0).getFamily());
             List<Integer> photoIds = photoInEventService.getAllPhotoIdsInEvent(events.get(0).getEventAlbumSet().iterator().next().getId());
@@ -230,6 +230,30 @@ public class EventController {
                 log.error("Error in start getting redirected image threads.", e.getMessage());
                 e.printStackTrace();
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @PostMapping("/dates_contain_events")
+    private ResponseEntity<Response> findDatesContainEvents(@Valid @RequestBody FindDatesContainEventsReqBody reqBody){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(reqBody.familyId);
+        Helper helper = Helper.getInstance();
+
+        if(family.checkIfUserExist(user)){
+            try {
+                ArrayList<String> datesContainEvents = eventHelper.findDatesContainEvents(
+                        helper.formatDateWithoutTime(reqBody.from),
+                        helper.formatDateWithoutTime(reqBody.to)
+                );
+
+                return ResponseEntity.ok(new Response(datesContainEvents, new ArrayList<>()));
+            } catch (ParseException e) {
+                log.error("Couldn't parse date in /dates_contain_events", e.getMessage());
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.dateFormatInvalid"))));
             }
         }
 

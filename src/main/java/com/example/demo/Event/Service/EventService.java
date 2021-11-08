@@ -52,7 +52,7 @@ public class EventService {
                 family.getId(),
                 users,
 //                sb.toString(),
-                title,
+                title != null ? title.toLowerCase() : "",
                 sortByDeadLine,
                 (from != null) ? Helper.getInstance().formatDateWithTimeForQuery(from) : "",
                 (to != null) ? Helper.getInstance().formatDateWithTimeForQuery(to) : "",
@@ -60,5 +60,10 @@ public class EventService {
         );
 
         return events;
+    }
+
+    public boolean checkIfDateContainEvents(String date){
+        Integer rs = eventRepo.findAnEventIdOnDate(date);
+        return  rs != null && rs > 0;
     }
 }
