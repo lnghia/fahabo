@@ -30,7 +30,7 @@
     <changeSet id="add_table_event_album" author="nghia">
         <createTable tableName="events_albums">
             <column name="id" type="int">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events_albums"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_event_album"/>
             </column>
             <column name="event_id" type="int">
                 <constraints nullable="false" foreignKeyName="fk_event_album_event" references="events(id)"/>
