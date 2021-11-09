@@ -34,6 +34,8 @@ import java.util.UUID;
 public class Helper {
     private static Helper instance;
 
+    public final String TEMP_FAMILY = "family rac de xoa family";
+
     public final int CHORE_PHOTO_MAX_NUM = 20;
 
     ArrayList<Integer> dateNumInMonths = new ArrayList<>(List.of(

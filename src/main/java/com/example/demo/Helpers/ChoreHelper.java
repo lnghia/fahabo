@@ -7,6 +7,7 @@ import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.PhotoInChore.PhotoInChoreService;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.*;
+import com.example.demo.domain.Family.Family;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +79,14 @@ public class ChoreHelper {
         photoInChoreService.deletePhotosInChoreAlbumByFamilyId(familyId);
         choreAlbumService.deleteChoreAlbumByFamilyId(familyId);
         choreService.deleteChoresInFamily(familyId);
+
+        Family family = familyService.findById(familyId);
+        Family tmp = familyService.findByName(Helper.getInstance().TEMP_FAMILY);
+
+        for(var chore : family.getChores()){
+            chore.setFamily(tmp);
+            choreService.saveChore(chore);
+        }
     }
 
     public HashMap<String, Object> getJson(int familyId, Chore chore) {

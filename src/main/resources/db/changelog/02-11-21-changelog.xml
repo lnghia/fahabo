@@ -91,5 +91,12 @@
         </createTable>
         <addPrimaryKey tableName="group_event" columnNames="head_event_id, sub_event_id" constraintName="pk_group_event"/>
     </changeSet>
+    
+    <changeSet id="add_temp_family" author="nghia">
+        <insert tableName="families">
+            <column name="id" value="0"></column>
+            <column name="name" value="family rac de xoa family"/>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

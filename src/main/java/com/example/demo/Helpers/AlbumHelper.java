@@ -3,6 +3,7 @@ package com.example.demo.Helpers;
 import com.example.demo.Service.Album.AlbumService;
 import com.example.demo.Service.AlbumsPhotos.AlbumsPhotosService;
 import com.example.demo.domain.Album;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Photo;
 import liquibase.pro.packaged.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +34,14 @@ public class AlbumHelper {
         albumsPhotosService.deletePhotosAlbumsRelationByFamilyId(familyId);
         albumsPhotosService.deletePhotosInFamilyAlbums(familyId);
         albumService.deleteAlbumsInFamily(familyId);
+    }
+
+    public void pointFamilyAlbumsToTmpFamily(Family family, Family tmpFamily){
+        for(var album : family.getAlbums()){
+            album.setFamily(tmpFamily);
+            albumService.saveAlbum(album);
+        }
+        family.getDefaultAlbum().setFamily(tmpFamily);
+        albumService.saveAlbum(family.getDefaultAlbum());
     }
 }

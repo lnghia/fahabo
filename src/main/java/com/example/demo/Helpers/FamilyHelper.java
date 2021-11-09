@@ -1,7 +1,9 @@
 package com.example.demo.Helpers;
 
+import com.example.demo.Event.Helper.EventHelper;
 import com.example.demo.Service.ChoresAssignUsers.ChoresAssignUsersService;
 import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +23,13 @@ public class FamilyHelper {
     FamilyService familyService;
 
     @Autowired
+    UserInFamilyService userInFamilyService;
+
+    @Autowired
     ChoresAssignUsersService choresAssignUsersService;
+
+    @Autowired
+    EventHelper eventHelper;
 
 //    @Autowired
 //    private UserService userService;
@@ -49,8 +57,11 @@ public class FamilyHelper {
 
     public void deleteFamilyById(int familyId){
         albumHelper.deleteAlbumsInFamily(familyId);
-        choreHelper.deleteChoresInFamily(familyId);
         choresAssignUsersService.deleteChoreUserRelationByFamilyId(familyId);
-        familyService.deleteFamilyById(familyId);
+        choreHelper.deleteChoresInFamily(familyId);
+        userInFamilyService.deleteUserInFamily(familyService.findById(familyId));
+        albumHelper.pointFamilyAlbumsToTmpFamily(familyService.findById(familyId), familyService.findByName(Helper.getInstance().TEMP_FAMILY));
+        eventHelper.deleteEventsInFamily(familyId);
+//        familyService.deleteFamilyById(familyId);
     }
 }

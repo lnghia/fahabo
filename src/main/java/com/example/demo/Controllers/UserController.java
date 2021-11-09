@@ -2,6 +2,7 @@ package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
+import com.example.demo.Firebase.FirebaseMessageHelper;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Helpers.UserHelper;
@@ -68,6 +69,13 @@ public class UserController {
         List<Object> data = users.stream().map(user -> userHelper.UserToJson(user)).collect(Collectors.toList());
 
         log.info(userAgent);
+
+        String token = "dRNAZti-R4K9jtHA1HC-b5:APA91bFdz08iVuV204qsTbWuVmKe8vastey-OmxCf27mN4WL91j7kUmgLJUfCzV-JOXS5FCxKvNTzaRqKaot5jTiKjqfqE-"+
+                "FYTQ1MJhkBayS3R6DMM729G50n-YltN9BLdSxHt5mjlGbxS_o";
+
+        String tmp = "eLge7rIu5UA1sAx-x6vzWq:APA91bG20weCjpg2DnymcxpnAGGDZwsLJOjNHeFVU2-MOtxcD6oc9eRYlqgSO26A-G33dj70x48UqWQ8KyFU6H-4yBz5XrrCDvC0oB_IM5dulJOfmSHdyZ07ayV6ymY-CYtmkHHrkR_p";
+
+        FirebaseMessageHelper.getInstance().sendNotifications(List.of(token, tmp), "hihi", "haha");
 
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }

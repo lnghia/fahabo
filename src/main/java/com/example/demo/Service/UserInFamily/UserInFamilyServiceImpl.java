@@ -69,6 +69,13 @@ public class UserInFamilyServiceImpl implements UserInFamilyService{
     }
 
     @Override
+    public void deleteUserInFamily(Family family){
+        for(var userInFamily : family.getUsersInFamily()){
+            userInFamilyRepo.delete(userInFamily);
+        }
+    }
+
+    @Override
     public List<User> getUsersInFamily(int familyId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 

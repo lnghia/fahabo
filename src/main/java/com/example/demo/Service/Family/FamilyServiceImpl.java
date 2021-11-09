@@ -36,8 +36,9 @@ public class FamilyServiceImpl implements FamilyService{
 
     @Override
     public void deleteFamilyById(int familyId) {
-        Family family = familyRepo.getById(familyId);
-        familyRepo.delete(family);
+//        Family family = familyRepo.getById(familyId);
+//        familyRepo.delete(family);
+        familyRepo.deleteById(familyId);
     }
 
     @Override

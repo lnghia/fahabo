@@ -12,7 +12,9 @@ import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -81,6 +83,7 @@ public class ChoreService {
         return chores;
     }
 
+    @Transactional
     public void deleteChoresInFamily(int familyId){
         choreRepo.deleteChoresInFamily(familyId);
     }

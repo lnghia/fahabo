@@ -5,6 +5,7 @@ import com.example.demo.domain.ChoresAssignUsers;
 import com.example.demo.domain.Family.Family;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ChoresAssignUsersService {
@@ -20,6 +21,7 @@ public class ChoresAssignUsersService {
         return choresAssignUsersRepo.findChoreIdsByFamilyId(family.getId());
     }
 
+    @Transactional
     public void deleteChoreUserRelationByFamilyId(int familyId){
         choresAssignUsersRepo.deleteChoreUserRelationByFamilyId(familyId);
     }

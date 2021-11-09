@@ -4,6 +4,7 @@ import com.example.demo.domain.Chore;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.parameters.P;
@@ -71,7 +72,7 @@ public interface ChoreRepo extends JpaRepository<Chore, Integer>, JpaSpecificati
                                                                                        @Param("from") String from,
                                                                                        @Param("to") String to,
                                                                                        Pageable pageable);
-
+    @Modifying
     @Query(value = "UPDATE chores SET is_deleted=TRUE WHERE is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
     void deleteChoresInFamily(@Param("familyId") int familyId);
 }

@@ -28,11 +28,13 @@ public class AlbumsPhotosServiceImpl implements AlbumsPhotosService {
     }
 
     @Override
+    @Transactional
     public void deletePhotosAlbumsRelationByFamilyId(int familyId) {
         albumsPhotosRepo.deletePhotosAlbumsRelationByFamilyId(familyId);
     }
 
     @Override
+    @Transactional
     public void deletePhotosInFamilyAlbums(int familyId) {
         albumsPhotosRepo.deletePhotosInFamilyAlbums(familyId);
     }

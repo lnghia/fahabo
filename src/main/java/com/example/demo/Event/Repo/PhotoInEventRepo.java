@@ -22,7 +22,7 @@ public interface PhotoInEventRepo extends JpaRepository<PhotoInEvent, PhotoInEve
     @Transactional
     @Query(value = "UPDATE photos_in_events SET is_deleted=TRUE " +
             "WHERE is_deleted=FALSE " +
-            "AND event_albums IN (SELECT a.id FROM (SELECT a.id, a.is_deleted, b.family_id FROM event_album AS a INNER JOIN events AS b ON a.event_id=b.id) WHERE is_deleted=FALSE AND family_id=:familyId)",
+            "AND event_albums IN (SELECT tmp.id FROM (SELECT a.id, a.is_deleted, b.family_id FROM events_albums AS a INNER JOIN events AS b ON a.event_id=b.id) AS tmp WHERE tmp.is_deleted=FALSE AND tmp.family_id=:familyId)",
             nativeQuery = true)
     int deletePhotosINEventAlbumByFamilyId(@Param("familyId") int familyId);
 

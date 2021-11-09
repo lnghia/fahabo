@@ -71,6 +71,7 @@ public class AlbumServiceImpl implements AlbumService{
     }
 
     @Override
+    @Transactional
     public void deleteAlbumsInFamily(int familyId) {
         albumRepo.deleteAlbumsInFamily(familyId);
     }

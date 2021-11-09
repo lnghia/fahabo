@@ -7,6 +7,7 @@ import liquibase.pro.packaged.A;
 import liquibase.pro.packaged.I;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -58,6 +59,7 @@ public interface AlbumRepo extends JpaRepository<Album, Integer> {
             " WHERE c.album_id=:albumId AND c.is_deleted=FALSE ORDER BY c.created_at DESC LIMIT 9", nativeQuery = true)
     List<Integer> get9LatestPhotosFromAlbum(@Param("albumId") int albumId);
 
+    @Modifying
     @Query(value = "UPDATE albums SET is_deleted=TRUE WHERE is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
     void deleteAlbumsInFamily(@Param("familyId") int familyId);
 

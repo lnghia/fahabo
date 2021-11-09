@@ -4,6 +4,7 @@ import com.example.demo.Event.Entity.Event;
 import com.example.demo.domain.Chore;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Repository
 public interface EventRepo extends JpaRepository<Event, Integer>{
+    @Modifying
     @Query(value = "UPDATE events SET is_deleted=TRUE WHERE is_deleted=FALSE AND family_id=:familyId", nativeQuery = true)
     void deleteEventsInFamily(@Param("familyId") int familyId);
 

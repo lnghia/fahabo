@@ -3,6 +3,7 @@ package com.example.demo.Repo;
 import com.example.demo.domain.PhotoInChore;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,9 +23,10 @@ public interface PhotoInChoreRepo extends JpaRepository<PhotoInChore, Integer> {
     PhotoInChore getPhotoInChoreByAlbumIdAndPhotoId(@Param("choreAlbumId") int choreAlbumId,
                                                     @Param("photoId") int photoId);
 
+    @Modifying
     @Query(value = "UPDATE photos_in_chore_albums SET is_deleted=TRUE " +
             "WHERE is_deleted=FALSE " +
-            "AND chore_albums IN (SELECT a.id FROM (SELECT a.id, a.is_deleted, b.family_id FROM chore_album AS a INNER JOIN chores AS b ON a.chore_id=b.id) WHERE is_deleted=FALSE AND family_id=:familyId)",
+            "AND chore_albums IN (SELECT tmp.id FROM (SELECT a.id, a.is_deleted, b.family_id FROM chore_album AS a INNER JOIN chores AS b ON a.chore_id=b.id) AS tmp WHERE tmp.is_deleted=FALSE AND tmp.family_id=:familyId)",
             nativeQuery = true)
     void deletePhotosINChoreAlbumByFamilyId(@Param("familyId") int familyId);
 
