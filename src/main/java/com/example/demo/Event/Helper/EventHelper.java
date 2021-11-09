@@ -645,7 +645,7 @@ public class EventHelper {
             }
             calendar.add(Calendar.DATE, 1);
         }
-        if(eventService.checkIfDateContainEvents(helper.formatDateWithoutTime(calendar.getTime()))){
+        if(eventService.checkIfDateContainEvents(helper.formatDateForQuery(calendar.getTime()))){
             ans.add(helper.formatDateWithoutTime(calendar.getTime()));
         }
 
