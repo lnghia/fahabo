@@ -12,7 +12,6 @@ import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.*;
 import com.example.demo.domain.Family.Family;
-import liquibase.pro.packaged.C;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -633,19 +632,19 @@ public class EventHelper {
         return events;
     }
 
-    public ArrayList<String> findDatesContainEvents(Date from, Date to) throws ParseException {
+    public ArrayList<String> findDatesContainEventsInFamily(Date from, Date to, int familyId) throws ParseException {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(from);
         ArrayList<String> ans = new ArrayList<>();
         Helper helper = Helper.getInstance();
 
         while(calendar.getTime().before(to)){
-            if(eventService.checkIfDateContainEvents(helper.formatDateForQuery(calendar.getTime()))){
+            if(eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)){
                 ans.add(helper.formatDateWithoutTime(calendar.getTime()));
             }
             calendar.add(Calendar.DATE, 1);
         }
-        if(eventService.checkIfDateContainEvents(helper.formatDateForQuery(calendar.getTime()))){
+        if(eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)){
             ans.add(helper.formatDateWithoutTime(calendar.getTime()));
         }
 

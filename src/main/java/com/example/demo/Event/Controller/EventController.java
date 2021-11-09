@@ -247,9 +247,10 @@ public class EventController {
 
         if(family.checkIfUserExist(user)){
             try {
-                ArrayList<String> datesContainEvents = eventHelper.findDatesContainEvents(
+                ArrayList<String> datesContainEvents = eventHelper.findDatesContainEventsInFamily(
                         helper.formatDateWithoutTime(reqBody.from),
-                        helper.formatDateWithoutTime(reqBody.to)
+                        helper.formatDateWithoutTime(reqBody.to),
+                        family.getId()
                 );
 
                 return ResponseEntity.ok(new Response(datesContainEvents, new ArrayList<>()));

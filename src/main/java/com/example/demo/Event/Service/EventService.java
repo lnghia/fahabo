@@ -4,15 +4,12 @@ import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Repo.EventRepo;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Array;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,8 +61,8 @@ public class EventService {
         return events;
     }
 
-    public boolean checkIfDateContainEvents(String date){
-        int rs = eventRepo.findAnEventIdOnDate(date);
+    public boolean checkIfDateContainEventsByFamilyId(String date, int familyId){
+        int rs = eventRepo.findAnEventIdOnDateByFamilyId(date, familyId);
         return rs > 0;
     }
 }
