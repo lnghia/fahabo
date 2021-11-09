@@ -355,7 +355,7 @@ public class UserController {
                                                 @RequestBody GetFamiliesReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         List<UserInFamily> userInFamilies = userInFamilyService.findAllByUserIdWithPagination(user.getId(),
-                (requestBody.searchText != null) ? requestBody.searchText : "",
+                (requestBody.searchText != null) ? requestBody.searchText.toLowerCase() : "",
                 page, size
         );
 //        List<Family> families = user.getUserInFamilies().stream().map(UserInFamily::getFamily).collect(Collectors.toList());
