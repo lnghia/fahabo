@@ -48,7 +48,7 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
                                                                                        @Param("to") String to,
                                                                                        Pageable pageable);
 
-    @Query(value = "SELECT id FROM events WHERE is_deleted=FALSE AND cast(date(from_time) as VARCHAR) <= :date AND cast(date(to_time) as VARCHAR) >= :date LIMIT 1", nativeQuery = true)
-    Integer findAnEventIdOnDate(@Param("date") String date);
+    @Query(value = "SELECT COUNT(id) FROM events WHERE is_deleted=FALSE AND cast(date(from_time) as VARCHAR) <= :date AND cast(date(to_time) as VARCHAR) >= :date", nativeQuery = true)
+    int findAnEventIdOnDate(@Param("date") String date);
 }
 

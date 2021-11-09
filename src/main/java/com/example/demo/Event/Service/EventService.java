@@ -65,7 +65,7 @@ public class EventService {
     }
 
     public boolean checkIfDateContainEvents(String date){
-        Integer rs = eventRepo.findAnEventIdOnDate(date);
-        return  rs != null;
+        int rs = eventRepo.findAnEventIdOnDate(date);
+        return rs > 0;
     }
 }
