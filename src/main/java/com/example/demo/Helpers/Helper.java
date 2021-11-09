@@ -319,6 +319,7 @@ public class Helper {
     }
 
     public boolean isDropboxUri(String uri){
+        if(uri == null) return false;
         return uri.contains("dropbox");
     }
 
