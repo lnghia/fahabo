@@ -12,6 +12,8 @@ import com.example.demo.SecurityProvider.OTPTokenProvider;
 import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Stringee.StringeeHelper;
+import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
+import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
 import com.example.demo.Validators.RequestBody.RequestBodyRequired;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.User;
@@ -64,6 +66,9 @@ public class AuthenticationController {
     @Autowired
     private EmailSenderProvider emailSender;
 
+    @Autowired
+    private UserFirebaseTokenHelper userFirebaseTokenHelper;
+
     @PostMapping("/login")
     public ResponseEntity<Response> login(@Valid @RequestBody LoginReqForm loginReqForm) {
         Map<String, Object> data = new HashMap<>();
@@ -91,6 +96,21 @@ public class AuthenticationController {
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("", new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
+    }
+
+    @PostMapping("/add_user_firebase_token")
+    public ResponseEntity<Response> addUserFirebaseToken(@RequestBody AddUserFirebaseTokenReqForm reqForm) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        String firebaseToken = reqForm.firebaseToken;
+
+        if (!userFirebaseTokenHelper.doesUserContainToken(user.getId(), firebaseToken)) {
+            UserFirebaseToken userFirebaseToken = userFirebaseTokenHelper.createUserFirebaseToken(user, firebaseToken);
+            user.getFirebaseTokenSet().add(userFirebaseToken);
+
+            return ResponseEntity.ok(new Response());
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("firebase.tokenExist"))));
     }
 
     @PostMapping("/aaa")
@@ -256,6 +276,11 @@ public class AuthenticationController {
             String access_token = tokenProvider.generateAccessToken(userDetails);
             String refresh_token = tokenProvider.generateRefreshToken(userDetails);
 
+//            if(!userFirebaseTokenHelper.doesUserContainToken(user.getId(), firebaseToken)){
+//                UserFirebaseToken userFirebaseToken = userFirebaseTokenHelper.createUserFirebaseToken(user, firebaseToken);
+//                user.getFirebaseTokenSet().add(userFirebaseToken);
+//            }
+
             Map<String, Object> data = new HashMap<>() {{
                 put("accessToken", access_token);
                 put("refreshToken", refresh_token);
@@ -277,7 +302,7 @@ public class AuthenticationController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
         }
-        if(user.getValidEmail()){
+        if (user.getValidEmail()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("verification.hasBeenVerified"))));
         }
 
@@ -299,16 +324,16 @@ public class AuthenticationController {
     }
 
     @PostMapping("/get_reset_password_otp")
-    public ResponseEntity<Response> getResetPwOTP(@Valid @RequestBody GetOTPReqForm requestBody){
+    public ResponseEntity<Response> getResetPwOTP(@Valid @RequestBody GetOTPReqForm requestBody) {
         User user = userService.getUserByUsername(requestBody.getUsername());
 
-        if(user == null)
+        if (user == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.ForgotPassword.accountNotExist.toString()))));
 
-        if(!user.getSocialAccountType().equals(socialAccountTypeService.getBySocialName("Manual"))){
-            HashMap<String, Object> data = new HashMap<>(){{
+        if (!user.getSocialAccountType().equals(socialAccountTypeService.getBySocialName("Manual"))) {
+            HashMap<String, Object> data = new HashMap<>() {{
                 put("authType", user.getSocialAccountType().getId());
-               put("resetPasswordLink", user.getSocialAccountType().getChangePasswordUrl());
+                put("resetPasswordLink", user.getSocialAccountType().getChangePasswordUrl());
             }};
 
             return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -332,7 +357,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify_reset_password")
-    public ResponseEntity<Response> verifyResetPassword(@Valid @RequestBody VerificationOTPReqForm requestBody){
+    public ResponseEntity<Response> verifyResetPassword(@Valid @RequestBody VerificationOTPReqForm requestBody) {
         String otp = requestBody.getOtp();
         User user = userService.getUserByUsername(requestBody.getUsername());
 
@@ -348,14 +373,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset_password")
-    public ResponseEntity<Response> resetPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody){
+    public ResponseEntity<Response> resetPassword(@Valid @RequestBody ForgotPasswordReqForm requestBody) {
         User user = userService.getUserByUsername(requestBody.getUsername());
         String otp = requestBody.getOtp();
 
-        if(!otpTokenProvider.validateResetPasswordOTP(otp, user))
+        if (!otpTokenProvider.validateResetPasswordOTP(otp, user))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.Verification.fail.toString()))));
 
-        if(requestBody.getPassword().equals(requestBody.getRepeatPassword())){
+        if (requestBody.getPassword().equals(requestBody.getRepeatPassword())) {
             user.setPassword(requestBody.getPassword());
             user.setResetPasswordOTP("");
             userService.saveUser(user);
@@ -369,14 +394,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/change_password")
-    public ResponseEntity<Response> changePassword(@Valid @RequestBody ChangePasswordReqForm requestBody){
-        User user = ((CustomUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+    public ResponseEntity<Response> changePassword(@Valid @RequestBody ChangePasswordReqForm requestBody) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if(!passwordEncoder.matches(requestBody.getCurrentPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(requestBody.getCurrentPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(ResponseMsg.Authentication.SignIn.fail.toString()))));
         }
 
-        if(requestBody.getNewPassword().equals(requestBody.getConfirmNewPassword())){
+        if (requestBody.getNewPassword().equals(requestBody.getConfirmNewPassword())) {
             user.setPassword(requestBody.getNewPassword());
             userService.saveUser(user);
 

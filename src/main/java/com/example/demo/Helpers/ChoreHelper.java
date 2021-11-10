@@ -33,7 +33,9 @@ public class ChoreHelper {
     @Autowired
     private UserService userService;
 
-    public void assignUser(int[] assigneeIds, Chore chore){
+    public List<User> assignUser(int[] assigneeIds, Chore chore){
+        List<User> users = new ArrayList<>();
+
         for(var assigneeId : assigneeIds){
             User assignee = userService.getUserById(assigneeId);
             ChoresAssignUsers choresAssignUsers = new ChoresAssignUsers();
@@ -41,7 +43,10 @@ public class ChoreHelper {
             choresAssignUsers.setChore(chore);
             chore.getChoresAssignUsers().add(choresAssignUsers);
             assignee.getChoresAssignUsers().add(choresAssignUsers);
+            users.add(assignee);
         }
+
+        return users;
     }
 
     public Date getNewDeadline(Date deadline, String repeatType){

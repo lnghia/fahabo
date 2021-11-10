@@ -16,6 +16,7 @@ import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.Service.UserService;
 import com.example.demo.domain.*;
 import com.example.demo.domain.Family.Family;
+import com.google.rpc.Help;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,9 @@ public class UserController {
     @Autowired
     private PhotoService photoService;
 
+    @Autowired
+    private FirebaseMessageHelper firebaseMessageHelper;
+
     @GetMapping
     private ResponseEntity<Response> getUsers(@RequestHeader("User-Agent") String userAgent) {
         List<User> users = userService.getUsers();
@@ -70,12 +74,12 @@ public class UserController {
 
         log.info(userAgent);
 
-        String token = "dRNAZti-R4K9jtHA1HC-b5:APA91bFdz08iVuV204qsTbWuVmKe8vastey-OmxCf27mN4WL91j7kUmgLJUfCzV-JOXS5FCxKvNTzaRqKaot5jTiKjqfqE-"+
+        String token = "dRNAZti-R4K9jtHA1HC-b5:APA91bFdz08iVuV204qsTbWuVmKe8vastey-OmxCf27mN4WL91j7kUmgLJUfCzV-JOXS5FCxKvNTzaRqKaot5jTiKjqfqE-" +
                 "FYTQ1MJhkBayS3R6DMM729G50n-YltN9BLdSxHt5mjlGbxS_o";
 
         String tmp = "eLge7rIu5UA1sAx-x6vzWq:APA91bG20weCjpg2DnymcxpnAGGDZwsLJOjNHeFVU2-MOtxcD6oc9eRYlqgSO26A-G33dj70x48UqWQ8KyFU6H-4yBz5XrrCDvC0oB_IM5dulJOfmSHdyZ07ayV6ymY-CYtmkHHrkR_p";
 
-        FirebaseMessageHelper.getInstance().sendNotifications(List.of(token, tmp), "hihi", "haha");
+        firebaseMessageHelper.sendNotifications(List.of(token, tmp), "hihi", "haha");
 
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
@@ -160,7 +164,7 @@ public class UserController {
         ArrayList<Photo> photos = new ArrayList<>();
         ArrayList<Image> images = new ArrayList<>();
 
-        for(var item : itemIds){
+        for (var item : itemIds) {
             Photo photo = photoService.getById(item);
             images.add(new Image(photo.getName(), photo.getUri()));
         }
@@ -169,10 +173,10 @@ public class UserController {
             GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
             return ResponseEntity.ok(new Response(
                     photos.stream().map(photo -> {
-                            String uri = result.getSuccessfulResults().containsKey(photo.getName()) ? result.getSuccessfulResults().get(photo.getName()).getUri() : photo.getUri();
-                            return new HashMap<String, String>(){{
-                                put("uri", uri);
-                            }};
+                        String uri = result.getSuccessfulResults().containsKey(photo.getName()) ? result.getSuccessfulResults().get(photo.getName()).getUri() : photo.getUri();
+                        return new HashMap<String, String>() {{
+                            put("uri", uri);
+                        }};
                     }).collect(Collectors.toList()),
                     new ArrayList<>())
             );
@@ -256,6 +260,8 @@ public class UserController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(requestBody.familyId);
         Role role = roleService.findByName("MEMBER");
+        Helper helper = Helper.getInstance();
+        String langCode = (family.getTimezone() == null) ? "en" : ((family.getTimezone().equals("Asia/Ho_Chi_Minh") || family.getTimezone().equals("Asia/Saigon")) ? "vi" : "en");
 
         if (family.checkIfUserExist(user)) {
             HashMap<String, Object> data = new HashMap<>() {{
@@ -279,6 +285,18 @@ public class UserController {
             put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
         }};
 
+        HashMap<String, String> notiData = new HashMap<>() {{
+            put("navigate", "FAMILY_DETAIL");
+            put("id", Integer.toString(family.getId()));
+        }};
+
+        firebaseMessageHelper.notifyAllUsersInFamily(
+                family,
+                helper.getMessageInLanguage("newMemberJoinedFamilyTitle", langCode),
+                String.format(helper.getMessageInLanguage("newMemberJoinedFamilyBody", langCode), user.getName()),
+                notiData
+        );
+
         return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
 
@@ -288,7 +306,7 @@ public class UserController {
         Family family = familyService.findById(requestBody.familyId);
 
         if (family.checkIfUserExist(user)) {
-            if(family.getUsersInFamily().size() == 1){
+            if (family.getUsersInFamily().size() == 1) {
                 familyHelper.deleteFamilyById(requestBody.familyId);
                 return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
             }

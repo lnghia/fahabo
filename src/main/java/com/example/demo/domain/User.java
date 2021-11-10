@@ -2,6 +2,7 @@ package com.example.demo.domain;
 
 import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Entity.EventAssignUser;
+import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.domain.Family.Family;
 
 import javax.persistence.*;
@@ -71,6 +72,9 @@ public class User {
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<UserFirebaseToken> userFirebaseTokens = new HashSet<>();
+
     public String getResetPasswordOTP() {
         return resetPasswordOTP;
     }
@@ -95,6 +99,9 @@ public class User {
 
     @OneToMany(mappedBy = "assignee")
     private Set<EventAssignUser> eventAssignUsers = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<UserFirebaseToken> firebaseTokenSet = new HashSet<>();
 
     public int getId() {
         return id;
@@ -300,6 +307,22 @@ public class User {
 
     public void deleteFamily(UserInFamily userInFamily){
         userInFamilies.removeIf(userInFamily1 -> userInFamily1.equals(userInFamily));
+    }
+
+    public Set<UserFirebaseToken> getFirebaseTokenSet() {
+        return firebaseTokenSet;
+    }
+
+    public void setFirebaseTokenSet(Set<UserFirebaseToken> firebaseTokenSet) {
+        this.firebaseTokenSet = firebaseTokenSet;
+    }
+
+    public Set<UserFirebaseToken> getUserFirebaseTokens() {
+        return userFirebaseTokens;
+    }
+
+    public void setUserFirebaseTokens(HashSet<UserFirebaseToken> userFirebaseTokens) {
+        this.userFirebaseTokens = userFirebaseTokens;
     }
 
     public String toString() {

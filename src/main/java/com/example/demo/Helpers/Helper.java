@@ -54,6 +54,37 @@ public class Helper {
             31
     ));
 
+    public final HashMap<String, HashMap<String, String>> langDictionary = new HashMap<>(){{
+        put("choreHasBeenAssignedTitle", new HashMap<>(){{
+            put("en", "A chore has been assigned to you");
+            put("vi", "Một công việc vừa được phân công cho bạn");
+        }});
+        put("choreHasBeenAssignedBody", new HashMap<>(){{
+            put("en", "A chore has been assigned to you by %s");
+            put("vi", "Một công việc vừa được phân công cho bạn bởi %s");
+        }});
+        put("eventHasBeenAssignedTitle", new HashMap<>(){{
+            put("en", "You have been mentioned in an upcoming event");
+            put("vi", "Bạn vừa được nhắc đến trong một sự kiện");
+        }});
+        put("eventHasBeenAssignedBody", new HashMap<>(){{
+            put("en", "You have been mentioned in an upcoming event by %s");
+            put("vi", "Bạn vừa được nhắc đến trong một sự kiện bởi %s");
+        }});
+        put("newMemberJoinedFamilyTitle", new HashMap<>(){{
+            put("en", "A new member has joined your family");
+            put("vi", "Một thành viên mới vừa gia nhập gia đình");
+        }});
+        put("newMemberJoinedFamilyBody", new HashMap<>(){{
+            put("en", "A new member %s has just joined your family %s. Please make sure everything is in place! ");
+            put("vi", "Một thành viên mới %s vừa gia nhập gia đình %s.");
+        }});
+    }};
+
+    public String getMessageInLanguage(String messageType, String langCode){
+        return langDictionary.get(messageType).get(langCode);
+    }
+
     public final String DEFAULT_FAMILY_THUMBNAIL = "https://media.istockphoto.com/vectors/large-happy-family-is-standing-and-hugging-several-generations-with-vector-id1221390042?b=1&k=20&m=1221390042&s=612x612&w=0&h=DIY35-8Q2jZe8LMLdwXETf54sKwQL3_F6OCtXdTnB44=";
 
     public static Helper getInstance() {

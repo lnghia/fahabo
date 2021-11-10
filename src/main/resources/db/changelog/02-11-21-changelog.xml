@@ -99,4 +99,15 @@
         </insert>
     </changeSet>
 
+    <changeSet id="add_table_user_firebase_token" author="nghia">
+        <createTable tableName="user_firebase_token">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_user_firebase_token_users" references="users(id)"/>
+            </column>
+            <column name="token" type="varchar"></column>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+        <addPrimaryKey tableName="user_firebase_token" columnNames="user_id, token" constraintName="pk_user_firebase_token"/>
+    </changeSet>
+
 </databaseChangeLog>

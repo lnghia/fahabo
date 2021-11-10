@@ -15,4 +15,7 @@
     <include file="src/main/resources/db/changelog/14-10-21-changelog.xml"/>
     <include file="src/main/resources/db/changelog/15-10-21-changelog.xml"/>
     <include file="src/main/resources/db/changelog/17-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/20-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/24-10-21-changelog.xml"/>
+    <include file="src/main/resources/db/changelog/02-11-21-changelog.xml"/>
 </databaseChangeLog>
