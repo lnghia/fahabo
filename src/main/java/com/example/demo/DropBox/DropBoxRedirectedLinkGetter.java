@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class DropBoxRedirectedLinkGetter implements AutoCloseable {
 
-    private int THREAD_NUM = 4;
+    private int THREAD_NUM = 15;
 
     private ExecutorService executor;
 

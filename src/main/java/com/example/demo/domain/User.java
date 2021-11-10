@@ -100,7 +100,7 @@ public class User {
     @OneToMany(mappedBy = "assignee")
     private Set<EventAssignUser> eventAssignUsers = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<UserFirebaseToken> firebaseTokenSet = new HashSet<>();
 
     public int getId() {

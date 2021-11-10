@@ -21,7 +21,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class DropBoxUploader implements AutoCloseable{
 //    @Value("${THREAD_NUM}")
-    private int THREAD_NUM = 4;
+    private int THREAD_NUM = 15;
 
 //    @Autowired
 //    private DropBoxConfig dropBoxConfig;

@@ -98,6 +98,7 @@ public class ChoreController {
             }
             if (requestBody.assigneeIds != null && requestBody.assigneeIds.length != 0) {
                 users = choreHelper.assignUser(requestBody.assigneeIds, chore);
+                users = users.stream().filter(user1 -> user1.getId() != user.getId()).collect(Collectors.toList());
             } else {
                 choreHelper.assignUser(new int[]{user.getId()}, chore);
             }
