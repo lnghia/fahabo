@@ -101,6 +101,8 @@ public class PhotoController {
                 }).collect(Collectors.toList())));
 
                 if (executionResult != null) {
+                    Date secondStart = new Date();
+
                     data = new ArrayList<>(photos.stream()
                             .map(photo -> {
                                 return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
@@ -110,6 +112,7 @@ public class PhotoController {
                     Date end = new Date();
 
                     log.info("Get photos execution time: %d", end.getTime() - start.getTime());
+                    log.info("Map photo results execution time: %d", end.getTime() - secondStart.getTime());
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
                 }
