@@ -106,11 +106,9 @@ public class AuthenticationController {
         if (!userFirebaseTokenHelper.doesUserContainToken(user.getId(), firebaseToken)) {
             UserFirebaseToken userFirebaseToken = userFirebaseTokenHelper.createUserFirebaseToken(user, firebaseToken);
             user.getFirebaseTokenSet().add(userFirebaseToken);
-
-            return ResponseEntity.ok(new Response());
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("firebase.tokenExist"))));
+        return ResponseEntity.ok(new Response());
     }
 
     @PostMapping("/aaa")
