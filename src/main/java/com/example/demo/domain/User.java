@@ -72,9 +72,6 @@ public class User {
     @Column(name = "reset_pw_otp")
     private String resetPasswordOTP;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    private Set<UserFirebaseToken> userFirebaseTokens = new HashSet<>();
-
     public String getResetPasswordOTP() {
         return resetPasswordOTP;
     }
@@ -315,14 +312,6 @@ public class User {
 
     public void setFirebaseTokenSet(Set<UserFirebaseToken> firebaseTokenSet) {
         this.firebaseTokenSet = firebaseTokenSet;
-    }
-
-    public Set<UserFirebaseToken> getUserFirebaseTokens() {
-        return userFirebaseTokens;
-    }
-
-    public void setUserFirebaseTokens(HashSet<UserFirebaseToken> userFirebaseTokens) {
-        this.userFirebaseTokens = userFirebaseTokens;
     }
 
     public String toString() {

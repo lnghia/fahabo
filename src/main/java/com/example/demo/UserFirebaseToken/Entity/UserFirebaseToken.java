@@ -17,8 +17,8 @@ public class UserFirebaseToken {
     @Column(name = "token")
     private String token;
 
-    @ManyToOne
-    @JoinColumn(name = "users", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "users")
     private User user;
 
     @Column(name = "is_deleted")

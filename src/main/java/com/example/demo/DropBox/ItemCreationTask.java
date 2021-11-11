@@ -6,6 +6,7 @@ import com.dropbox.core.v2.sharing.PathLinkMetadata;
 import jdk.jshell.Snippet;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.mail.FetchProfile;
 import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,50 +17,84 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public class ItemCreationTask implements Callable<Map<String, ItemCreationTask.ItemCreationResult>> {
+public class ItemCreationTask implements Callable<ItemCreationTask.ItemCreationResult> {
     private DbxClientV2 dbxClientV2;
 
-    private List<ByteUploadTask.ByteUploadResult> itemsToCreate;
+    private ByteUploadTask.ByteUploadResult itemToCreate;
 
 //    private final List<PathLinkMetadata> newItems = new ArrayList<>();
 
-    public ItemCreationTask(DbxClientV2 clientV2, List<ByteUploadTask.ByteUploadResult> itemsToCreate) {
-        this.itemsToCreate = itemsToCreate;
-        this.dbxClientV2 = clientV2;
+    public ItemCreationTask(DbxClientV2 dbxClientV2, ByteUploadTask.ByteUploadResult itemToCreate) {
+        this.dbxClientV2 = dbxClientV2;
+        this.itemToCreate = itemToCreate;
     }
 
+//    @Override
+//    public Map<String, ItemCreationResult> call() {
+//        log.info("Calling API to create public uri: " + itemsToCreate.size());
+//
+//        Map<String, ItemCreationResult> results = new HashMap<>(itemsToCreate.size());
+//
+//        if(itemsToCreate.isEmpty()){
+//            throw new IllegalArgumentException("No items to create.");
+//        }
+//
+//        for(var item : itemsToCreate){
+//            PathLinkMetadata pathLinkMetadata = null;
+//            URLConnection con = null;
+//            try {
+//                pathLinkMetadata = dbxClientV2.sharing().createSharedLink("/" + item.getName());
+//                con = new URL(pathLinkMetadata.getUrl().replace("dl=0", "raw=1")).openConnection();
+//                con.connect();
+//                InputStream in = con.getInputStream();
+//                in.close();
+//            } catch (DbxException e) {
+//                log.info("API error while calling createSharedLink. " + e.getMessage());
+//                e.printStackTrace();
+//                results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
+//            } catch (IOException e) {
+//                log.info("Error while getting redirected uri. " + e.getMessage());
+//                e.printStackTrace();
+//                results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
+//            }
+//            results.put(item.name, ItemCreationResult.createSuccessResult(item.name, pathLinkMetadata, con.getURL().toString()));
+//        }
+//
+//        return results;
+//    }
+
     @Override
-    public Map<String, ItemCreationResult> call() {
-        log.info("Calling API to create public uri: " + itemsToCreate.size());
+    public ItemCreationResult call() {
+        log.info("Calling API to create public uri: " + itemToCreate.name);
 
-        Map<String, ItemCreationResult> results = new HashMap<>(itemsToCreate.size());
-
-        if(itemsToCreate.isEmpty()){
+        if(itemToCreate == null){
             throw new IllegalArgumentException("No items to create.");
         }
 
-        for(var item : itemsToCreate){
-            PathLinkMetadata pathLinkMetadata = null;
-            URLConnection con = null;
-            try {
-                pathLinkMetadata = dbxClientV2.sharing().createSharedLink("/" + item.getName());
-                con = new URL(pathLinkMetadata.getUrl().replace("dl=0", "raw=1")).openConnection();
-                con.connect();
-                InputStream in = con.getInputStream();
-                in.close();
-            } catch (DbxException e) {
-                log.info("API error while calling createSharedLink. " + e.getMessage());
-                e.printStackTrace();
-                results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
-            } catch (IOException e) {
-                log.info("Error while getting redirected uri. " + e.getMessage());
-                e.printStackTrace();
-                results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
-            }
-            results.put(item.name, ItemCreationResult.createSuccessResult(item.name, pathLinkMetadata, con.getURL().toString()));
+        PathLinkMetadata pathLinkMetadata = null;
+        URLConnection con = null;
+        ItemCreationResult result = null;
+        try {
+            pathLinkMetadata = dbxClientV2.sharing().createSharedLink("/" + itemToCreate.getName());
+            con = new URL(pathLinkMetadata.getUrl().replace("dl=0", "raw=1")).openConnection();
+            con.connect();
+            InputStream in = con.getInputStream();
+            in.close();
+
+            result = ItemCreationResult.createSuccessResult(itemToCreate.name, pathLinkMetadata, con.getURL().toString());
+        } catch (DbxException e) {
+            log.info("API error while calling createSharedLink. " + e.getMessage());
+            e.printStackTrace();
+            result = ItemCreationResult.createFailureResult(itemToCreate.name, e);
+//            results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
+        } catch (IOException e) {
+            log.info("Error while getting redirected uri. " + e.getMessage());
+            e.printStackTrace();
+            result = ItemCreationResult.createFailureResult(itemToCreate.name, e);
+//            results.put(item.name, ItemCreationResult.createFailureResult(item.name, e));
         }
 
-        return results;
+        return result;
     }
 
     public static class ItemCreationResult {
