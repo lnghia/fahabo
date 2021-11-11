@@ -285,13 +285,15 @@ public class UserController {
             put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
         }};
 
+        List<User> usersToNotify = family.getUsersInFamily().stream().filter(userInFamily1 -> userInFamily1.getUserId() != user.getId()).map(userInFamily1 -> userInFamily1.getUser()).collect(Collectors.toList());
+
         HashMap<String, String> notiData = new HashMap<>() {{
             put("navigate", "FAMILY_DETAIL");
             put("id", Integer.toString(family.getId()));
         }};
 
-        firebaseMessageHelper.notifyAllUsersInFamily(
-                family,
+        firebaseMessageHelper.notifyUsers(
+                usersToNotify,
                 helper.getMessageInLanguage("newMemberJoinedFamilyTitle", langCode),
                 String.format(helper.getMessageInLanguage("newMemberJoinedFamilyBody", langCode), user.getName(), family.getFamilyName()),
                 notiData
