@@ -293,7 +293,7 @@ public class UserController {
         firebaseMessageHelper.notifyAllUsersInFamily(
                 family,
                 helper.getMessageInLanguage("newMemberJoinedFamilyTitle", langCode),
-                String.format(helper.getMessageInLanguage("newMemberJoinedFamilyBody", langCode), user.getName()),
+                String.format(helper.getMessageInLanguage("newMemberJoinedFamilyBody", langCode), user.getName(), family.getFamilyName()),
                 notiData
         );
 
