@@ -84,11 +84,6 @@ public class DropBoxUploader implements AutoCloseable{
         uploadToRetry = new ArrayList<>();
         successfulUploads = new HashMap<>(items.length);
 
-        HashMap<String, ItemToUpload> initialItems = new HashMap<>();
-        for(var item : items){
-            initialItems.put(item.getName(), item);
-        }
-
         scheduleUploadItemBytes(items);
 
         log.info("All byte uploads tasks have been scheduled.");
@@ -105,8 +100,13 @@ public class DropBoxUploader implements AutoCloseable{
 //                log.info(byteUploadResult.getError().getMessage());
                 log.error(byteUploadResult.getName(), byteUploadResult.getError());
                 log.info("Preparing to retry: ", byteUploadResult.getName());
-                uploadToRetry.add(initialItems.get(byteUploadResult.name));
-//                failedUploads.put(byteUploadResult.name, byteUploadResult);
+                try {
+                    byteUploadResult.getFileStreamToUpload().reset();
+                    uploadToRetry.add(new ItemToUpload(byteUploadResult.name, byteUploadResult.fileStreamToUpload));
+                } catch (IOException e) {
+                    failedUploads.put(byteUploadResult.name, byteUploadResult);
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -125,13 +125,9 @@ public class DropBoxUploader implements AutoCloseable{
     }
 
     public void retryUploadItems() throws InterruptedException, ExecutionException {
+        ItemToUpload[] tmp = uploadToRetry.toArray(new ItemToUpload[uploadToRetry.size()]);
 
-        HashMap<String, ItemToUpload> initialItems = new HashMap<>();
-        for(var item : uploadToRetry){
-            initialItems.put(item.getName(), item);
-        }
-
-        scheduleUploadItemBytes(uploadToRetry.toArray(new ItemToUpload[uploadToRetry.size()]));
+        scheduleUploadItemBytes(tmp);
 
         log.info("All byte upload retry tasks have been scheduled.");
 
