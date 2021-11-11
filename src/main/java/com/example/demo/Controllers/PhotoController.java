@@ -111,8 +111,8 @@ public class PhotoController {
 
                     Date end = new Date();
 
-                    log.info("Get photos execution time: %d", end.getTime() - start.getTime());
-                    log.info("Map photo results execution time: %d", end.getTime() - secondStart.getTime());
+                    log.info("Get photos execution time: " + Long.toString(end.getTime() - start.getTime()));
+                    log.info("Map photo results execution time: " + Long.toString(end.getTime() - secondStart.getTime()));
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
                 }
