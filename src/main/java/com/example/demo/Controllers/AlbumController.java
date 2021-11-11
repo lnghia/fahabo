@@ -224,7 +224,7 @@ public class AlbumController {
                     photo.setUri(item.getMetadata().getUrl());
                     photoService.savePhoto(photo);
 
-                    data.add(photo.getJson(item.getUri()));
+                    data.add(photo.getJsonWithRedirectedUri(item.getUri()));
                 }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -316,7 +316,7 @@ public class AlbumController {
                     data = new ArrayList<>(photos.stream()
                             .map(photo -> {
                                 return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
-                                        photo.getJson(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
+                                        photo.getJsonWithRedirectedUri(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
                             }).collect(Collectors.toList()));
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));

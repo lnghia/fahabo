@@ -177,7 +177,7 @@ public class PhotoController {
                     photo.setUri(successUploads.get(0).getMetadata().getUrl());
                     photoService.savePhoto(photo);
 
-                    return ResponseEntity.ok(new Response(photo.getJson(successUploads.get(0).getUri()), new ArrayList<>()));
+                    return ResponseEntity.ok(new Response(photo.getJsonWithRedirectedUri(successUploads.get(0).getUri()), new ArrayList<>()));
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Cound not upload image", e.getMessage());
                     e.printStackTrace();

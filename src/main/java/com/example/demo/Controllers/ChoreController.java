@@ -460,7 +460,7 @@ public class ChoreController {
                     data = new ArrayList<>(photos.stream()
                             .map(photo -> {
                                 return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
-                                        photo.getJson(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
+                                        photo.getJsonWithRedirectedUri(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
                             }).collect(Collectors.toList()));
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
