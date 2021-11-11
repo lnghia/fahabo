@@ -5,6 +5,7 @@ import com.example.demo.domain.Image;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
@@ -38,7 +39,10 @@ public class DropBoxRedirectedLinkGetter implements AutoCloseable {
     }
 
     public GetRedirectedLinkExecutionResult getRedirectedLinks(ArrayList<Image> itemsToGet) throws InterruptedException, ExecutionException {
+        Date start = new Date();
+
         ArrayList<Image> validItemsToGet = new ArrayList<>();
+
         for(var img : itemsToGet){
             if(!Helper.getInstance().isDropboxUri(img.getUri())){
                 successfulGet.put(img.getName(), new GetRedirectedLinkTask.GetRedirectedLinkResult(img.getName(), img.getUri(), null));
@@ -74,7 +78,9 @@ public class DropBoxRedirectedLinkGetter implements AutoCloseable {
             retryRedirectingLinks(retryGet);
         }
 
-        log.info("Execution complete.");
+        Date end = new Date();
+
+        log.info("Execution complete in " + Long.toString(end.getTime()-start.getTime()) + " milliseconds");
 
         return new GetRedirectedLinkExecutionResult(successfulGet, failedGet);
     }
