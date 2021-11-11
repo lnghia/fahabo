@@ -106,7 +106,7 @@ public class PhotoController {
                     data = new ArrayList<>(photos.stream()
                             .map(photo -> {
                                 return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
-                                        photo.getJson(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
+                                        photo.getJsonWithRedirectedUri(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
                             }).collect(Collectors.toList()));
 
                     Date end = new Date();

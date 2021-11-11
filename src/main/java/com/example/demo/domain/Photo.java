@@ -177,4 +177,13 @@ public class Photo {
            put("updatedAt", getUpdatedAtAsString());
         }};
     }
+
+    public HashMap<String, Object> getJsonWithRedirectedUri(String redirectedUri){
+        return new HashMap<>(){{
+            put("id", id);
+            put("uri", (redirectedUri == null) ? uri : redirectedUri);
+            put("createdAt", getCreatedAtAsString());
+            put("updatedAt", getUpdatedAtAsString());
+        }};
+    }
 }
