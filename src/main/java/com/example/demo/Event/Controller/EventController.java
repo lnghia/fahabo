@@ -99,9 +99,11 @@ public class EventController {
             for (var tmp : events.get(0).getEventAssignUsers()) {
                 users.add(tmp.getAssignee());
             }
-            if (!users.isEmpty()) {
+            List<User> usersToNotify = new ArrayList<>();
+            if (users.size() > 1) {
+                usersToNotify = users.stream().filter(user1 -> user1.getId() != user.getId()).collect(Collectors.toList());
                 firebaseMessageHelper.notifyUsers(
-                        users,
+                        usersToNotify,
                         helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{
@@ -109,8 +111,9 @@ public class EventController {
                             put("id", Integer.toString(events.get(0).getId()));
                         }});
             } else {
-                firebaseMessageHelper.notifyAllUsersInFamily(
-                        family,
+                usersToNotify = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUserId() != user.getId()).map(userInFamily -> userInFamily.getUser()).collect(Collectors.toList());
+                firebaseMessageHelper.notifyUsers(
+                        usersToNotify,
                         helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{
