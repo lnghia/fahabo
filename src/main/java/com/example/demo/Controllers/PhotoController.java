@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -93,6 +94,8 @@ public class PhotoController {
 //                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
                 DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
 
+                Date start = new Date();
+
                 GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(photos.stream().map(photo -> {
                     return new Image(photo.getName(), photo.getUri());
                 }).collect(Collectors.toList())));
@@ -103,6 +106,10 @@ public class PhotoController {
                                 return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
                                         photo.getJson(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
                             }).collect(Collectors.toList()));
+
+                    Date end = new Date();
+
+                    log.info("Get photos execution time: %d", end.getTime() - start.getTime());
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
                 }
