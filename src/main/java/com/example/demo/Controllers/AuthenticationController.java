@@ -11,9 +11,11 @@ import com.example.demo.SecurityProvider.JwtTokenProvider;
 import com.example.demo.SecurityProvider.OTPTokenProvider;
 import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
 import com.example.demo.Service.UserService;
+import com.example.demo.Stringee.StringeeAccessTokenProvider;
 import com.example.demo.Stringee.StringeeHelper;
 import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
+import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
 import com.example.demo.Validators.RequestBody.RequestBodyRequired;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.User;
@@ -68,6 +70,12 @@ public class AuthenticationController {
 
     @Autowired
     private UserFirebaseTokenHelper userFirebaseTokenHelper;
+
+    @Autowired
+    private UserFirebaseTokenService userFirebaseTokenService;
+
+    @Autowired
+    private StringeeAccessTokenProvider stringeeAccessTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@Valid @RequestBody LoginReqForm loginReqForm) {
@@ -409,5 +417,29 @@ public class AuthenticationController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.confirmNewPasswordMustMatch"))));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Response> logout(@RequestBody LogoutReqForm reqForm){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        if(userFirebaseTokenHelper.doesUserContainToken(user.getId(), reqForm.firebaseToken)){
+            UserFirebaseToken userFirebaseToken = userFirebaseTokenHelper.findUserFirebaseTokenByToken(user.getId(), reqForm.firebaseToken);
+            userFirebaseToken.setDeleted(true);
+            userFirebaseTokenService.saveUserFirebaseToken(userFirebaseToken);
+        }
+
+        return ResponseEntity.ok(new Response(null, new ArrayList<>()));
+    }
+
+    @PostMapping("/stringee_access_token")
+    public ResponseEntity<Response> getStringeeToken(){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        String accessToken = stringeeAccessTokenProvider.genAccessToken(user.getId());
+
+        return ResponseEntity.ok(new Response(new HashMap<String, String>(){{
+            put("stringeeAccessToken", accessToken);
+        }}, new ArrayList<>()));
     }
 }

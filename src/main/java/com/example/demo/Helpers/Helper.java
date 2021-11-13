@@ -4,6 +4,7 @@ import com.example.demo.DropBox.DropBoxRedirectedLinkGetter;
 import com.example.demo.DropBox.GetRedirectedLinkExecutionResult;
 import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.ResponseFormat.Response;
+import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Image;
 import com.example.demo.domain.Photo;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,34 +55,42 @@ public class Helper {
             31
     ));
 
-    public final HashMap<String, HashMap<String, String>> langDictionary = new HashMap<>(){{
-        put("choreHasBeenAssignedTitle", new HashMap<>(){{
+    public final HashMap<String, HashMap<String, String>> langDictionary = new HashMap<>() {{
+        put("choreHasBeenAssignedTitle", new HashMap<>() {{
             put("en", "A chore has been assigned to you");
             put("vi", "Một công việc vừa được phân công cho bạn");
         }});
-        put("choreHasBeenAssignedBody", new HashMap<>(){{
+        put("choreHasBeenAssignedBody", new HashMap<>() {{
             put("en", "A chore has been assigned to you by %s");
             put("vi", "Một công việc vừa được phân công cho bạn bởi %s");
         }});
-        put("eventHasBeenAssignedTitle", new HashMap<>(){{
+        put("eventHasBeenAssignedTitle", new HashMap<>() {{
             put("en", "You have been mentioned in an upcoming event");
             put("vi", "Bạn vừa được nhắc đến trong một sự kiện");
         }});
-        put("eventHasBeenAssignedBody", new HashMap<>(){{
+        put("eventHasBeenAssignedBody", new HashMap<>() {{
             put("en", "You have been mentioned in an upcoming event by %s");
             put("vi", "Bạn vừa được nhắc đến trong một sự kiện bởi %s");
         }});
-        put("newMemberJoinedFamilyTitle", new HashMap<>(){{
+        put("newMemberJoinedFamilyTitle", new HashMap<>() {{
             put("en", "A new member has joined your family");
             put("vi", "Một thành viên mới vừa gia nhập gia đình");
         }});
-        put("newMemberJoinedFamilyBody", new HashMap<>(){{
+        put("newMemberJoinedFamilyBody", new HashMap<>() {{
             put("en", "A new member %s has just joined your family %s. Please make sure everything is in place! ");
             put("vi", "Một thành viên mới %s vừa gia nhập gia đình %s.");
         }});
+        put("invitedToACallTitle", new HashMap<>() {{
+            put("en", "You have been invited to a call!");
+            put("vi", "Bạn được mời tham gia một cuộc gọi!");
+        }});
+        put("invitedToACallBody", new HashMap<>() {{
+            put("en", "You have just been invited to a call in family %s by %s!");
+            put("vi", "Bạn được mời tham gia một cuộc gọi trong gia đình %s bởi thành viên %s!");
+        }});
     }};
 
-    public String getMessageInLanguage(String messageType, String langCode){
+    public String getMessageInLanguage(String messageType, String langCode) {
         return langDictionary.get(messageType).get(langCode);
     }
 
@@ -208,15 +217,15 @@ public class Helper {
     }
 
     public String formatDate(Date date) {
-        if(date == null) return "";
+        if (date == null) return "";
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 
         return formatter.format(date);
     }
 
-    public String formatDateWithoutTime(Date date){
-        if(date == null) return "";
+    public String formatDateWithoutTime(Date date) {
+        if (date == null) return "";
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -229,7 +238,7 @@ public class Helper {
         return formatter.parse(date);
     }
 
-    public Date formatDateWithoutTime(String datetime) throws ParseException{
+    public Date formatDateWithoutTime(String datetime) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
         return formatter.parse(datetime);
@@ -240,7 +249,7 @@ public class Helper {
         HashMap<String, String> rs = new HashMap<>();
         ArrayList<Image> images = new ArrayList<>();
 
-        for(var photo : photos){
+        for (var photo : photos) {
             images.add(new Image(photo.getName(), photo.getUri()));
         }
 
@@ -269,7 +278,7 @@ public class Helper {
     }
 
     public String formatDateForQuery(Date date) throws ParseException {
-        if(date == null){
+        if (date == null) {
             return null;
         }
 
@@ -279,8 +288,8 @@ public class Helper {
         return formatter.format(date);
     }
 
-    public String formatDateWithTime(Date date){
-        if(date == null){
+    public String formatDateWithTime(Date date) {
+        if (date == null) {
             return null;
         }
 
@@ -298,7 +307,7 @@ public class Helper {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateToSubtract);
 
-        switch (repeatType){
+        switch (repeatType) {
             case "DAILY":
                 calendar.add(Calendar.DATE, occurrences * -1);
                 return calendar.getTime();
@@ -316,12 +325,12 @@ public class Helper {
         return null;
     }
 
-    public int getOccurrencesBetween(Date from, Date to, String repeatType){
+    public int getOccurrencesBetween(Date from, Date to, String repeatType) {
         LocalDate toCal = convertToLocalDateViaInstant(to);
         LocalDate fromCal = convertToLocalDateViaInstant(from);
         Period period = Period.between(fromCal, toCal);
 
-        switch (repeatType){
+        switch (repeatType) {
             case "DAILY":
                 return period.getDays();
             case "WEEKLY":
@@ -335,8 +344,8 @@ public class Helper {
         return 0;
     }
 
-    public String formatDateWithTimeForQuery(Date date){
-        if(date == null){
+    public String formatDateWithTimeForQuery(Date date) {
+        if (date == null) {
             return null;
         }
 
@@ -345,27 +354,27 @@ public class Helper {
         return formatter.format(date);
     }
 
-    public String generateUUID(){
+    public String generateUUID() {
         return UUID.randomUUID().toString();
     }
 
-    public boolean isDropboxUri(String uri){
-        if(uri == null) return false;
+    public boolean isDropboxUri(String uri) {
+        if (uri == null) return false;
         return uri.contains("dropbox");
     }
 
-    public Date getNowAsTimeZone(String timezone){
+    public Date getNowAsTimeZone(String timezone) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone(timezone));
         return calendar.getTime();
     }
 
-    public Date getNewDateAfterOccurrences(Date date, String timezone, String repeatType, int occurrences){
+    public Date getNewDateAfterOccurrences(Date date, String timezone, String repeatType, int occurrences) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone(timezone));
         calendar.setTime(date);
 
-        switch (repeatType){
+        switch (repeatType) {
             case "DAILY":
                 calendar.add(Calendar.DATE, occurrences);
                 return calendar.getTime();
@@ -381,5 +390,11 @@ public class Helper {
         }
 
         return null;
+    }
+
+    public String getLangCode(Family family) {
+        return (family.getTimezone() == null) ?
+                "en" : ((family.getTimezone().equals("Asia/Ho_Chi_Minh") || family.getTimezone().equals("Asia/Saigon")) ?
+                    "vi" : "en");
     }
 }

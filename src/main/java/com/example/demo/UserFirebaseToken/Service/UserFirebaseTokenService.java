@@ -17,4 +17,8 @@ public class UserFirebaseTokenService {
     public boolean doesUserContainToken(int userId, String token){
         return userFirebaseTokenRepo.searchTokenInUser(userId, token) != null;
     }
+
+    public UserFirebaseToken findUserFirebaseTokenByToken(int userId, String token){
+        return userFirebaseTokenRepo.findTokenInUser(userId, token);
+    }
 }

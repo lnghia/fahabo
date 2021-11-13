@@ -406,4 +406,36 @@ public class UserController {
                     new ArrayList<>(List.of("unknownError"))));
         }
     }
+
+    @PostMapping("/make_video_call")
+    public ResponseEntity<Response> makeVideoCall(@RequestBody VideoCallReqForm reqForm){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(reqForm.familyId);
+        List<User> users = new ArrayList<>();
+        Helper helper = Helper.getInstance();
+        String langCode = helper.getLangCode(family);
+
+        if (family.checkIfUserExist(user)) {
+            for(var id : reqForm.participantIds){
+                User participant = userService.getUserById(id);
+                if(family.checkIfUserExist(participant)){
+                    users.add(participant);
+                }
+            }
+
+            HashMap<String, String> data = new HashMap<>(){{
+                put("roomCallId", reqForm.roomCallId);
+            }};
+
+            firebaseMessageHelper.notifyUsers(
+                    users,
+                    helper.getMessageInLanguage("invitedToACallTitle", langCode),
+                    String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
+                    data);
+
+            return ResponseEntity.ok(new Response(null, new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
 }
