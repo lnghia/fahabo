@@ -126,7 +126,7 @@ public class ChoreHelper {
     }
 
     public boolean isPhotoNumExceedLimitChore(int num, Chore chore){
-        if(chore == null){
+        if(chore == null || chore.getChoreAlbumSet().isEmpty()){
             return num > Helper.getInstance().CHORE_PHOTO_MAX_NUM;
         }
 
