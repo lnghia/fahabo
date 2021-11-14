@@ -13,6 +13,7 @@ import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Stringee.StringeeAccessTokenProvider;
 import com.example.demo.Stringee.StringeeHelper;
+import com.example.demo.Twilio.TwilioAccessTokenProvider;
 import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
 import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
@@ -76,6 +77,9 @@ public class AuthenticationController {
 
     @Autowired
     private StringeeAccessTokenProvider stringeeAccessTokenProvider;
+
+    @Autowired
+    private TwilioAccessTokenProvider twilioAccessTokenProvider;
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@Valid @RequestBody LoginReqForm loginReqForm) {
@@ -420,10 +424,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Response> logout(@RequestBody LogoutReqForm reqForm){
+    public ResponseEntity<Response> logout(@RequestBody LogoutReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if(userFirebaseTokenHelper.doesUserContainToken(user.getId(), reqForm.firebaseToken)){
+        if (userFirebaseTokenHelper.doesUserContainToken(user.getId(), reqForm.firebaseToken)) {
             UserFirebaseToken userFirebaseToken = userFirebaseTokenHelper.findUserFirebaseTokenByToken(user.getId(), reqForm.firebaseToken);
             userFirebaseToken.setDeleted(true);
             userFirebaseTokenService.saveUserFirebaseToken(userFirebaseToken);
@@ -432,14 +436,17 @@ public class AuthenticationController {
         return ResponseEntity.ok(new Response(null, new ArrayList<>()));
     }
 
-    @PostMapping("/stringee_access_token")
-    public ResponseEntity<Response> getStringeeToken(){
+    @PostMapping("/communication_access_token")
+    public ResponseEntity<Response> getTwilioAccessToken(@RequestBody GetTwilioAccessTokenReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        String accessToken = stringeeAccessTokenProvider.genAccessToken(user.getId());
+        String accessToken = twilioAccessTokenProvider.generateAccessToken(
+                Integer.toString(user.getId()),
+                reqForm.roomId
+        );
 
-        return ResponseEntity.ok(new Response(new HashMap<String, String>(){{
-            put("stringeeAccessToken", accessToken);
+        return ResponseEntity.ok(new Response(new HashMap<String, String>() {{
+            put("twilioAccessToken", accessToken);
         }}, new ArrayList<>()));
     }
 }

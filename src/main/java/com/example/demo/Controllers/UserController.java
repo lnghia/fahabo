@@ -424,7 +424,8 @@ public class UserController {
             }
 
             HashMap<String, String> data = new HashMap<>(){{
-                put("roomCallId", reqForm.roomCallId);
+                put("navigate", "VIDEO_CALL");
+                put("id", reqForm.roomCallId);
             }};
 
             firebaseMessageHelper.notifyUsers(
