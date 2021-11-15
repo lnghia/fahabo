@@ -430,6 +430,7 @@ public class UserController {
             HashMap<String, String> data = new HashMap<>(){{
                 put("navigate", "VIDEO_CALL");
                 put("id", reqForm.roomCallId);
+                put("familyId", Integer.toString(reqForm.familyId));
             }};
 
             if(reqForm.participantIds != null && reqForm.participantIds.length == 0){
