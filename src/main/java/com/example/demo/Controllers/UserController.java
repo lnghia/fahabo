@@ -428,11 +428,21 @@ public class UserController {
                 put("id", reqForm.roomCallId);
             }};
 
-            firebaseMessageHelper.notifyUsers(
-                    users,
-                    helper.getMessageInLanguage("invitedToACallTitle", langCode),
-                    String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
-                    data);
+            if(users.isEmpty()){
+                firebaseMessageHelper.notifyAllUsersInFamily(
+                        family,
+                        helper.getMessageInLanguage("invitedToACallTitle", langCode),
+                        String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
+                        data
+                );
+            }
+            else{
+                firebaseMessageHelper.notifyUsers(
+                        users,
+                        helper.getMessageInLanguage("invitedToACallTitle", langCode),
+                        String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
+                        data);
+            }
 
             return ResponseEntity.ok(new Response(null, new ArrayList<>()));
         }
