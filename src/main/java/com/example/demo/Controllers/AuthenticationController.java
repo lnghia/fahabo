@@ -439,10 +439,13 @@ public class AuthenticationController {
     @PostMapping("/communication_access_token")
     public ResponseEntity<Response> getTwilioAccessToken(@RequestBody GetTwilioAccessTokenReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        String token = new StringBuilder(
+                Integer.toString(user.getId()) + '_' + Integer.toString(reqForm.familyId) + '_' + Long.toString(new Date().getTime())
+        ).toString();
 
         String accessToken = twilioAccessTokenProvider.generateAccessToken(
                 Integer.toString(user.getId()),
-                reqForm.roomId
+                token
         );
 
         return ResponseEntity.ok(new Response(new HashMap<String, String>() {{
