@@ -97,6 +97,21 @@ public class FirebaseMessageHelper {
         sendNotifications(tokens, title, body, data);
     }
 
+    public void notifyAllUsersInFamilyExceptUser(Family family, User user, String title, String body, HashMap<String, String> data){
+        List<String> tokens = new ArrayList<>();
+
+        List<User> users = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUser().getId() != user.getId()).map(userInFamily -> {
+            return userInFamily.getUser();
+        }).collect(Collectors.toList());
+
+        for(var _user : users){
+            for(var token : _user.getFirebaseTokenSet()){
+                tokens.add(token.getToken());
+            }
+        }
+        sendNotifications(tokens, title, body, data);
+    }
+
     public void notifyAllDevicesOfUser(User user, String title, String body, HashMap<String, String> data){
         List<String> tokens = new ArrayList<>();
 

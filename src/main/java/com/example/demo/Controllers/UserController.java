@@ -434,8 +434,9 @@ public class UserController {
             }};
 
             if(reqForm.participantIds != null && reqForm.participantIds.length == 0){
-                firebaseMessageHelper.notifyAllUsersInFamily(
+                firebaseMessageHelper.notifyAllUsersInFamilyExceptUser(
                         family,
+                        user,
                         helper.getMessageInLanguage("invitedToACallTitle", langCode),
                         String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
                         data
