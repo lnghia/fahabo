@@ -443,14 +443,19 @@ public class AuthenticationController {
                 Integer.toString(user.getId()) + '_' + Integer.toString(reqForm.familyId) + '_' + Long.toString(new Date().getTime())
         ).toString();
 
+        if(reqForm.roomCallId != null && !reqForm.roomCallId.isEmpty() && !reqForm.roomCallId.isBlank()){
+            token = reqForm.roomCallId;
+        }
+
         String accessToken = twilioAccessTokenProvider.generateAccessToken(
                 Integer.toString(user.getId()),
                 token
         );
 
+        String finalToken = token;
         return ResponseEntity.ok(new Response(new HashMap<String, String>() {{
             put("twilioAccessToken", accessToken);
-            put("roomCallId", token);
+            put("roomCallId", finalToken);
         }}, new ArrayList<>()));
     }
 }
