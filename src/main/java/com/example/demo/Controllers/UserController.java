@@ -415,6 +415,10 @@ public class UserController {
         Helper helper = Helper.getInstance();
         String langCode = helper.getLangCode(family);
 
+        if(reqForm.participantIds == null){
+            return ResponseEntity.ok(new Response(null, new ArrayList<>()));
+        }
+
         if (family.checkIfUserExist(user)) {
             for(var id : reqForm.participantIds){
                 User participant = userService.getUserById(id);
@@ -428,7 +432,7 @@ public class UserController {
                 put("id", reqForm.roomCallId);
             }};
 
-            if(users.isEmpty()){
+            if(reqForm.participantIds != null && reqForm.participantIds.length == 0){
                 firebaseMessageHelper.notifyAllUsersInFamily(
                         family,
                         helper.getMessageInLanguage("invitedToACallTitle", langCode),
