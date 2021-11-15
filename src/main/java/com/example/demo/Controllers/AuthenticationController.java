@@ -450,6 +450,7 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(new Response(new HashMap<String, String>() {{
             put("twilioAccessToken", accessToken);
+            put("roomCallId", token);
         }}, new ArrayList<>()));
     }
 }
