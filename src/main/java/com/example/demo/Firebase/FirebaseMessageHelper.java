@@ -22,7 +22,7 @@ public class FirebaseMessageHelper {
 
     private final String ICON_URL = "https://www.google.com/url?sa=i&url=https%3A%2F%2Ftoppng.com%2Ffacebook-bell-notification-icon-facebook-notification-icon-PNG-free-PNG-Images_125458&psig=AOvVaw3w3mEjgAsAIujeJ6KjDHTy&ust=1636452942072000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCLCeuLvEiPQCFQAAAAAdAAAAABAD";
 
-    public void notifyDevices(List<String> tokens, String title, String body){
+    public void notifyDevices(List<String> tokens, String title, String body) {
         MulticastMessage message = MulticastMessage.builder()
                 .setNotification(Notification.builder()
                         .setTitle(title)
@@ -41,8 +41,8 @@ public class FirebaseMessageHelper {
                 for (int i = 0; i < responses.size(); i++) {
                     if (!responses.get(i).isSuccessful()) {
                         // The order of responses corresponds to the order of the registration tokens.
-                        if(responses.get(i).getException().getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED ||
-                                responses.get(i).getException().getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT){
+                        if (responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.UNREGISTERED) ||
+                                responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.INVALID_ARGUMENT)) {
                             userFirebaseTokenService.deleteToken(tokens.get(i));
                         }
                         failedTokens.add(tokens.get(i));
@@ -58,7 +58,7 @@ public class FirebaseMessageHelper {
         }
     }
 
-    public void notifyDevices(List<String> tokens, String title, String body, HashMap<String, String> data){
+    public void notifyDevices(List<String> tokens, String title, String body, HashMap<String, String> data) {
         MulticastMessage message = MulticastMessage.builder()
                 .putAllData(data)
                 .setNotification(Notification.builder()
@@ -78,8 +78,8 @@ public class FirebaseMessageHelper {
                 for (int i = 0; i < responses.size(); i++) {
                     if (!responses.get(i).isSuccessful()) {
                         // The order of responses corresponds to the order of the registration tokens.
-                        if(responses.get(i).getException().getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED ||
-                                responses.get(i).getException().getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT){
+                        if (responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.UNREGISTERED) ||
+                                responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.INVALID_ARGUMENT)) {
                             userFirebaseTokenService.deleteToken(tokens.get(i));
                         }
                         failedTokens.add(tokens.get(i));
@@ -95,63 +95,63 @@ public class FirebaseMessageHelper {
         }
     }
 
-    public void notifyAllUsersInFamily(Family family, String title, String body, HashMap<String, String> data){
+    public void notifyAllUsersInFamily(Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
 
         List<User> users = family.getUsersInFamily().stream().map(userInFamily -> {
             return userInFamily.getUser();
         }).collect(Collectors.toList());
 
-        for(var user : users){
-            for(var token : user.getFirebaseTokenSet()){
-                tokens.add(token.getToken());
+        for (var user : users) {
+            for (var token : user.getFirebaseTokenSet()) {
+                if (!token.isDeleted()) tokens.add(token.getToken());
             }
         }
         sendNotifications(tokens, title, body, data);
     }
 
-    public void notifyAllUsersInFamilyExceptUser(Family family, User user, String title, String body, HashMap<String, String> data){
+    public void notifyAllUsersInFamilyExceptUser(Family family, User user, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
 
         List<User> users = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUser().getId() != user.getId()).map(userInFamily -> {
             return userInFamily.getUser();
         }).collect(Collectors.toList());
 
-        for(var _user : users){
-            for(var token : _user.getFirebaseTokenSet()){
-                tokens.add(token.getToken());
+        for (var _user : users) {
+            for (var token : _user.getFirebaseTokenSet()) {
+                if (!token.isDeleted()) tokens.add(token.getToken());
             }
         }
         sendNotifications(tokens, title, body, data);
     }
 
-    public void notifyAllDevicesOfUser(User user, String title, String body, HashMap<String, String> data){
+    public void notifyAllDevicesOfUser(User user, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
 
-        for(var userToken : user.getFirebaseTokenSet()){
-            tokens.add(userToken.getToken());
+        for (var userToken : user.getFirebaseTokenSet()) {
+            if (!userToken.isDeleted()) tokens.add(userToken.getToken());
         }
         sendNotifications(tokens, title, body, data);
     }
 
-    public void notifyUsers(List<User> users, String title, String body, HashMap<String, String> data){
+    public void notifyUsers(List<User> users, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
 
-        for(var user : users){
-            for (var userToken : user.getFirebaseTokenSet()){
-                tokens.add(userToken.getToken());
+        for (var user : users) {
+            for (var userToken : user.getFirebaseTokenSet()) {
+                if (!userToken.isDeleted()) tokens.add(userToken.getToken());
             }
         }
         sendNotifications(tokens, title, body, data);
     }
 
-    public void sendNotifications(List<String> tokens, String title, String body){
+    public void sendNotifications(List<String> tokens, String title, String body) {
         new Thread(() -> {
             notifyDevices(tokens, title, body);
         }).start();
     }
 
-    public void sendNotifications(List<String> tokens, String title, String body, HashMap<String, String> data){
+    public void sendNotifications(List<String> tokens, String title, String body, HashMap<String, String> data) {
         new Thread(() -> {
             notifyDevices(tokens, title, body, data);
         }).start();
