@@ -140,7 +140,8 @@ public class Helper {
                         "/api/v1/verify_reset_password",
                         "/api/v1/reset_password",
                         "/api/v1/country_code_list",
-                        "/api/v1/users/temp"));
+                        "/api/v1/users/temp",
+                        "/api/v1/callback"));
     }
 
     public String mapToJsonString(HashMap<Object, Object> map) throws JsonProcessingException {
