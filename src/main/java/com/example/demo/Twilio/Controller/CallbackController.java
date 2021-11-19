@@ -60,11 +60,11 @@ public class CallbackController {
                                              @RequestParam("Timestamp") String Timestamp,
                                              @RequestParam("ParticipantStatus") String ParticipantStatus,
                                              @RequestParam("ParticipantSid") String ParticipantSid,
-                                             @RequestParam("ParticipantDuration") int ParticipantDuration,
-                                             @RequestParam("RoomDuration") int RoomDuration,
+                                             @RequestParam("ParticipantDuration") String ParticipantDuration,
+                                             @RequestParam(value = "RoomDuration", defaultValue = "") String RoomDuration,
                                              @RequestParam("SequenceNumber") String SequenceNumber,
-                                             @RequestParam("ParticipantTrackSidStatus") String ParticipantTrackSidStatus,
-                                             @RequestParam("TrackKind") String TrackKind) {
+                                             @RequestParam(value = "ParticipantTrackSidStatus", defaultValue = "") String ParticipantTrackSidStatus,
+                                             @RequestParam(value = "TrackKind", defaultValue = "") String TrackKind) {
         log.info("Handling twilio callback ...");
 
         String roomName = RoomName;
@@ -87,7 +87,7 @@ public class CallbackController {
             firebaseMessageHelper.notifyUsers(
                     users,
                     helper.getMessageInLanguage("videoCallHasEndedTitle", langCode),
-                    String.format(helper.getMessageInLanguage("videoCallHasEndedBody", langCode)),
+                    helper.getMessageInLanguage("videoCallHasEndedBody", langCode),
                     new HashMap<>() {{
                         put("navigate", "END_VIDEO_CALL");
                         put("id", roomName);
