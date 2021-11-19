@@ -21,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -53,23 +50,37 @@ public class CallbackController {
     private FamilyHelper familyHelper;
 
     @PostMapping
-    public ResponseEntity<Response> callback(@RequestBody CallbackReqBody reqBody) {
+    public ResponseEntity<Response> callback(@RequestParam("RoomName") String RoomName,
+                                             @RequestParam("ParticipantIdentity") String ParticipantIdentity,
+                                             @RequestParam("StatusCallbackEvent") String StatusCallbackEvent,
+                                             @RequestParam("AccountSid") String AccountSid,
+                                             @RequestParam("RoomSid") String RoomSid,
+                                             @RequestParam("RoomStatus") String RoomStatus,
+                                             @RequestParam("RoomType") String RoomType,
+                                             @RequestParam("Timestamp") String Timestamp,
+                                             @RequestParam("ParticipantStatus") String ParticipantStatus,
+                                             @RequestParam("ParticipantSid") String ParticipantSid,
+                                             @RequestParam("ParticipantDuration") int ParticipantDuration,
+                                             @RequestParam("RoomDuration") int RoomDuration,
+                                             @RequestParam("SequenceNumber") String SequenceNumber,
+                                             @RequestParam("ParticipantTrackSidStatus") String ParticipantTrackSidStatus,
+                                             @RequestParam("TrackKind") String TrackKind) {
         log.info("Handling twilio callback ...");
 
-        String roomName = reqBody.RoomName;
-        int userId = Integer.parseInt(reqBody.ParticipantIdentity);
+        String roomName = RoomName;
+        int userId = Integer.parseInt(ParticipantIdentity);
         User user = userService.getUserById(userId);
         int familyId = Integer.parseInt(roomName.split("_")[1]);
         Family family = familyService.findById(familyId);
         Helper helper = Helper.getInstance();
         String langCode = helper.getLangCode(family);
 
-        if (reqBody.StatusCallbackEvent.equals("participant-connected")) {
+        if (StatusCallbackEvent.equals("participant-connected")) {
             UserInCallRoom userInCallRoom = new UserInCallRoom(roomName, user);
             userInCallRoomService.saveUserInCallRoom(userInCallRoom);
-        } else if (reqBody.StatusCallbackEvent.equals("participant-disconnected")) {
+        } else if (StatusCallbackEvent.equals("participant-disconnected")) {
             userInCallRoomService.deleteUserFromRoom(roomName, userId);
-        } else if (reqBody.StatusCallbackEvent.equals("room-ended")) {
+        } else if (StatusCallbackEvent.equals("room-ended")) {
             ArrayList<Integer> userIds = userInCallRoomService.findAllUserIdInRoomCall(roomName);
             List<User> users = userIds.stream().map(id -> userService.getUserById(id)).collect(Collectors.toList());
 
