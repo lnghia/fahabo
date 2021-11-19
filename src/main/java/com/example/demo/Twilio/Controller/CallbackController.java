@@ -54,6 +54,8 @@ public class CallbackController {
 
     @PostMapping
     public ResponseEntity<Response> callback(@RequestBody CallbackReqBody reqBody) {
+        log.info("Handling twilio callback ...");
+
         String roomName = reqBody.RoomName;
         int userId = Integer.parseInt(reqBody.ParticipantIdentity);
         User user = userService.getUserById(userId);
