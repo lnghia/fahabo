@@ -162,7 +162,9 @@ public class ChoreController {
             return ResponseEntity.ok(new Response(chore.getJson(), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping
@@ -216,7 +218,9 @@ public class ChoreController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/delete_chore")
@@ -239,7 +243,9 @@ public class ChoreController {
             return ResponseEntity.ok(new Response(requestBody.choreId, new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/update_chore")
@@ -424,7 +430,9 @@ public class ChoreController {
             return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/get_chore_photos")
@@ -476,7 +484,9 @@ public class ChoreController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/detail")
@@ -493,6 +503,8 @@ public class ChoreController {
             return ResponseEntity.ok(new Response(choreHelper.getJson(chore.getFamily().getId(), chore), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

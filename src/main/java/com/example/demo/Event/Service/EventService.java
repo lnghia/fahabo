@@ -4,6 +4,7 @@ import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Repo.EventRepo;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.domain.Family.Family;
+import com.google.rpc.Help;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,5 +66,10 @@ public class EventService {
     public boolean checkIfDateContainEventsByFamilyId(String date, int familyId){
         int rs = eventRepo.findAnEventIdOnDateByFamilyId(date, familyId);
         return rs > 0;
+    }
+
+    public ArrayList<Event> findAllUpComingEventsIn30Mins(String timezone){
+        Date now = Helper.getInstance().getNowAsTimeZone(timezone);
+        return eventRepo.findAllUpComingEventsIn30Mins(Helper.getInstance().formatDateWithTimeForQuery(now));
     }
 }

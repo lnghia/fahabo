@@ -268,7 +268,9 @@ public class EventController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/get_event_photos")
@@ -292,7 +294,9 @@ public class EventController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", event.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/dates_contain_events")
@@ -317,7 +321,9 @@ public class EventController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/detail")
@@ -334,6 +340,8 @@ public class EventController {
             return ResponseEntity.ok(new Response(event.getJson(), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", event.getFamily().getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

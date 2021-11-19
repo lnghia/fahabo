@@ -310,6 +310,8 @@ public class UserController {
         if (family.checkIfUserExist(user)) {
             if (family.getUsersInFamily().size() == 1) {
                 familyHelper.deleteFamilyById(requestBody.familyId);
+                family.setDeleted(true);
+                familyService.saveFamily(family);
                 return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
             }
             if (userInFamilyService.hasRole(user, family, "HOST")) {
@@ -453,6 +455,8 @@ public class UserController {
             return ResponseEntity.ok(new Response(null, new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

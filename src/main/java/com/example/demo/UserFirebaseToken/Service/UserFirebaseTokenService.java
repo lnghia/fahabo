@@ -4,6 +4,7 @@ import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.UserFirebaseToken.Repo.UserFirebaseTokenRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserFirebaseTokenService {
@@ -20,5 +21,10 @@ public class UserFirebaseTokenService {
 
     public UserFirebaseToken findUserFirebaseTokenByToken(int userId, String token){
         return userFirebaseTokenRepo.findTokenInUser(userId, token);
+    }
+
+    @Transactional
+    public void deleteToken(String token){
+        userFirebaseTokenRepo.disableToken(token);
     }
 }

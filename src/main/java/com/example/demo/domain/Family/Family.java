@@ -44,6 +44,9 @@ public class Family {
     @OneToMany(mappedBy = "family")
     private Set<Event> events = new HashSet<>();
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
 //    @ManyToMany(mappedBy = "families")
 //    private Set<Role> roles;
 
@@ -159,6 +162,14 @@ public class Family {
 
     public void setEvents(Set<Event> events) {
         this.events = events;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public HashMap<String, Object> getJson(boolean getThumbnail) {

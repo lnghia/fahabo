@@ -52,11 +52,14 @@ public class Event {
     @OneToMany(mappedBy = "event")
     private Set<EventAlbum> eventAlbumSet = new HashSet<>();
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER)
     private Set<EventAssignUser> eventAssignUsers = new HashSet<>();
 
     @Column(name = "repeat_occurrences")
     private int repeatOccurrences;
+
+    @Column(name = "notified")
+    private boolean notified = false;
 
     public int getId() {
         return id;
@@ -187,6 +190,14 @@ public class Event {
 
     public String getToAsString(){
         return Helper.getInstance().formatDate(to);
+    }
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified(boolean notified) {
+        this.notified = notified;
     }
 
     public HashMap<String, Object> getJson() {

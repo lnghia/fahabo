@@ -92,7 +92,9 @@ public class AlbumController {
             return ResponseEntity.ok(new Response(albumHelper.getJson(newAlbum, null), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/update_album")
@@ -288,7 +290,9 @@ public class AlbumController {
             ), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/preview_album")
@@ -332,7 +336,9 @@ public class AlbumController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping(value = "/add_video", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})

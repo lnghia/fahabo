@@ -164,7 +164,9 @@ public class FamilyControllers {
             return ResponseEntity.ok(new Response(family.getJson(true), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/users_in_family")
@@ -212,7 +214,9 @@ public class FamilyControllers {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/update_family")
@@ -229,7 +233,9 @@ public class FamilyControllers {
             return ResponseEntity.ok(new Response(family.getJson(true), new ArrayList<>()));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/update_thumbnail")
@@ -285,6 +291,8 @@ public class FamilyControllers {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
+                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

@@ -88,6 +88,30 @@ public class Helper {
             put("en", "You have just been invited to a call in family %s by %s!");
             put("vi", "Bạn được mời tham gia một cuộc gọi trong gia đình %s bởi thành viên %s!");
         }});
+        put("anUpComingEventIn30MinsTitle", new HashMap<>() {{
+            put("en", "You have a upcoming event today!");
+            put("vi", "Bạn có một sự kiện diễn ra hôm nay!");
+        }});
+        put("anUpComingEventIn30MinsBody", new HashMap<>() {{
+            put("en", "You have a upcoming event at %s today!");
+            put("vi", "Bạn có một sự kiện diễn ra lúc %s hôm nay!");
+        }});
+        put("newMessageTitle", new HashMap<>() {{
+            put("en", "You have a new message!");
+            put("vi", "Bạn có tin nhắn mới!");
+        }});
+        put("newMessageBody", new HashMap<>() {{
+            put("en", "You have a new message in family %s!");
+            put("vi", "Bạn có tin nhắn mới trong gia đình %s!");
+        }});
+        put("videoCallHasEndedTitle", new HashMap<>() {{
+            put("en", "A video call room has ended!");
+            put("vi", "Một cuộc gọi video vừa kết thúc!");
+        }});
+        put("videoCallHasEndedBody", new HashMap<>() {{
+            put("en", "A video call room in family %s has ended!");
+            put("vi", "Một cuộc gọi video trong gia đình %s vừa kết thúc!");
+        }});
     }};
 
     public String getMessageInLanguage(String messageType, String langCode) {

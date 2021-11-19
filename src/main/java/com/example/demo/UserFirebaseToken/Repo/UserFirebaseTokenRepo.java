@@ -13,9 +13,13 @@ import java.util.List;
 @Repository
 public interface UserFirebaseTokenRepo extends JpaRepository<UserFirebaseToken, UserFirebaseTokenIdClass> {
     @Modifying
-    @Query(value = "UPDATE user_firebase_token SET is_deleted = FALSE WHERE user_id=:userId AND token=:token", nativeQuery = true)
+    @Query(value = "UPDATE user_firebase_token SET is_deleted=TRUE WHERE user_id=:userId AND token=:token", nativeQuery = true)
     int disableToken(@Param("userId") int userId,
                      @Param("token") String token);
+
+    @Modifying
+    @Query(value = "UPDATE user_firebase_token SET is_deleted=TRUE WHERE token=:token AND is_deleted=FALSE", nativeQuery = true)
+    int disableToken(@Param("token") String token);
 
     @Query(value = "SELECT token FROM user_firebase_token WHERE is_deleted=FALSE AND user_id=:userId", nativeQuery = true)
     List<String> getUserTokens(@Param("userId") int userId);

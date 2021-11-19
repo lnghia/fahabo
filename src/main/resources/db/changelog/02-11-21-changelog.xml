@@ -110,4 +110,28 @@
         <addPrimaryKey tableName="user_firebase_token" columnNames="user_id, token" constraintName="pk_user_firebase_token"/>
     </changeSet>
 
+    <changeSet id="add_column_families" author="nghia">
+        <addColumn tableName="families">
+            <column name="is_deleted" type="boolean" defaultValue="false"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_events_notified" author="nghia">
+        <addColumn tableName="events">
+            <column name="notified" type="boolean" defaultValue="false"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_table_users_in_call_rooms" author="nghia">
+        <createTable tableName="users_in_call_rooms">
+            <column name="room_name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_users_in_call_rooms_users" references="users(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="users_in_call_rooms" columnNames="room_name, user_id" constraintName="pk_users_in_call_rooms"/>
+    </changeSet>
+
 </databaseChangeLog>

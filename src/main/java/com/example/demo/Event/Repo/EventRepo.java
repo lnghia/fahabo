@@ -51,5 +51,12 @@ public interface EventRepo extends JpaRepository<Event, Integer>{
     @Query(value = "SELECT COUNT(id) FROM events WHERE is_deleted=FALSE AND family_id=:familyId AND cast(date(from_time) as VARCHAR) <= :date AND cast(date(to_time) as VARCHAR) >= :date", nativeQuery = true)
     int findAnEventIdOnDateByFamilyId(@Param("date") String date,
                                       @Param("familyId") int familyId);
+
+    @Query(value = "SELECT * FROM events WHERE is_deleted=FALSE AND " +
+            "from_time\\:\\:date=:now\\:\\:date AND " +
+            "DATE_PART('hour', :now\\:\\:time - from_time\\:\\:time) * 60 + DATE_PART('minute', :now\\:\\:time - from_time\\:\\:time) <= 30 AND " +
+            "notified=FALSE",
+            nativeQuery = true)
+    ArrayList<Event> findAllUpComingEventsIn30Mins(@Param("now") String now);
 }
 

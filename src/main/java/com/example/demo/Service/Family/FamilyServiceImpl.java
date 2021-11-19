@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Service
@@ -44,5 +45,10 @@ public class FamilyServiceImpl implements FamilyService{
     @Override
     public boolean isHostInFamily(int userId, int familyId) {
         return familyRepo.isHostInFamily(userId, familyId) > 0;
+    }
+
+    @Override
+    public ArrayList<Family> findAllFamily(){
+        return familyRepo.findAllFamily();
     }
 }

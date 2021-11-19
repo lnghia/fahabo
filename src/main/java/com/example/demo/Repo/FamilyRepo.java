@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+
 @Repository
 public interface FamilyRepo extends JpaRepository<Family, Integer> {
 //    @Modifying
@@ -43,4 +45,7 @@ public interface FamilyRepo extends JpaRepository<Family, Integer> {
     @Query(value = "SELECT COUNT(*) FROM users_in_families WHERE users=:userId AND families=:familyId AND roles=0", nativeQuery = true)
     int isHostInFamily(@Param("userId") int userId,
                        @Param("familyId") int familyId);
+
+    @Query(value = "SELECT * FROM families WHERE is_deleted=FALSE", nativeQuery = true)
+    ArrayList<Family> findAllFamily();
 }
