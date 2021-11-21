@@ -22,4 +22,10 @@ public interface NotificationRepo extends JpaRepository<Notification, Integer> {
     @Query(value = "SELECT * FROM notifications WHERE user_id=:userId AND id=:id", nativeQuery = true)
     Notification getByUserIdAndId(@Param("userId") int userId,
                                   @Param("id") int id);
+
+    @Query(value = "SELECT * FROM notifications WHERE user_id=:userId ORDER BY created_at DESC",
+            countQuery = "SELECT * FROM notifications WHERE user_id=:userId",
+            nativeQuery = true)
+    ArrayList<Notification> getNotificationsByUserId(@Param("userId") int userId,
+                                                     Pageable pageable);
 }

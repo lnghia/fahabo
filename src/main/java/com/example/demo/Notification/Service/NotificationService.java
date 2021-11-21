@@ -20,6 +20,12 @@ public class NotificationService {
         return notificationRepo.getNotificationsByUserIdAndFamilyId(userId, familyId, pageable);
     }
 
+    public ArrayList<Notification> getNotificationsByUserId(int userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return notificationRepo.getNotificationsByUserId(userId, pageable);
+    }
+
     public Notification saveNotification(Notification notification){
         return notificationRepo.save(notification);
     }
@@ -27,4 +33,6 @@ public class NotificationService {
     public Notification getByUserIdAndId(int userId, int id){
         return notificationRepo.getByUserIdAndId(userId, id);
     }
+
+
 }

@@ -43,26 +43,25 @@ public class NotificationController {
     private UserInFamilyService userInFamilyService;
 
     @PostMapping
-    public ResponseEntity<Response> getNotifications(@Valid @RequestBody GetNotificationsReqBody reqBody,
-                                                     @RequestParam(value = "page", defaultValue = "0") Integer page,
+    public ResponseEntity<Response> getNotifications(@RequestParam(value = "page", defaultValue = "0") Integer page,
                                                      @RequestParam(value = "size", defaultValue = "5") Integer size) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        Family family = familyService.findById(reqBody.familyId);
+//        Family family = familyService.findById(reqBody.familyId);
 
-        if (family.checkIfUserExist(user)) {
-            ArrayList<Notification> notifications = notificationService.getNotificationsByUserIdAndFamilyId(user.getId(), reqBody.familyId, page, size);
+//        if (family.checkIfUserExist(user)) {
+        ArrayList<Notification> notifications = notificationService.getNotificationsByUserId(user.getId(), page, size);
 
-            Helper.getInstance().reverseArrayList(notifications);
+        Helper.getInstance().reverseArrayList(notifications);
 
-            ArrayList<HashMap<String, Object>> data = new ArrayList<>();
-            for (var notification : notifications) {
-                data.add(notification.getJson());
-            }
-
-            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+        ArrayList<HashMap<String, Object>> data = new ArrayList<>();
+        for (var notification : notifications) {
+            data.add(notification.getJson());
         }
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+//        }
+
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/count_notification")
@@ -110,11 +109,11 @@ public class NotificationController {
     }
 
     @PostMapping("/click")
-    public ResponseEntity<Response> clickNotification(@RequestBody ClickNotificationReqBody reqBody){
+    public ResponseEntity<Response> clickNotification(@RequestBody ClickNotificationReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Notification notification = notificationService.getByUserIdAndId(user.getId(), reqBody.id);
 
-        if(notification != null){
+        if (notification != null) {
             notification.setClicked(true);
             notificationService.saveNotification(notification);
 
