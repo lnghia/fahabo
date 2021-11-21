@@ -88,7 +88,7 @@ public class NotificationController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         user.setCountNoti(0);
-        userService.saveUser(user);
+        userService.updateUser(user);
 
         return ResponseEntity.ok(new Response("Notification count has been set to 0", new ArrayList<>()));
     }

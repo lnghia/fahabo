@@ -39,7 +39,7 @@ public class NotificationHelper {
             userInFamilyService.saveUserInFamily(userInFamily);
         } else {
             user.setCountNoti(user.getCountNoti() + 1);
-            userService.saveUser(user);
+            userService.updateUser(user);
         }
 
         return notificationService.saveNotification(notification);
