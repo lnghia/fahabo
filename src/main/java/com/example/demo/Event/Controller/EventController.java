@@ -104,6 +104,7 @@ public class EventController {
                 usersToNotify = users.stream().filter(user1 -> user1.getId() != user.getId()).collect(Collectors.toList());
                 firebaseMessageHelper.notifyUsers(
                         usersToNotify,
+                        family,
                         helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{
@@ -114,6 +115,7 @@ public class EventController {
                 usersToNotify = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUserId() != user.getId()).map(userInFamily -> userInFamily.getUser()).collect(Collectors.toList());
                 firebaseMessageHelper.notifyUsers(
                         usersToNotify,
+                        family,
                         helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{
@@ -183,6 +185,7 @@ public class EventController {
                 if (!users.isEmpty()) {
                     firebaseMessageHelper.notifyUsers(
                             users,
+                            event.getFamily(),
                             helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
                             String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
                             new HashMap<String, String>() {{

@@ -34,6 +34,9 @@ public class UserInFamily implements Serializable {
     @JoinColumn(name = "roles", referencedColumnName = "id")
     private Role role;
 
+    @Column(name = "count_chat")
+    private int countChat = 0;
+
     public UserInFamily(){}
 
     public UserInFamily(User user, Family family) {
@@ -92,6 +95,14 @@ public class UserInFamily implements Serializable {
     public void setRole(Role role) {
         this.role = role;
         this.roleId = role.getId();
+    }
+
+    public int getCountChat() {
+        return countChat;
+    }
+
+    public void setCountChat(int countChat) {
+        this.countChat = countChat;
     }
 
     public HashMap<String, Object> getJson(){

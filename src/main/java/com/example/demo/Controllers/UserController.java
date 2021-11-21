@@ -294,6 +294,7 @@ public class UserController {
 
         firebaseMessageHelper.notifyUsers(
                 usersToNotify,
+                family,
                 helper.getMessageInLanguage("newMemberJoinedFamilyTitle", langCode),
                 String.format(helper.getMessageInLanguage("newMemberJoinedFamilyBody", langCode), user.getName(), family.getFamilyName()),
                 notiData
@@ -447,6 +448,7 @@ public class UserController {
             else{
                 firebaseMessageHelper.notifyUsers(
                         users,
+                        family,
                         helper.getMessageInLanguage("invitedToACallTitle", langCode),
                         String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
                         data);

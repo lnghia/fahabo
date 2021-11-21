@@ -1,5 +1,8 @@
 package com.example.demo.Firebase;
 
+import com.example.demo.Helpers.Helper;
+import com.example.demo.Notification.Helper.NotificationHelper;
+import com.example.demo.Notification.Service.NotificationService;
 import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
 import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
 import com.example.demo.domain.Family.Family;
@@ -9,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +24,9 @@ import java.util.stream.Collectors;
 public class FirebaseMessageHelper {
     @Autowired
     private UserFirebaseTokenService userFirebaseTokenService;
+
+    @Autowired
+    private NotificationHelper notificationHelper;
 
     private final String ICON_URL = "https://www.google.com/url?sa=i&url=https%3A%2F%2Ftoppng.com%2Ffacebook-bell-notification-icon-facebook-notification-icon-PNG-free-PNG-Images_125458&psig=AOvVaw3w3mEjgAsAIujeJ6KjDHTy&ust=1636452942072000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCLCeuLvEiPQCFQAAAAAdAAAAABAD";
 
@@ -97,8 +105,19 @@ public class FirebaseMessageHelper {
 
     public void notifyAllUsersInFamily(Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
+        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
 
         List<User> users = family.getUsersInFamily().stream().map(userInFamily -> {
+            notificationHelper.createNotification(
+                    userInFamily.getUser(),
+                    family,
+                    notificationHelper.getTypeBasedOnNavigate(data.get("navigate")),
+                    title,
+                    body,
+                    now,
+                    data.get("navigate"),
+                    data.get("id")
+            );
             return userInFamily.getUser();
         }).collect(Collectors.toList());
 
@@ -112,8 +131,19 @@ public class FirebaseMessageHelper {
 
     public void notifyAllUsersInFamilyExceptUser(Family family, User user, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
+        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
 
         List<User> users = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUser().getId() != user.getId()).map(userInFamily -> {
+            notificationHelper.createNotification(
+                    userInFamily.getUser(),
+                    family,
+                    notificationHelper.getTypeBasedOnNavigate(data.get("navigate")),
+                    title,
+                    body,
+                    now,
+                    data.get("navigate"),
+                    data.get("id")
+            );
             return userInFamily.getUser();
         }).collect(Collectors.toList());
 
@@ -125,19 +155,41 @@ public class FirebaseMessageHelper {
         sendNotifications(tokens, title, body, data);
     }
 
-    public void notifyAllDevicesOfUser(User user, String title, String body, HashMap<String, String> data) {
+    public void notifyAllDevicesOfUser(User user, Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
+        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
 
+        notificationHelper.createNotification(
+                user,
+                family,
+                notificationHelper.getTypeBasedOnNavigate(data.get("navigate")),
+                title,
+                body,
+                now,
+                data.get("navigate"),
+                data.get("id")
+        );
         for (var userToken : user.getFirebaseTokenSet()) {
             if (!userToken.isDeleted()) tokens.add(userToken.getToken());
         }
         sendNotifications(tokens, title, body, data);
     }
 
-    public void notifyUsers(List<User> users, String title, String body, HashMap<String, String> data) {
+    public void notifyUsers(List<User> users, Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
+        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
 
         for (var user : users) {
+            notificationHelper.createNotification(
+                    user,
+                    family,
+                    notificationHelper.getTypeBasedOnNavigate(data.get("navigate")),
+                    title,
+                    body,
+                    now,
+                    data.get("navigate"),
+                    data.get("id")
+            );
             for (var userToken : user.getFirebaseTokenSet()) {
                 if (!userToken.isDeleted()) tokens.add(userToken.getToken());
             }

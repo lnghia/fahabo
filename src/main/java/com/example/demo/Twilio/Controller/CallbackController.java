@@ -86,6 +86,7 @@ public class CallbackController {
 
             firebaseMessageHelper.notifyUsers(
                     users,
+                    family,
                     helper.getMessageInLanguage("videoCallHasEndedTitle", langCode),
                     helper.getMessageInLanguage("videoCallHasEndedBody", langCode),
                     new HashMap<>() {{

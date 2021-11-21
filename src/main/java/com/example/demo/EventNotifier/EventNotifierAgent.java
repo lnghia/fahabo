@@ -67,6 +67,7 @@ public class EventNotifierAgent {
 
                     firebaseMessageHelper.notifyUsers(
                             participants,
+                            family,
                             helper.getMessageInLanguage("anUpComingEventIn30MinsTitle", langCode),
                             String.format(
                                     helper.getMessageInLanguage("anUpComingEventIn30MinsBody", langCode),

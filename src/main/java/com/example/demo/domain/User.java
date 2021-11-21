@@ -47,6 +47,9 @@ public class User {
 
     private String avatar;
 
+    @Column(name = "count_noti")
+    private int countNoti = 0;
+
 //    @ManyToMany(fetch = FetchType.EAGER)
 //    @JoinTable(
 //            name = "users_roles",
@@ -312,6 +315,14 @@ public class User {
 
     public void setFirebaseTokenSet(Set<UserFirebaseToken> firebaseTokenSet) {
         this.firebaseTokenSet = firebaseTokenSet;
+    }
+
+    public int getCountNoti() {
+        return countNoti;
+    }
+
+    public void setCountNoti(int countNoti) {
+        this.countNoti = countNoti;
     }
 
     public String toString() {

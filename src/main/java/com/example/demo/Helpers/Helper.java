@@ -3,6 +3,7 @@ package com.example.demo.Helpers;
 import com.example.demo.DropBox.DropBoxRedirectedLinkGetter;
 import com.example.demo.DropBox.GetRedirectedLinkExecutionResult;
 import com.example.demo.DropBox.ItemToUpload;
+import com.example.demo.Notification.Entity.Notification;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Image;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -420,6 +422,19 @@ public class Helper {
     public String getLangCode(Family family) {
         return (family.getTimezone() == null) ?
                 "en" : ((family.getTimezone().equals("Asia/Ho_Chi_Minh") || family.getTimezone().equals("Asia/Saigon")) ?
-                    "vi" : "en");
+                "vi" : "en");
+    }
+
+    public <T> void reverseArrayList(ArrayList<T> arrayList) {
+        int first = 0;
+        int second = arrayList.size() - 1;
+
+        while (first < second) {
+            T tmp = arrayList.get(first);
+            arrayList.set(first, arrayList.get(second));
+            arrayList.set(second, tmp);
+            ++first;
+            --second;
+        }
     }
 }

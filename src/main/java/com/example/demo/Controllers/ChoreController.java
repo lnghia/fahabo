@@ -151,6 +151,7 @@ public class ChoreController {
             if(!users.isEmpty()){
                 firebaseMessageHelper.notifyUsers(
                         users,
+                        family,
                         helper.getMessageInLanguage("choreHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("choreHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{
@@ -419,6 +420,7 @@ public class ChoreController {
             if(!users.isEmpty()){
                 firebaseMessageHelper.notifyUsers(
                         users,
+                        chore.getFamily(),
                         helper.getMessageInLanguage("choreHasBeenAssignedTitle", langCode),
                         String.format(helper.getMessageInLanguage("choreHasBeenAssignedBody", langCode), user.getName()),
                         new HashMap<String, String>() {{

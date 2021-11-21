@@ -134,4 +134,31 @@
         <addPrimaryKey tableName="users_in_call_rooms" columnNames="room_name, user_id" constraintName="pk_users_in_call_rooms"/>
     </changeSet>
 
+    <changeSet id="add_table_notifications" author="nghia">
+        <createTable tableName="notifications">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_notifications"/>
+            </column>
+            <column name="type" type="varchar"></column>
+            <column name="title" type="varchar"/>
+            <column name="description" type="varchar"/>
+            <column name="is_clicked" type="boolean" defaultValue="false"/>
+            <column name="created_at" type="datetime"/>
+            <column name="navigate" type="varchar"/>
+            <column name="sub_id" type="varchar"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_column_count_chat_users_in_families" author="nghia">
+        <addColumn tableName="users_in_families">
+            <column name="count_chat" type="int" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_count_noti_users" author="nghia">
+        <addColumn tableName="users">
+            <column name="count_noti" type="int" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
