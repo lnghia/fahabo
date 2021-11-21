@@ -26,7 +26,7 @@ public class UserFamilyHelper {
         userInFamilyService.saveUserInFamily(userInFamily);
         user.addFamily(userInFamily);
         family.addUser(userInFamily);
-        userService.saveUser(user);
+        userService.updateUser(user);
         familyService.saveFamily(family);
 
         return family;
