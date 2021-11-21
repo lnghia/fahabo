@@ -3,6 +3,7 @@ package com.example.demo.Notification.Controller;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Notification.Entity.Notification;
 import com.example.demo.Notification.RequestBody.ClearChatNotiReqBody;
+import com.example.demo.Notification.RequestBody.ClickNotificationReqBody;
 import com.example.demo.Notification.RequestBody.GetNotificationsReqBody;
 import com.example.demo.Notification.Service.NotificationService;
 import com.example.demo.ResponseFormat.Response;
@@ -106,5 +107,20 @@ public class NotificationController {
         }
 
         return ResponseEntity.ok(new Response("Notification count has been set to 0", new ArrayList<>()));
+    }
+
+    @PostMapping("/click")
+    public ResponseEntity<Response> clickNotification(@RequestBody ClickNotificationReqBody reqBody){
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Notification notification = notificationService.getByUserIdAndId(user.getId(), reqBody.id);
+
+        if(notification != null){
+            notification.setClicked(true);
+            notificationService.saveNotification(notification);
+
+            return ResponseEntity.ok(new Response("Notification has been clicked", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of(""))));
     }
 }

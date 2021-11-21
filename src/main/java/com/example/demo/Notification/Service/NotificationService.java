@@ -23,4 +23,8 @@ public class NotificationService {
     public Notification saveNotification(Notification notification){
         return notificationRepo.save(notification);
     }
+
+    public Notification getByUserIdAndId(int userId, int id){
+        return notificationRepo.getByUserIdAndId(userId, id);
+    }
 }
