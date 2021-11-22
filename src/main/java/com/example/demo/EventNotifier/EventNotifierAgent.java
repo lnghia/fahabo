@@ -58,7 +58,10 @@ public class EventNotifierAgent {
                                     helper.getMessageInLanguage("anUpComingEventIn30MinsBody", langCode),
                                     event.getFromAsString()
                             ),
-                            new HashMap<>()
+                            new HashMap<>(){{
+                                put("navigate", "EVENT_DETAIL");
+                                put("id", Integer.toString(event.getId()));
+                            }}
                     );
                     event.setNotified(true);
                     eventService.saveEvent(event);
@@ -73,7 +76,10 @@ public class EventNotifierAgent {
                                     helper.getMessageInLanguage("anUpComingEventIn30MinsBody", langCode),
                                     event.getFromAsString()
                             ),
-                            new HashMap<>()
+                            new HashMap<>(){{
+                                put("navigate", "EVENT_DETAIL");
+                                put("id", Integer.toString(event.getId()));
+                            }}
                     );
                 }
             }
