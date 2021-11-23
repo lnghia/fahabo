@@ -503,7 +503,15 @@ public class UserController {
                                 }).collect(Collectors.toList())));
 
                 firebaseMessageHelper.notifyUsersWithDataOnly(users, family, new HashMap<>());
-                List<UserFirebaseToken> userFirebaseTokenList = userFirebaseTokenService.findAllUserFirebaseTokenByUser(user.getId());
+                ArrayList<UserFirebaseToken> userFirebaseTokenList = new ArrayList<>();
+
+                for (var u : users){
+                    List<UserFirebaseToken> userFirebaseTokensInFamily = userFirebaseTokenService.findAllUserFirebaseTokenByUser(u.getId());
+                    if(userFirebaseTokensInFamily != null && !userFirebaseTokensInFamily.isEmpty()){
+                        userFirebaseTokenList.addAll(userFirebaseTokensInFamily);
+                    }
+                }
+
                 HashSet<Integer> locatedUser = new HashSet<>();
 
                 if (result != null) {
