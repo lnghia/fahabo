@@ -24,6 +24,12 @@ public class UserFirebaseToken {
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
+    @Column(name = "longitude")
+    private float longitude = 0f;
+
+    @Column(name = "altitude")
+    private float altitude = 0f;
+
     public UserFirebaseToken() {
     }
 
@@ -64,5 +70,21 @@ public class UserFirebaseToken {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
+    }
+
+    public float getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(float altitude) {
+        this.altitude = altitude;
     }
 }

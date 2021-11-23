@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserFirebaseTokenService {
     @Autowired
@@ -26,5 +28,9 @@ public class UserFirebaseTokenService {
     @Transactional
     public void deleteToken(String token){
         userFirebaseTokenRepo.disableToken(token);
+    }
+
+    public List<UserFirebaseToken> findAllUserFirebaseTokenByUser(int userId){
+        return userFirebaseTokenRepo.findAllUserFirebaseTokenByUser(userId);
     }
 }

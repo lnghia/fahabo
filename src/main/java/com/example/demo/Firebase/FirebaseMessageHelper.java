@@ -103,6 +103,41 @@ public class FirebaseMessageHelper {
         }
     }
 
+    public void notifyDevices(List<String> tokens, HashMap<String, String> data) {
+        MulticastMessage message = MulticastMessage.builder()
+                .putAllData(data)
+                .setNotification(Notification.builder()
+                        .setImage(ICON_URL)
+                        .build())
+                .addAllTokens(tokens)
+                .build();
+
+        try {
+            BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
+
+            if (response.getFailureCount() > 0) {
+                List<SendResponse> responses = response.getResponses();
+                List<String> failedTokens = new ArrayList<>();
+                for (int i = 0; i < responses.size(); i++) {
+                    if (!responses.get(i).isSuccessful()) {
+                        // The order of responses corresponds to the order of the registration tokens.
+                        if (responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.UNREGISTERED) ||
+                                responses.get(i).getException().getMessagingErrorCode().equals(MessagingErrorCode.INVALID_ARGUMENT)) {
+                            userFirebaseTokenService.deleteToken(tokens.get(i));
+                        }
+                        failedTokens.add(tokens.get(i));
+                        log.error(responses.get(i).getException().getMessage());
+                    }
+                }
+
+                log.info("List of tokens that caused failures: " + failedTokens);
+            }
+        } catch (FirebaseMessagingException e) {
+            log.error("Couldn't push notifications.", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void notifyAllUsersInFamily(Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
         Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
@@ -197,6 +232,18 @@ public class FirebaseMessageHelper {
         sendNotifications(tokens, title, body, data);
     }
 
+    public void notifyUsersWithDataOnly(List<User> users, Family family, HashMap<String, String> data) {
+        List<String> tokens = new ArrayList<>();
+        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+
+        for (var user : users) {
+            for (var userToken : user.getFirebaseTokenSet()) {
+                if (!userToken.isDeleted()) tokens.add(userToken.getToken());
+            }
+        }
+        sendNotifications(tokens, data);
+    }
+
     public void sendNotifications(List<String> tokens, String title, String body) {
         new Thread(() -> {
             notifyDevices(tokens, title, body);
@@ -206,6 +253,12 @@ public class FirebaseMessageHelper {
     public void sendNotifications(List<String> tokens, String title, String body, HashMap<String, String> data) {
         new Thread(() -> {
             notifyDevices(tokens, title, body, data);
+        }).start();
+    }
+
+    public void sendNotifications(List<String> tokens, HashMap<String, String> data) {
+        new Thread(() -> {
+            notifyDevices(tokens, data);
         }).start();
     }
 }

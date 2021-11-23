@@ -161,4 +161,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add_column_recent_pos" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="longitude" type="float" defaultValue="0"></column>
+            <column name="altitude" type="float" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -14,6 +14,8 @@ import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.Service.Role.RoleService;
 import com.example.demo.Service.UserInFamily.UserInFamilyService;
 import com.example.demo.Service.UserService;
+import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
+import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
 import com.example.demo.domain.*;
 import com.example.demo.domain.Family.Family;
 import com.google.rpc.Help;
@@ -66,6 +68,9 @@ public class UserController {
 
     @Autowired
     private FirebaseMessageHelper firebaseMessageHelper;
+
+    @Autowired
+    private UserFirebaseTokenService userFirebaseTokenService;
 
     @GetMapping
     private ResponseEntity<Response> getUsers(@RequestHeader("User-Agent") String userAgent) {
@@ -411,32 +416,32 @@ public class UserController {
     }
 
     @PostMapping("/make_video_call")
-    public ResponseEntity<Response> makeVideoCall(@RequestBody VideoCallReqForm reqForm){
+    public ResponseEntity<Response> makeVideoCall(@RequestBody VideoCallReqForm reqForm) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(reqForm.familyId);
         List<User> users = new ArrayList<>();
         Helper helper = Helper.getInstance();
         String langCode = helper.getLangCode(family);
 
-        if(reqForm.participantIds == null){
+        if (reqForm.participantIds == null) {
             return ResponseEntity.ok(new Response(null, new ArrayList<>()));
         }
 
         if (family.checkIfUserExist(user)) {
-            for(var id : reqForm.participantIds){
+            for (var id : reqForm.participantIds) {
                 User participant = userService.getUserById(id);
-                if(family.checkIfUserExist(participant)){
+                if (family.checkIfUserExist(participant)) {
                     users.add(participant);
                 }
             }
 
-            HashMap<String, String> data = new HashMap<>(){{
+            HashMap<String, String> data = new HashMap<>() {{
                 put("navigate", "VIDEO_CALL");
                 put("id", reqForm.roomCallId);
                 put("familyId", Integer.toString(reqForm.familyId));
             }};
 
-            if(reqForm.participantIds != null && reqForm.participantIds.length == 0){
+            if (reqForm.participantIds != null && reqForm.participantIds.length == 0) {
                 firebaseMessageHelper.notifyAllUsersInFamilyExceptUser(
                         family,
                         user,
@@ -444,8 +449,7 @@ public class UserController {
                         String.format(helper.getMessageInLanguage("invitedToACallBody", langCode), family.getFamilyName(), user.getName()),
                         data
                 );
-            }
-            else{
+            } else {
                 firebaseMessageHelper.notifyUsers(
                         users,
                         family,
@@ -458,7 +462,85 @@ public class UserController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
+
+    @PostMapping("/register_location")
+    public ResponseEntity<Response> registerUserLocation(@RequestBody RegisterUserLocationReqForm reqForm) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        UserFirebaseToken userFirebaseToken = userFirebaseTokenService.findUserFirebaseTokenByToken(user.getId(), reqForm.firebaseToken);
+
+        if (userFirebaseToken != null) {
+            userFirebaseToken.setLongitude(reqForm.longitude);
+            userFirebaseToken.setAltitude(reqForm.latitude);
+        } else {
+            userFirebaseToken = new UserFirebaseToken(reqForm.firebaseToken, user);
+            userFirebaseToken.setAltitude(reqForm.latitude);
+            userFirebaseToken.setLongitude(reqForm.longitude);
+        }
+        userFirebaseTokenService.saveUserFirebaseToken(userFirebaseToken);
+
+        return ResponseEntity.ok(new Response("Registered location successfully", new ArrayList<>()));
+    }
+
+    @PostMapping("/locate_members")
+    public ResponseEntity<Response> locateMembers(@Valid @RequestBody LocateMembersReqForm reqForm) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        Family family = familyService.findById(reqForm.familyId);
+
+        if (family.checkIfUserExist(user)) {
+            List<User> users = family.getUsersInFamily().stream().map(UserInFamily::getUser).collect(Collectors.toList());
+            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+            ArrayList<HashMap<String, Object>> data;
+
+            try {
+                GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(
+                        new ArrayList<>(
+                                users.stream().filter(user1 -> user1.getId() != user.getId()).map(user1 -> {
+                                    return new Image(user1.getName(), user1.getAvatar());
+                                }).collect(Collectors.toList())));
+
+                firebaseMessageHelper.notifyUsersWithDataOnly(users, family, new HashMap<>());
+                List<UserFirebaseToken> userFirebaseTokenList = userFirebaseTokenService.findAllUserFirebaseTokenByUser(user.getId());
+
+                if (result != null) {
+                    data = new ArrayList<>(userFirebaseTokenList.stream()
+                            .map(userFirebaseToken -> {
+                                User tmpUser = userFirebaseToken.getUser();
+                                float longitude = userFirebaseToken.getLongitude();
+                                float latitude = userFirebaseToken.getAltitude();
+
+                                return result.getSuccessfulResults().containsKey(tmpUser.getName()) ?
+                                        tmpUser.getJsonWithLocation(result.getSuccessfulResults().get(tmpUser.getName()).getUri(), longitude, latitude) :
+                                        tmpUser.getJsonWithLocation(null, longitude, latitude);
+                            }).collect(Collectors.toList()));
+
+                    return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+                }
+
+                data = new ArrayList<>(userFirebaseTokenList.stream()
+                        .map(userFirebaseToken -> {
+                            User tmpUser = userFirebaseToken.getUser();
+                            float longitude = userFirebaseToken.getLongitude();
+                            float latitude = userFirebaseToken.getAltitude();
+
+                            return tmpUser.getJsonWithLocation(null, longitude, latitude);
+                        }).collect(Collectors.toList()));
+
+                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+            } catch (InterruptedException | ExecutionException e) {
+                log.error("Couldn't retrieve redirected url, unknown error.");
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(
+                        users.stream().map(user1 -> user1.getShortJsonWithHost(null, familyService.isHostInFamily(user1.getId(), family.getId()))).collect(Collectors.toList()),
+                        new ArrayList<>(List.of("avatar.unavailable"))));
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
 }

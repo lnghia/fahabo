@@ -427,4 +427,16 @@ public class User {
     public void setChoresAssignUsers(Set<ChoresAssignUsers> choresAssignUsers) {
         this.choresAssignUsers = choresAssignUsers;
     }
+
+    public HashMap<String, Object> getJsonWithLocation(String avatarUrl, float longitude, float latitude){
+        HashMap<String, Object> rs = new HashMap<>();
+
+        rs.put("id", id);
+        rs.put("name", name);
+        rs.put("longitude", longitude);
+        rs.put("avatar", (avatarUrl == null) ? avatar : avatarUrl);
+        rs.put("latitude", latitude);
+
+        return rs;
+    }
 }
