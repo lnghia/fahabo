@@ -7,6 +7,7 @@ import com.example.demo.domain.Family.Family;
 
 import javax.persistence.*;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -428,7 +429,7 @@ public class User {
         this.choresAssignUsers = choresAssignUsers;
     }
 
-    public HashMap<String, Object> getJsonWithLocation(String avatarUrl, float longitude, float latitude){
+    public HashMap<String, Object> getJsonWithLocation(String avatarUrl, BigDecimal longitude, BigDecimal latitude){
         HashMap<String, Object> rs = new HashMap<>();
 
         rs.put("id", id);

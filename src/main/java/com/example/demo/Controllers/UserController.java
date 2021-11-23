@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -505,9 +506,9 @@ public class UserController {
                 firebaseMessageHelper.notifyUsersWithDataOnly(users, family, new HashMap<>());
                 ArrayList<UserFirebaseToken> userFirebaseTokenList = new ArrayList<>();
 
-                for (var u : users){
+                for (var u : users) {
                     List<UserFirebaseToken> userFirebaseTokensInFamily = userFirebaseTokenService.findAllUserFirebaseTokenByUser(u.getId());
-                    if(userFirebaseTokensInFamily != null && !userFirebaseTokensInFamily.isEmpty()){
+                    if (userFirebaseTokensInFamily != null && !userFirebaseTokensInFamily.isEmpty()) {
                         userFirebaseTokenList.addAll(userFirebaseTokensInFamily);
                     }
                 }
@@ -517,8 +518,8 @@ public class UserController {
                 if (result != null) {
                     for (var userFirebaseToken : userFirebaseTokenList) {
                         User tmpUser = userFirebaseToken.getUser();
-                        float longitude = userFirebaseToken.getLongitude();
-                        float latitude = userFirebaseToken.getAltitude();
+                        BigDecimal longitude = userFirebaseToken.getLongitude();
+                        BigDecimal latitude = userFirebaseToken.getAltitude();
 
                         if (userFirebaseToken.isDeleted()) {
                             if (!locatedUser.contains(tmpUser.getId())) {
@@ -526,6 +527,9 @@ public class UserController {
                             } else {
                                 continue;
                             }
+                        }
+                        if (longitude == null || latitude == null) {
+                            continue;
                         }
 
                         data.add(result.getSuccessfulResults().containsKey(tmpUser.getName()) ?
@@ -538,8 +542,8 @@ public class UserController {
 
                 for (var userFirebaseToken : userFirebaseTokenList) {
                     User tmpUser = userFirebaseToken.getUser();
-                    float longitude = userFirebaseToken.getLongitude();
-                    float latitude = userFirebaseToken.getAltitude();
+                    BigDecimal longitude = userFirebaseToken.getLongitude();
+                    BigDecimal latitude = userFirebaseToken.getAltitude();
 
                     if (userFirebaseToken.isDeleted()) {
                         if (!locatedUser.contains(tmpUser.getId())) {
@@ -547,6 +551,9 @@ public class UserController {
                         } else {
                             continue;
                         }
+                    }
+                    if (longitude == null || latitude == null) {
+                        continue;
                     }
 
                     data.add(tmpUser.getJsonWithLocation(null, longitude, latitude));

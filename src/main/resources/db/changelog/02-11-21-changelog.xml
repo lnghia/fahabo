@@ -174,4 +174,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="delete_column_recent_pos" author="nghia">
+        <dropColumn tableName="user_firebase_token">
+            <column name="longitude"></column>
+            <column name="altitude"></column>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="alter_column_recent_pos" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="longitude" type="java.math.BigDecimal"></column>
+            <column name="altitude" type="java.math.BigDecimal"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

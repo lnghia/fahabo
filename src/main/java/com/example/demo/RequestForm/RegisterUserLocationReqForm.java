@@ -1,9 +1,11 @@
 package com.example.demo.RequestForm;
 
+import java.math.BigDecimal;
+
 public class RegisterUserLocationReqForm {
     public String firebaseToken;
 
-    public float longitude;
+    public BigDecimal longitude;
 
-    public float latitude;
+    public BigDecimal latitude;
 }

@@ -4,6 +4,7 @@ import com.example.demo.UserFirebaseToken.IdClass.UserFirebaseTokenIdClass;
 import com.example.demo.domain.User;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -26,10 +27,10 @@ public class UserFirebaseToken {
     private boolean isDeleted = false;
 
     @Column(name = "longitude")
-    private float longitude = 0f;
+    private BigDecimal longitude;
 
     @Column(name = "altitude")
-    private float altitude = 0f;
+    private BigDecimal altitude;
 
     @Column(name = "updated_at")
     private Date updated_at;
@@ -76,19 +77,19 @@ public class UserFirebaseToken {
         isDeleted = deleted;
     }
 
-    public float getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(float longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 
-    public float getAltitude() {
+    public BigDecimal getAltitude() {
         return altitude;
     }
 
-    public void setAltitude(float altitude) {
+    public void setAltitude(BigDecimal altitude) {
         this.altitude = altitude;
     }
 
