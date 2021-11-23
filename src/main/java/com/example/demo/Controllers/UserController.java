@@ -29,9 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -481,6 +479,7 @@ public class UserController {
             userFirebaseToken.setAltitude(reqForm.latitude);
             userFirebaseToken.setLongitude(reqForm.longitude);
         }
+        userFirebaseToken.setUpdated_at(new Date());
         userFirebaseTokenService.saveUserFirebaseToken(userFirebaseToken);
 
         return ResponseEntity.ok(new Response("Registered location successfully", new ArrayList<>()));
@@ -494,7 +493,7 @@ public class UserController {
         if (family.checkIfUserExist(user)) {
             List<User> users = family.getUsersInFamily().stream().map(UserInFamily::getUser).collect(Collectors.toList());
             DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
-            ArrayList<HashMap<String, Object>> data;
+            ArrayList<HashMap<String, Object>> data = new ArrayList<>();
 
             try {
                 GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(
@@ -505,30 +504,45 @@ public class UserController {
 
                 firebaseMessageHelper.notifyUsersWithDataOnly(users, family, new HashMap<>());
                 List<UserFirebaseToken> userFirebaseTokenList = userFirebaseTokenService.findAllUserFirebaseTokenByUser(user.getId());
+                HashSet<Integer> locatedUser = new HashSet<>();
 
                 if (result != null) {
-                    data = new ArrayList<>(userFirebaseTokenList.stream()
-                            .map(userFirebaseToken -> {
-                                User tmpUser = userFirebaseToken.getUser();
-                                float longitude = userFirebaseToken.getLongitude();
-                                float latitude = userFirebaseToken.getAltitude();
+                    for (var userFirebaseToken : userFirebaseTokenList) {
+                        User tmpUser = userFirebaseToken.getUser();
+                        float longitude = userFirebaseToken.getLongitude();
+                        float latitude = userFirebaseToken.getAltitude();
 
-                                return result.getSuccessfulResults().containsKey(tmpUser.getName()) ?
-                                        tmpUser.getJsonWithLocation(result.getSuccessfulResults().get(tmpUser.getName()).getUri(), longitude, latitude) :
-                                        tmpUser.getJsonWithLocation(null, longitude, latitude);
-                            }).collect(Collectors.toList()));
+                        if (userFirebaseToken.isDeleted()) {
+                            if (!locatedUser.contains(tmpUser.getId())) {
+                                locatedUser.add(tmpUser.getId());
+                            } else {
+                                continue;
+                            }
+                        }
+
+                        data.add(result.getSuccessfulResults().containsKey(tmpUser.getName()) ?
+                                tmpUser.getJsonWithLocation(result.getSuccessfulResults().get(tmpUser.getName()).getUri(), longitude, latitude) :
+                                tmpUser.getJsonWithLocation(null, longitude, latitude));
+                    }
 
                     return ResponseEntity.ok(new Response(data, new ArrayList<>()));
                 }
 
-                data = new ArrayList<>(userFirebaseTokenList.stream()
-                        .map(userFirebaseToken -> {
-                            User tmpUser = userFirebaseToken.getUser();
-                            float longitude = userFirebaseToken.getLongitude();
-                            float latitude = userFirebaseToken.getAltitude();
+                for (var userFirebaseToken : userFirebaseTokenList) {
+                    User tmpUser = userFirebaseToken.getUser();
+                    float longitude = userFirebaseToken.getLongitude();
+                    float latitude = userFirebaseToken.getAltitude();
 
-                            return tmpUser.getJsonWithLocation(null, longitude, latitude);
-                        }).collect(Collectors.toList()));
+                    if (userFirebaseToken.isDeleted()) {
+                        if (!locatedUser.contains(tmpUser.getId())) {
+                            locatedUser.add(tmpUser.getId());
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    data.add(tmpUser.getJsonWithLocation(null, longitude, latitude));
+                }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
             } catch (InterruptedException | ExecutionException e) {

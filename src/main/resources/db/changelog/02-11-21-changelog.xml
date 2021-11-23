@@ -168,4 +168,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add_column_updated_at_user_firebase_token" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="updated_at" type="datetime"></column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

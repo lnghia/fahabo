@@ -4,6 +4,7 @@ import com.example.demo.UserFirebaseToken.IdClass.UserFirebaseTokenIdClass;
 import com.example.demo.domain.User;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "user_firebase_token")
@@ -29,6 +30,9 @@ public class UserFirebaseToken {
 
     @Column(name = "altitude")
     private float altitude = 0f;
+
+    @Column(name = "updated_at")
+    private Date updated_at;
 
     public UserFirebaseToken() {
     }
@@ -86,5 +90,13 @@ public class UserFirebaseToken {
 
     public void setAltitude(float altitude) {
         this.altitude = altitude;
+    }
+
+    public Date getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(Date updated_at) {
+        this.updated_at = updated_at;
     }
 }

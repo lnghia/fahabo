@@ -32,6 +32,6 @@ public interface UserFirebaseTokenRepo extends JpaRepository<UserFirebaseToken, 
     UserFirebaseToken findTokenInUser(@Param("userId") int userId,
                            @Param("token") String token);
 
-    @Query(value = "SELECT * FROM user_firebase_token WHERE is_deleted=FALSE AND user_id=:userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM user_firebase_token WHERE user_id=:userId ORDER BY updated_at DESC", nativeQuery = true)
     List<UserFirebaseToken> findAllUserFirebaseTokenByUser(@Param("userId") int userId);
 }
