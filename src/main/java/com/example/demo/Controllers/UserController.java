@@ -509,7 +509,12 @@ public class UserController {
                 for (var u : users) {
                     List<UserFirebaseToken> userFirebaseTokensInFamily = userFirebaseTokenService.findAllUserFirebaseTokenByUser(u.getId());
                     if (userFirebaseTokensInFamily != null && !userFirebaseTokensInFamily.isEmpty()) {
-                        userFirebaseTokenList.addAll(userFirebaseTokensInFamily);
+                        userFirebaseTokenList.add(userFirebaseTokensInFamily.get(0));
+                    } else {
+                        userFirebaseTokensInFamily = userFirebaseTokenService.findLastSeenUserFirebaseTokenByUser(u.getId());
+                        if (userFirebaseTokensInFamily != null && userFirebaseTokensInFamily.size() > 0) {
+                            userFirebaseTokenList.add(userFirebaseTokensInFamily.get(0));
+                        }
                     }
                 }
 

@@ -33,4 +33,8 @@ public class UserFirebaseTokenService {
     public List<UserFirebaseToken> findAllUserFirebaseTokenByUser(int userId){
         return userFirebaseTokenRepo.findAllUserFirebaseTokenByUser(userId);
     }
+
+    public List<UserFirebaseToken> findLastSeenUserFirebaseTokenByUser(int userId){
+        return userFirebaseTokenRepo.findLastUpdatedUserFirebaseTokenByUser(userId);
+    }
 }
