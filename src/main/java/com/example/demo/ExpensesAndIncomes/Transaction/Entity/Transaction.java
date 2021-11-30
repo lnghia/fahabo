@@ -215,8 +215,9 @@ public class Transaction {
             put("type", type);
             put("date", Helper.getInstance().formatDateWithoutTime(date));
             put("cost", cost.toString());
-            put("categoryName", category.getTitle());
-            put("categoryIcon", (iconUrl != null) ? iconUrl : category.getIcon());
+            put("note", note);
+            put("repeatType", repeatType);
+            put("category", category.getJson((iconUrl != null) ? iconUrl : category.getIcon()));
         }};
     }
 }
