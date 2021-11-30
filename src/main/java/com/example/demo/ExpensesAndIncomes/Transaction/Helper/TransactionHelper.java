@@ -261,6 +261,9 @@ public class TransactionHelper {
         if (requestBody.title != null && !requestBody.title.equals(transaction.getTitle())){
             transaction.setTitle(requestBody.title);
         }
+        if(requestBody.repeatType != null && !requestBody.repeatType.equals(transaction.getRepeatType())){
+            transaction.setRepeatType(requestBody.repeatType);
+        }
         photos = updateTransactionPhotos(transaction, requestBody, photos);
         transactionService.save(transaction);
 
