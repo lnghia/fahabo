@@ -1,5 +1,7 @@
 package com.example.demo.ExpensesAndIncomes.Transaction.RequestBody;
 
+import java.math.BigDecimal;
+
 public class UpdateTransactionReqBody {
     public int transactionId;
     public boolean updateAll = false;
@@ -11,4 +13,6 @@ public class UpdateTransactionReqBody {
     public Integer occurrences;
     public String repeatType;
     public String title;
+    public String type;
+    public BigDecimal cost;
 }

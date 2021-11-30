@@ -81,7 +81,7 @@ public class TransactionHelper {
         }
     }
 
-    public Transaction createTransactionFromAvailableOne(Transaction transaction){
+    public Transaction createTransactionFromAvailableOne(Transaction transaction) {
         Transaction transaction1 = new Transaction();
 
         transaction1.setTitle(transaction.getTitle());
@@ -107,8 +107,8 @@ public class TransactionHelper {
 
         Set<PhotosInTransactions> photos = transaction.getTransactionAlbum().getPhotos();
 
-        for (var photoInTransaction : photos){
-            if(!photoInTransaction.isDeleted()){
+        for (var photoInTransaction : photos) {
+            if (!photoInTransaction.isDeleted()) {
                 PhotosInTransactions photosInTransactions = new PhotosInTransactions(photoInTransaction.getPhoto(), transactionAlbum);
                 photosInTransactionsService.save(photosInTransactions);
             }
@@ -258,11 +258,17 @@ public class TransactionHelper {
         if (requestBody.note != null && !requestBody.note.equals(transaction.getNote())) {
             transaction.setNote(requestBody.note);
         }
-        if (requestBody.title != null && !requestBody.title.equals(transaction.getTitle())){
+        if (requestBody.title != null && !requestBody.title.equals(transaction.getTitle())) {
             transaction.setTitle(requestBody.title);
         }
-        if(requestBody.repeatType != null && !requestBody.repeatType.equals(transaction.getRepeatType())){
+        if (requestBody.repeatType != null && !requestBody.repeatType.equals(transaction.getRepeatType())) {
             transaction.setRepeatType(requestBody.repeatType);
+        }
+        if (requestBody.type != null && !requestBody.type.equals(transaction.getType())) {
+            transaction.setType(requestBody.type);
+        }
+        if (requestBody.cost != null && !requestBody.cost.equals(transaction.getCost())) {
+            transaction.setCost(requestBody.cost);
         }
         photos = updateTransactionPhotos(transaction, requestBody, photos);
         transactionService.save(transaction);
@@ -343,7 +349,7 @@ public class TransactionHelper {
     public Transaction updateTransaction(Transaction transaction, UpdateTransactionReqBody requestBody) throws ParseException, ExecutionException, InterruptedException {
         ArrayList<Photo> photos = new ArrayList<>();
         photos = updateATransaction(transaction, requestBody, photos);
-        if(requestBody.updateAll){
+        if (requestBody.updateAll) {
             TransactionGroups transactionGroup = transactionGroupService.findTransactionGroupBySubId(transaction.getId());
             ArrayList<TransactionGroups> transactionGroups = transactionGroupService.findAllTransactionsInGroup(transactionGroup.getHead().getId());
 
