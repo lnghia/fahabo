@@ -3,11 +3,15 @@ package com.example.demo.EventNotifier;
 import com.example.demo.Event.Entity.Event;
 import com.example.demo.Event.Entity.EventAssignUser;
 import com.example.demo.Event.Service.EventService;
+import com.example.demo.ExpensesAndIncomes.Transaction.Entity.Transaction;
+import com.example.demo.ExpensesAndIncomes.Transaction.Helper.TransactionHelper;
+import com.example.demo.ExpensesAndIncomes.Transaction.Service.TransactionService;
 import com.example.demo.Firebase.FirebaseMessageHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.User;
+import liquibase.pro.packaged.A;
 import liquibase.pro.packaged.E;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,12 @@ public class EventNotifierAgent {
 
     @Autowired
     private FirebaseMessageHelper firebaseMessageHelper;
+
+    @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
+    private TransactionHelper transactionHelper;
 
     @Scheduled(fixedDelay = 55000)
     public void notifyAboutUpComingEvents() {
@@ -88,5 +98,20 @@ public class EventNotifierAgent {
         Date end = new Date();
 
         log.info(String.format("Checking upcoming events completes in %d milliseconds", end.getTime() - start.getTime()));
+    }
+
+    @Scheduled(fixedDelay = 24 * 60 * 60 * 1000)
+    public void generateNextTransaction() {
+        Date now = new Date();
+        String nowAsString = Helper.getInstance().formatDateWithTimeForQuery(now);
+        nowAsString = nowAsString.split(" ")[0];
+
+        ArrayList<Transaction> transactions = transactionService.findAllFromTo(
+                nowAsString + " 00:00:00",
+                nowAsString + " 59:59:59");
+
+        for (var transaction : transactions){
+            transactionHelper.createTransactionFromAvailableOne(transaction);
+        }
     }
 }
