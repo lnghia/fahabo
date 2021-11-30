@@ -255,7 +255,7 @@ public class TransactionHelper {
         if (requestBody.date != null && !requestBody.date.equals(helper.formatDateWithoutTime(transaction.getDate()))) {
             transaction.setDate(helper.formatDateWithoutTime(requestBody.date));
         }
-        if (!requestBody.note.equals(transaction.getNote())) {
+        if (requestBody.note != null && !requestBody.note.equals(transaction.getNote())) {
             transaction.setNote(requestBody.note);
         }
         if (requestBody.title != null && !requestBody.title.equals(transaction.getTitle())){
