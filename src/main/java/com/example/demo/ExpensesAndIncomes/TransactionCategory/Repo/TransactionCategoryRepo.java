@@ -11,12 +11,12 @@ import java.util.ArrayList;
 @Repository
 public interface TransactionCategoryRepo extends JpaRepository<TransactionCategory, Integer> {
     @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE " +
-            "AND (type=:type OR :type IS NULL OR :type='') " +
-            "AND (family_id=null OR family_id=:familyId)", nativeQuery = true)
+            "AND (type=CAST(:type as text) OR :type IS NULL OR CAST(:type as text)='') " +
+            "AND (family_id IS NULL OR family_id=:familyId)", nativeQuery = true)
     ArrayList<TransactionCategory> findAll(@Param("familyId") int familyId,
                                            @Param("type") String type);
 
-    @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE AND (family_id=null OR family_id=:familyId) AND id=:id", nativeQuery = true)
+    @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE AND (family_id IS NULL OR family_id=:familyId) AND id=:id", nativeQuery = true)
     TransactionCategory findById(@Param("familyId") int familyId,
                                  @Param("id") int id);
 }
