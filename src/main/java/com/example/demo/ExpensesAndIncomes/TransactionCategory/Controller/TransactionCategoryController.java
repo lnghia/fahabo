@@ -54,7 +54,7 @@ public class TransactionCategoryController {
 
         log.info(String.format("Getting all transaction categories user: %d family: %d", user.getId(), reqBody.familyId));
         if(family.checkIfUserExist(user)){
-            ArrayList<TransactionCategory> categories = transactionCategoryService.findAll(reqBody.familyId);
+            ArrayList<TransactionCategory> categories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type);
             ArrayList<HashMap<String, Object>> data = new ArrayList<>();
             List<String> icons = categories.stream().map(category -> {
                 return category.getIcon();
@@ -115,8 +115,9 @@ public class TransactionCategoryController {
                 String iconUrl = (success != null && !success.isEmpty()) ? success.get(0).getMetadata().getUrl() : null;
                 String iconReadyToViewUrl = (success != null && !success.isEmpty()) ? success.get(0).getUri() : null;
 
-                TransactionCategoryGroup transactionCategoryGroup = transactionCategoryGroupService.findById(Integer.parseInt(reqBody.parentId));
-                TransactionCategory transactionCategory = new TransactionCategory(reqBody.name, reqBody.familyId, iconUrl, transactionCategoryGroup);
+//                TransactionCategoryGroup transactionCategoryGroup = transactionCategoryGroupService.findById(Integer.parseInt(reqBody.parentId));
+                TransactionCategory transactionCategory = new TransactionCategory(reqBody.name, reqBody.familyId, iconUrl);
+                transactionCategory.setType(reqBody.type);
                 transactionCategoryService.save(transactionCategory);
 
                 return ResponseEntity.ok(new Response(transactionCategory.getJson(iconReadyToViewUrl), new ArrayList<>()));

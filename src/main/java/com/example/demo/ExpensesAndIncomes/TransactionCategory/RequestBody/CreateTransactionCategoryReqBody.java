@@ -11,4 +11,6 @@ public class CreateTransactionCategoryReqBody {
     public String icon;
 
     public String parentId;
+
+    public String type;
 }

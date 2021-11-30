@@ -12,8 +12,8 @@ public class TransactionCategoryService {
     @Autowired
     private TransactionCategoryRepo transactionCategoryRepo;
 
-    public ArrayList<TransactionCategory> findAll(int familyId){
-        return transactionCategoryRepo.findAll(familyId);
+    public ArrayList<TransactionCategory> findAll(int familyId, String type){
+        return transactionCategoryRepo.findAll(familyId, type);
     }
 
     public TransactionCategory save(TransactionCategory transactionCategory){

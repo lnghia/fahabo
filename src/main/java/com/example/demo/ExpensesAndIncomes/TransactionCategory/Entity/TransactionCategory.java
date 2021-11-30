@@ -21,9 +21,12 @@ public class TransactionCategory {
     @Column(name = "icon")
     private String icon;
 
-    @ManyToOne
-    @JoinColumn(name = "category_group", referencedColumnName = "id")
-    private TransactionCategoryGroup transactionCategoryGroup;
+    @Column(name = "type")
+    private String type;
+
+//    @ManyToOne
+//    @JoinColumn(name = "category_group", referencedColumnName = "id")
+//    private TransactionCategoryGroup transactionCategoryGroup;
 
     @Column(name = "translated")
     private boolean translated = false;
@@ -34,11 +37,11 @@ public class TransactionCategory {
     public TransactionCategory() {
     }
 
-    public TransactionCategory(String title, int familyId, String icon, TransactionCategoryGroup transactionCategoryGroup) {
+    public TransactionCategory(String title, int familyId, String icon) {
         this.title = title;
         this.familyId = familyId;
         this.icon = icon;
-        this.transactionCategoryGroup = transactionCategoryGroup;
+//        this.transactionCategoryGroup = transactionCategoryGroup;
     }
 
     public int getId() {
@@ -73,13 +76,13 @@ public class TransactionCategory {
         this.icon = icon;
     }
 
-    public TransactionCategoryGroup getTransactionCategoryGroup() {
-        return transactionCategoryGroup;
-    }
-
-    public void setTransactionCategoryGroup(TransactionCategoryGroup transactionCategoryGroup) {
-        this.transactionCategoryGroup = transactionCategoryGroup;
-    }
+//    public TransactionCategoryGroup getTransactionCategoryGroup() {
+//        return transactionCategoryGroup;
+//    }
+//
+//    public void setTransactionCategoryGroup(TransactionCategoryGroup transactionCategoryGroup) {
+//        this.transactionCategoryGroup = transactionCategoryGroup;
+//    }
 
     public boolean isTranslated() {
         return translated;
@@ -87,6 +90,14 @@ public class TransactionCategory {
 
     public void setTranslated(boolean translated) {
         this.translated = translated;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public boolean isDeleted() {
@@ -102,7 +113,8 @@ public class TransactionCategory {
            put("title", title);
            put("translated", translated);
            put("categoryId", id);
-           put("categoryGroup", transactionCategoryGroup.getJson());
+           put("type", type);
+//           put("categoryGroup", transactionCategoryGroup.getJson());
            put("icon", (iconUrl != null) ? iconUrl : icon);
         }};
     }
