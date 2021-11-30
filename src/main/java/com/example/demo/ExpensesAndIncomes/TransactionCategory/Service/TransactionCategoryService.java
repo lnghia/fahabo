@@ -12,15 +12,19 @@ public class TransactionCategoryService {
     @Autowired
     private TransactionCategoryRepo transactionCategoryRepo;
 
-    public ArrayList<TransactionCategory> findAll(int familyId, String type){
+    public ArrayList<TransactionCategory> findAll(int familyId, String type) {
         return transactionCategoryRepo.findAll(familyId, type);
     }
 
-    public TransactionCategory save(TransactionCategory transactionCategory){
+    public TransactionCategory findById(int id) {
+        return transactionCategoryRepo.findById(id);
+    }
+
+    public TransactionCategory save(TransactionCategory transactionCategory) {
         return transactionCategoryRepo.save(transactionCategory);
     }
 
-    public TransactionCategory findById(int familyId, int id){
+    public TransactionCategory findById(int familyId, int id) {
         return transactionCategoryRepo.findById(familyId, id);
     }
 }

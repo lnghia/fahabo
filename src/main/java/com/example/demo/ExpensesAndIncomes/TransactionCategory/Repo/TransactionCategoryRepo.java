@@ -19,4 +19,7 @@ public interface TransactionCategoryRepo extends JpaRepository<TransactionCatego
     @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE AND (family_id IS NULL OR family_id=:familyId) AND id=:id", nativeQuery = true)
     TransactionCategory findById(@Param("familyId") int familyId,
                                  @Param("id") int id);
+
+    @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE AND id=:id", nativeQuery = true)
+    TransactionCategory findById(@Param("id") int id);
 }

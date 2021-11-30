@@ -4,6 +4,7 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.TransactionCategory;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.RequestBody.CreateTransactionCategoryReqBody;
+import com.example.demo.ExpensesAndIncomes.TransactionCategory.RequestBody.DeleteTransactionCategoryReqBody;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.RequestBody.GetTransactionCategoryReqBody;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Service.TransactionCategoryService;
 import com.example.demo.ExpensesAndIncomes.TransactionCategoryGroup.Entity.TransactionCategoryGroup;
@@ -48,12 +49,12 @@ public class TransactionCategoryController {
     private DropBoxHelper dropBoxHelper;
 
     @PostMapping
-    public ResponseEntity<Response> getCategories(@Valid @RequestBody GetTransactionCategoryReqBody reqBody){
+    public ResponseEntity<Response> getCategories(@Valid @RequestBody GetTransactionCategoryReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(reqBody.familyId);
 
         log.info(String.format("Getting all transaction categories user: %d family: %d", user.getId(), reqBody.familyId));
-        if(family.checkIfUserExist(user)){
+        if (family.checkIfUserExist(user)) {
             ArrayList<TransactionCategory> categories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type);
             ArrayList<HashMap<String, Object>> data = new ArrayList<>();
             List<String> icons = categories.stream().map(category -> {
@@ -67,9 +68,9 @@ public class TransactionCategoryController {
                     return new Image(Integer.toString(category.getId()), category.getIcon());
                 }).collect(Collectors.toList())));
 
-                if(executionResult != null){
+                if (executionResult != null) {
                     HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> success = executionResult.getSuccessfulResults();
-                    for(var category : categories){
+                    for (var category : categories) {
                         String iconName = Integer.toString(category.getId());
 
                         data.add(category.getJson(
@@ -97,13 +98,13 @@ public class TransactionCategoryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Response> createCategory(@Valid @RequestBody CreateTransactionCategoryReqBody reqBody){
+    public ResponseEntity<Response> createCategory(@Valid @RequestBody CreateTransactionCategoryReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(reqBody.familyId);
         Date now = new Date();
 
         log.info(String.format("Creating transaction category user: %d family: %d", user.getId(), reqBody.familyId));
-        if(family.checkIfUserExist(user)){
+        if (family.checkIfUserExist(user)) {
             ItemToUpload[] items = new ItemToUpload[1];
             items[0] = new ItemToUpload(reqBody.name + "_" + Integer.toString(reqBody.familyId) + "_" + now.getTime() + ".jpg", reqBody.icon);
 
@@ -136,5 +137,27 @@ public class TransactionCategoryController {
                         List.of("validation.unauthorized")
                 )
         ));
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<Response> deleteTransactionCategory(@RequestBody DeleteTransactionCategoryReqBody reqBody) {
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+        TransactionCategory transactionCategory = transactionCategoryService.findById(reqBody.categoryId);
+
+        if (transactionCategory != null) {
+            Family family = familyService.findById(transactionCategory.getFamilyId());
+            if (family.checkIfUserExist(user)) {
+                transactionCategory.setDeleted(true);
+                transactionCategoryService.save(transactionCategory);
+
+                return ResponseEntity.ok(new Response(new HashMap<>() {{
+                    put("categoryId", reqBody.categoryId);
+                }}, new ArrayList<>()));
+            }
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.transactionIdNotExist"))));
     }
 }
