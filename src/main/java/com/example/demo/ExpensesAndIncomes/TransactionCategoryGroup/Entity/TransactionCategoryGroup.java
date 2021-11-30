@@ -59,11 +59,11 @@ public class TransactionCategoryGroup {
         isDeleted = deleted;
     }
 
-    public HashMap<String, Object> getJson(){
-        return new HashMap<>(){{
+    public HashMap<String, Object> getJson() {
+        return new HashMap<>() {{
             put("id", id);
-           put("title", title);
-           put("translated", translated);
+            put("title", title);
+            put("translated", translated);
         }};
     }
 }
