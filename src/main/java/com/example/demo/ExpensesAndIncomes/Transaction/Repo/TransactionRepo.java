@@ -19,7 +19,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Integer> {
             "AND (:from='' OR :to='' OR (cast(date as VARCHAR) >= :from AND cast(date as VARCHAR) <= :to)))" +
             "ORDER BY created_at DESC",
             countQuery = "SELECT COUNT(id) FROM transactions " +
-                    "WHERE is_deleted=FALSE " +
+                    "WHERE (is_deleted=FALSE " +
                     "AND family_id=:familyId " +
                     "AND (:title IS NULL OR :title='' OR LOWER(title)\\:\\:text LIKE '%' || :title\\:\\:text || '%')" +
                     "AND (:from='' OR :to='' OR (cast(date as VARCHAR) >= :from AND cast(date as VARCHAR) <= :to))) ",
