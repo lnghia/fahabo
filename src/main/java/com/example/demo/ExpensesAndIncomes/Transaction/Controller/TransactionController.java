@@ -222,7 +222,7 @@ public class TransactionController {
                 final String iconUrlReadyToView = iconUrl;
 
                 return ResponseEntity.ok(new Response(
-                        transactions.stream().map(transaction -> transaction.getJson(iconUrlReadyToView)).collect(Collectors.toList()),
+                        transactions.get(0).getJson(iconUrlReadyToView),
                         new ArrayList<>()
                 ));
             } catch (ParseException e) {

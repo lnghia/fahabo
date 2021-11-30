@@ -51,7 +51,7 @@ public class NotificationController {
 //        if (family.checkIfUserExist(user)) {
         ArrayList<Notification> notifications = notificationService.getNotificationsByUserId(user.getId(), page, size);
 
-        Helper.getInstance().reverseArrayList(notifications);
+//        Helper.getInstance().reverseArrayList(notifications);
 
         ArrayList<HashMap<String, Object>> data = new ArrayList<>();
         for (var notification : notifications) {
