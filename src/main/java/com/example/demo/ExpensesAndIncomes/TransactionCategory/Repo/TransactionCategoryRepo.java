@@ -10,7 +10,9 @@ import java.util.ArrayList;
 
 @Repository
 public interface TransactionCategoryRepo extends JpaRepository<TransactionCategory, Integer> {
-    @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE AND type=:type AND family_id=null OR family_id=:familyId", nativeQuery = true)
+    @Query(value = "SELECT * FROM transaction_categories WHERE is_deleted=FALSE " +
+            "AND (type=:type OR :type IS NULL OR :type='') " +
+            "AND (family_id=null OR family_id=:familyId)", nativeQuery = true)
     ArrayList<TransactionCategory> findAll(@Param("familyId") int familyId,
                                            @Param("type") String type);
 
