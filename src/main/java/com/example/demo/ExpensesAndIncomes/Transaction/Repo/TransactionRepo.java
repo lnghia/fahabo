@@ -41,7 +41,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Integer> {
                                          @Param("to") String to);
 
     @Query(value = "SELECT * FROM transactions WHERE is_deleted=FALSE AND family_id=:familyId " +
-            "AND DATE_PART('month', date)=:month AND DATE_PART('year', date)=:year AND type=:type", nativeQuery = true)
+            "AND DATE_PART('month', date)=:month AND DATE_PART('year', date)=:year AND type=CAST(:type as text)", nativeQuery = true)
     ArrayList<Transaction> findTransactionsInMonthYear(@Param("month") int month,
                                                        @Param("year") int year,
                                                        @Param("familyId") int familyId,

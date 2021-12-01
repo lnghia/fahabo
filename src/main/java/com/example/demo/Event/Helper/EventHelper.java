@@ -269,12 +269,12 @@ public class EventHelper {
         return calendar.getTime();
     }
 
-    public void deletePhotosInEvent(int eventId){
+    public void deletePhotosInEvent(int eventId) {
         photoInEventService.deletePhotosInEvent(eventId);
     }
 
-    public void deletePhotosInEventByPhotoId(int eventId, int[] photoIds){
-        for(var id : photoIds){
+    public void deletePhotosInEventByPhotoId(int eventId, int[] photoIds) {
+        for (var id : photoIds) {
             photoInEventService.deletePhotosInEventByPhotoId(eventId, id);
         }
     }
@@ -537,8 +537,8 @@ public class EventHelper {
         }
 //        }
 
-        if(reqBody.deletePhotos != null && reqBody.deletePhotos.length > 0){
-            for(var tmp : events){
+        if (reqBody.deletePhotos != null && reqBody.deletePhotos.length > 0) {
+            for (var tmp : events) {
                 deletePhotosInEventByPhotoId(tmp.getSubEventId(), reqBody.deletePhotos);
             }
         }
@@ -638,13 +638,13 @@ public class EventHelper {
         ArrayList<String> ans = new ArrayList<>();
         Helper helper = Helper.getInstance();
 
-        while(calendar.getTime().before(to)){
-            if(eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)){
+        while (calendar.getTime().before(to)) {
+            if (eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)) {
                 ans.add(helper.formatDateWithoutTime(calendar.getTime()));
             }
             calendar.add(Calendar.DATE, 1);
         }
-        if(eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)){
+        if (eventService.checkIfDateContainEventsByFamilyId(helper.formatDateForQuery(calendar.getTime()), familyId)) {
             ans.add(helper.formatDateWithoutTime(calendar.getTime()));
         }
 
