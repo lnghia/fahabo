@@ -288,7 +288,6 @@ public class TransactionController {
 
 //            ArrayList<Image> images = new ArrayList<>();
             for (var category : transactionCategories) {
-//                images.add(new Image(Integer.toString(category.getId()), category.getIcon()));
                 HashMap<String, Object> tmp = new HashMap<>() {{
                     put("categoryName", category.getTitle());
                     put("cost", new BigDecimal(0));
@@ -297,9 +296,17 @@ public class TransactionController {
             }
 
             for (var transaction : transactions) {
-                HashMap<String, Object> tmp = categoryName.get(Integer.toString(transaction.getCategory().getId()));
-                BigDecimal temp = (BigDecimal) tmp.get("cost");
-                tmp.put("cost", temp.add(transaction.getCost()));
+                HashMap<String, Object> tmp;
+                if (categoryName.containsKey(Integer.toString(transaction.getCategory().getId()))) {
+                    tmp = categoryName.get(Integer.toString(transaction.getCategory().getId()));
+                    BigDecimal temp = (BigDecimal) tmp.get("cost");
+                    tmp.put("cost", temp.add(transaction.getCost()));
+                } else {
+                    tmp = new HashMap<>() {{
+                        put("categoryName", transaction.getCategory().getTitle());
+                        put("cost", transaction.getCost());
+                    }};
+                }
                 categoryName.put(Integer.toString(transaction.getCategory().getId()), tmp);
             }
 
@@ -317,6 +324,8 @@ public class TransactionController {
 //                        }
 //                    }
 //                }
+//
+//
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            } catch (ExecutionException e) {
