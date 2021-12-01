@@ -381,6 +381,16 @@ public class Helper {
         return formatter.format(date);
     }
 
+    public String formatDateWithoutTimeForQuery(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+
+        return formatter.format(date);
+    }
+
     public String generateUUID() {
         return UUID.randomUUID().toString();
     }

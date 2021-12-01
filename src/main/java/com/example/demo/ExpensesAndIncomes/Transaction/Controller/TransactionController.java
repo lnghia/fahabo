@@ -313,10 +313,8 @@ public class TransactionController {
                     tmp = new HashMap<>();
                     tmp.put("categoryName", transaction.getCategory().getTitle());
                     if (transaction.getType().equals("EXPENSE")) {
-                        BigDecimal temp = (BigDecimal) tmp.get("totalExpense");
                         tmp.put("totalExpense", transaction.getCost());
                     } else {
-                        BigDecimal temp = (BigDecimal) tmp.get("totalIncome");
                         tmp.put("totalIncome", transaction.getCost());
                     }
                 }

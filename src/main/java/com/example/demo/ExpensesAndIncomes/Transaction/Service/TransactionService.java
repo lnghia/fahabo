@@ -27,8 +27,8 @@ public class TransactionService {
         ArrayList<Transaction> ans = transactionRepo.findAll(
                 familyId,
                 title,
-                (from != null) ? Helper.getInstance().formatDateWithTimeForQuery(from) : "",
-                (to != null) ? Helper.getInstance().formatDateWithTimeForQuery(to) : "",
+                (from != null) ? Helper.getInstance().formatDateWithoutTimeForQuery(from) : "",
+                (to != null) ? Helper.getInstance().formatDateWithoutTimeForQuery(to) : "",
                 pageable);
 
         return ans;
