@@ -48,7 +48,7 @@ public class TransactionService {
         return transactionRepo.findAllFromTo(from, to);
     }
 
-    public ArrayList<Transaction> findTransactionsInMonthYear(int month, int year, int familyId){
-        return transactionRepo.findTransactionsInMonthYear(month, year, familyId);
+    public ArrayList<Transaction> findTransactionsInMonthYear(int month, int year, int familyId, String type){
+        return transactionRepo.findTransactionsInMonthYear(month, year, familyId, type);
     }
 }

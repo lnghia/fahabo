@@ -281,71 +281,53 @@ public class TransactionController {
         Family family = familyService.findById(reqBody.familyId);
 
         if (family.checkIfUserExist(user)) {
-            ArrayList<TransactionCategory> transactionCategories = transactionCategoryService.findAll(reqBody.familyId, "");
-            ArrayList<Transaction> transactions = transactionService.findTransactionsInMonthYear(reqBody.month, reqBody.year, reqBody.familyId);
+            ArrayList<TransactionCategory> transactionCategories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type);
+            ArrayList<Transaction> transactions = transactionService.findTransactionsInMonthYear(reqBody.month, reqBody.year, reqBody.familyId, reqBody.type);
             ArrayList<HashMap<String, Object>> data = new ArrayList<>();
             HashMap<String, HashMap<String, Object>> categoryName = new HashMap<>();
 
-            ArrayList<Image> images = new ArrayList<>();
+//            ArrayList<Image> images = new ArrayList<>();
             for (var category : transactionCategories) {
-                images.add(new Image(Integer.toString(category.getId()), category.getIcon()));
+//                images.add(new Image(Integer.toString(category.getId()), category.getIcon()));
                 HashMap<String, Object> tmp = new HashMap<>() {{
                     put("categoryName", category.getTitle());
-                    put("categoryIcon", category.getIcon());
-                    put("totalExpense", new BigDecimal(0));
-                    put("totalIncome", new BigDecimal(0));
+                    put("cost", new BigDecimal(0));
                 }};
                 categoryName.put(Integer.toString(category.getId()), tmp);
             }
 
             for (var transaction : transactions) {
-                HashMap<String, Object> tmp;
-                if (categoryName.containsKey(Integer.toString(transaction.getCategory().getId()))) {
-                    tmp = categoryName.get(Integer.toString(transaction.getCategory().getId()));
-                    if (transaction.getType().equals("EXPENSE")) {
-                        BigDecimal temp = (BigDecimal) tmp.get("totalExpense");
-                        tmp.put("totalExpense", temp.add(transaction.getCost()));
-                    } else {
-                        BigDecimal temp = (BigDecimal) tmp.get("totalIncome");
-                        tmp.put("totalIncome", temp.add(transaction.getCost()));
-                    }
-                } else {
-                    tmp = new HashMap<>();
-                    tmp.put("categoryName", transaction.getCategory().getTitle());
-                    if (transaction.getType().equals("EXPENSE")) {
-                        tmp.put("totalExpense", transaction.getCost());
-                    } else {
-                        tmp.put("totalIncome", transaction.getCost());
-                    }
-                }
+                HashMap<String, Object> tmp = categoryName.get(Integer.toString(transaction.getCategory().getId()));
+                BigDecimal temp = (BigDecimal) tmp.get("cost");
+                tmp.put("cost", temp.add(transaction.getCost()));
                 categoryName.put(Integer.toString(transaction.getCategory().getId()), tmp);
             }
 
-            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
-            try {
-                GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
+//            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+//            try {
+//                GetRedirectedLinkExecutionResult result = getter.getRedirectedLinks(images);
+//
+//                if (result != null) {
+//                    HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> success = result.getSuccessfulResults();
+//                    for (var category : transactionCategories) {
+//                        if (success.containsKey(Integer.toString(category.getId()))) {
+//                            HashMap<String, Object> tmp = categoryName.get(Integer.toString(category.getId()));
+//                            tmp.put("categoryIcon", success.get(Integer.toString(category.getId())).uri);
+//                            categoryName.put(Integer.toString(category.getId()), tmp);
+//                        }
+//                    }
+//                }
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
 
-                if (result != null) {
-                    HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> success = result.getSuccessfulResults();
-                    for (var category : transactionCategories) {
-                        if (success.containsKey(Integer.toString(category.getId()))) {
-                            HashMap<String, Object> tmp = categoryName.get(Integer.toString(category.getId()));
-                            tmp.put("categoryIcon", success.get(Integer.toString(category.getId())).uri);
-                            categoryName.put(Integer.toString(category.getId()), tmp);
-                        }
-                    }
-                }
-
-                for (var key : categoryName.keySet()){
-                    data.add(categoryName.get(key));
-                }
-
-                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            for (var key : categoryName.keySet()) {
+                data.add(categoryName.get(key));
             }
+
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));

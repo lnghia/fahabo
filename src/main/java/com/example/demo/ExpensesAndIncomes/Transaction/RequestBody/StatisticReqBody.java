@@ -7,4 +7,5 @@ public class StatisticReqBody {
     public int familyId;
     public int month;
     public int year;
+    public String type;
 }
