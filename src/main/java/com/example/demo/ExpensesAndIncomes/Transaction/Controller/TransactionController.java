@@ -336,7 +336,11 @@ public class TransactionController {
                     }
                 }
 
-                return ResponseEntity.ok(new Response(categoryName, new ArrayList<>()));
+                for (var key : categoryName.keySet()){
+                    data.add(categoryName.get(key));
+                }
+
+                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
