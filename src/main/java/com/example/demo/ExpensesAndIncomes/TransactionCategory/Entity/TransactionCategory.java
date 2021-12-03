@@ -16,7 +16,7 @@ public class TransactionCategory {
     private String title;
 
     @Column(name = "family_id")
-    private int familyId;
+    private Integer familyId;
 
     @Column(name = "icon")
     private String icon;
