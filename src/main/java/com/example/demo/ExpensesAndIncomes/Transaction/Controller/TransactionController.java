@@ -281,7 +281,7 @@ public class TransactionController {
         Family family = familyService.findById(reqBody.familyId);
 
         if (family.checkIfUserExist(user)) {
-            ArrayList<TransactionCategory> transactionCategories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type);
+            ArrayList<TransactionCategory> transactionCategories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type, 0, 1000);
             ArrayList<Transaction> transactions = transactionService.findTransactionsInMonthYear(reqBody.month, reqBody.year, reqBody.familyId, reqBody.type);
             ArrayList<HashMap<String, Object>> data = new ArrayList<>();
             HashMap<String, HashMap<String, Object>> categoryName = new HashMap<>();

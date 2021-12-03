@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -49,13 +46,15 @@ public class TransactionCategoryController {
     private DropBoxHelper dropBoxHelper;
 
     @PostMapping
-    public ResponseEntity<Response> getCategories(@Valid @RequestBody GetTransactionCategoryReqBody reqBody) {
+    public ResponseEntity<Response> getCategories(@Valid @RequestBody GetTransactionCategoryReqBody reqBody,
+                                                  @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                                  @RequestParam(value = "size", defaultValue = "5") Integer size) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Family family = familyService.findById(reqBody.familyId);
 
         log.info(String.format("Getting all transaction categories user: %d family: %d", user.getId(), reqBody.familyId));
         if (family.checkIfUserExist(user)) {
-            ArrayList<TransactionCategory> categories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type);
+            ArrayList<TransactionCategory> categories = transactionCategoryService.findAll(reqBody.familyId, reqBody.type, page, size);
             ArrayList<HashMap<String, Object>> data = new ArrayList<>();
             List<String> icons = categories.stream().map(category -> {
                 return category.getIcon();

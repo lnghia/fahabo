@@ -3,6 +3,8 @@ package com.example.demo.ExpensesAndIncomes.TransactionCategory.Service;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.TransactionCategory;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Repo.TransactionCategoryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,8 +14,9 @@ public class TransactionCategoryService {
     @Autowired
     private TransactionCategoryRepo transactionCategoryRepo;
 
-    public ArrayList<TransactionCategory> findAll(int familyId, String type) {
-        return transactionCategoryRepo.findAll(familyId, type);
+    public ArrayList<TransactionCategory> findAll(int familyId, String type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return transactionCategoryRepo.findAll(familyId, type, pageable);
     }
 
     public TransactionCategory findById(int id) {
