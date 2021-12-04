@@ -119,7 +119,7 @@ public class CallbackController {
             userInCallRoomService.deleteUserFromRoom(reqBody.roomName, user.getId());
             int roomSize = userInCallRoomService.countPeopleLeftInRoom(reqBody.roomName);
 
-            return ResponseEntity.ok(new Response(new HashMap<>(){{
+            return ResponseEntity.ok(new Response(new HashMap<>() {{
                 put("roomSize", roomSize);
             }}, new ArrayList<>()));
         }
@@ -132,12 +132,16 @@ public class CallbackController {
     }
 
     @PostMapping("/end_room")
-    public ResponseEntity<Response> endRoom(@Valid @RequestBody RoomSizeReqBody reqBody){
+    public ResponseEntity<Response> endRoom(@Valid @RequestBody RoomSizeReqBody reqBody) {
         Family family = familyService.findById(reqBody.familyId);
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if(family.checkIfUserExist(user)){
-            twilioAccessTokenProvider.endRoom(reqBody.roomName);
+        if (family.checkIfUserExist(user)) {
+            String sid = twilioAccessTokenProvider.getRoomSid(reqBody.roomName);
+
+            if (sid != null) {
+                twilioAccessTokenProvider.endRoom(reqBody.roomName);
+            }
 
             return ResponseEntity.ok(new Response("End room successfully.", new ArrayList<>()));
         }

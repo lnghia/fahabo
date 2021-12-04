@@ -41,4 +41,12 @@ public class TwilioAccessTokenProvider {
         log.info("Complete room " + roomName + " ...");
         Room room = Room.updater(roomName, Room.RoomStatus.COMPLETED).update();
     }
+
+    public String getRoomSid(String roomName) {
+        Room room = Room.fetcher(roomName).fetch();
+
+        if (room == null) return null;
+
+        return Room.fetcher(roomName).fetch().getSid();
+    }
 }
