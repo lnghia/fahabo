@@ -13,6 +13,7 @@ import com.example.demo.Helpers.Helper;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.UserService;
+import com.example.demo.Twilio.Entity.RoomNameService;
 import com.example.demo.Twilio.TwilioAccessTokenProvider;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.Family.Family;
@@ -54,6 +55,9 @@ public class CallbackController {
     @Autowired
     private TwilioAccessTokenProvider twilioAccessTokenProvider;
 
+    @Autowired
+    private RoomNameService roomNameService;
+
     @PostMapping
     public ResponseEntity<Response> callback(@RequestParam(value = "RoomName", defaultValue = "") String RoomName,
                                              @RequestParam(value = "ParticipantIdentity", defaultValue = "") String ParticipantIdentity,
@@ -84,6 +88,10 @@ public class CallbackController {
 
             UserInCallRoom userInCallRoom = new UserInCallRoom(roomName, user);
             userInCallRoomService.saveUserInCallRoom(userInCallRoom);
+        } else if (StatusCallbackEvent.equals("room-created")) {
+            roomNameService.createRoomNameWithName(RoomName);
+        } else if (StatusCallbackEvent.equals("room-ended")) {
+            roomNameService.endRoom(RoomName);
         }
 //        } else if (StatusCallbackEvent.equals("participant-disconnected")) {
 //            int userId = Integer.parseInt(ParticipantIdentity);

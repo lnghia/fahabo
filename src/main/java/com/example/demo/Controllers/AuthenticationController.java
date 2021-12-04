@@ -13,6 +13,8 @@ import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
 import com.example.demo.Service.UserService;
 import com.example.demo.Stringee.StringeeAccessTokenProvider;
 import com.example.demo.Stringee.StringeeHelper;
+import com.example.demo.Twilio.Entity.RoomName;
+import com.example.demo.Twilio.Entity.RoomNameService;
 import com.example.demo.Twilio.TwilioAccessTokenProvider;
 import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
@@ -80,6 +82,9 @@ public class AuthenticationController {
 
     @Autowired
     private TwilioAccessTokenProvider twilioAccessTokenProvider;
+
+    @Autowired
+    private RoomNameService roomNameService;
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@Valid @RequestBody LoginReqForm loginReqForm) {
@@ -445,6 +450,11 @@ public class AuthenticationController {
 
         if(reqForm.roomCallId != null && !reqForm.roomCallId.isEmpty() && !reqForm.roomCallId.isBlank()){
             token = reqForm.roomCallId;
+        }
+
+        RoomName roomName = roomNameService.findByRoomName(reqForm.roomCallId);
+        if (roomName != null && roomName.isEnded()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unavailableRoom"))));
         }
 
         String accessToken = twilioAccessTokenProvider.generateAccessToken(
