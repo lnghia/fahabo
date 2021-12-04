@@ -84,12 +84,13 @@ public class CallbackController {
 
             UserInCallRoom userInCallRoom = new UserInCallRoom(roomName, user);
             userInCallRoomService.saveUserInCallRoom(userInCallRoom);
-        } else if (StatusCallbackEvent.equals("participant-disconnected")) {
-            int userId = Integer.parseInt(ParticipantIdentity);
-            User user = userService.getUserById(userId);
-
-            userInCallRoomService.deleteUserFromRoom(roomName, userId);
         }
+//        } else if (StatusCallbackEvent.equals("participant-disconnected")) {
+//            int userId = Integer.parseInt(ParticipantIdentity);
+//            User user = userService.getUserById(userId);
+//
+//            userInCallRoomService.deleteUserFromRoom(roomName, userId);
+//        }
 //        } else if (StatusCallbackEvent.equals("room-ended")) {
 //            ArrayList<Integer> userIds = userInCallRoomService.findAllUserIdInRoomCall(roomName);
 //            List<User> users = userIds.stream().map(id -> userService.getUserById(id)).collect(Collectors.toList());
@@ -115,6 +116,7 @@ public class CallbackController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         if (family.checkIfUserExist(user)) {
+            userInCallRoomService.deleteUserFromRoom(reqBody.roomName, user.getId());
             int roomSize = userInCallRoomService.countPeopleLeftInRoom(reqBody.roomName);
 
             return ResponseEntity.ok(new Response(new HashMap<>(){{
