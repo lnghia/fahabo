@@ -140,7 +140,7 @@ public class CallbackController {
             String sid = twilioAccessTokenProvider.getRoomSid(reqBody.roomName);
 
             if (sid != null) {
-                twilioAccessTokenProvider.endRoom(reqBody.roomName);
+                twilioAccessTokenProvider.endRoom(sid);
             }
 
             return ResponseEntity.ok(new Response("End room successfully.", new ArrayList<>()));
