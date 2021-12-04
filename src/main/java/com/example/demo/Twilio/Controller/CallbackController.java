@@ -70,7 +70,7 @@ public class CallbackController {
                                              @RequestParam(value = "SequenceNumber", defaultValue = "") String SequenceNumber,
                                              @RequestParam(value = "ParticipantTrackSidStatus", defaultValue = "") String ParticipantTrackSidStatus,
                                              @RequestParam(value = "TrackKind", defaultValue = "") String TrackKind) {
-        log.info("Handling twilio callback ...");
+        log.info("Handling twilio callback ... " + StatusCallbackEvent);
 
         String roomName = RoomName;
         int familyId = Integer.parseInt(roomName.split("_")[1]);
@@ -137,6 +137,7 @@ public class CallbackController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         if (family.checkIfUserExist(user)) {
+            log.info("end room " + reqBody.roomName);
             String sid = twilioAccessTokenProvider.getRoomSid(reqBody.roomName);
 
             if (sid != null) {
