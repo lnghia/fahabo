@@ -18,6 +18,7 @@ public class RoomNameService {
     }
 
     public RoomName createRoomNameWithName(String name){
+        if (roomNameRepo.findByRoomName(name) != null) return null;
         RoomName roomName = new RoomName(name);
         return roomNameRepo.save(roomName);
     }
