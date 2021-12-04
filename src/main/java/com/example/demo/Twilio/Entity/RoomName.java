@@ -10,7 +10,7 @@ public class RoomName {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "room_name")
+    @Column(name = "room_name", unique = true)
     private String roomName;
 
     @Column(name = "ended")
