@@ -6,12 +6,14 @@ import com.example.demo.Communication.RequestBody.CallbackReqBody;
 import com.example.demo.Communication.RequestBody.UsersInChatRoomReqBody;
 import com.example.demo.DropBox.DropBoxRedirectedLinkGetter;
 import com.example.demo.DropBox.GetRedirectedLinkExecutionResult;
+import com.example.demo.ExpensesAndIncomes.TransactionCategoryGroup.RequestBody.RoomSizeReqBody;
 import com.example.demo.Firebase.FirebaseMessageHelper;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.Service.UserService;
+import com.example.demo.Twilio.TwilioAccessTokenProvider;
 import com.example.demo.domain.CustomUserDetails;
 import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.Image;
@@ -49,54 +51,100 @@ public class CallbackController {
     @Autowired
     private FamilyHelper familyHelper;
 
+    @Autowired
+    private TwilioAccessTokenProvider twilioAccessTokenProvider;
+
     @PostMapping
-    public ResponseEntity<Response> callback(@RequestParam("RoomName") String RoomName,
-                                             @RequestParam("ParticipantIdentity") String ParticipantIdentity,
-                                             @RequestParam("StatusCallbackEvent") String StatusCallbackEvent,
-                                             @RequestParam("AccountSid") String AccountSid,
-                                             @RequestParam("RoomSid") String RoomSid,
-                                             @RequestParam("RoomStatus") String RoomStatus,
-                                             @RequestParam("RoomType") String RoomType,
-                                             @RequestParam("Timestamp") String Timestamp,
-                                             @RequestParam("ParticipantStatus") String ParticipantStatus,
-                                             @RequestParam("ParticipantSid") String ParticipantSid,
-                                             @RequestParam("ParticipantDuration") String ParticipantDuration,
+    public ResponseEntity<Response> callback(@RequestParam(value = "RoomName", defaultValue = "") String RoomName,
+                                             @RequestParam(value = "ParticipantIdentity", defaultValue = "") String ParticipantIdentity,
+                                             @RequestParam(value = "StatusCallbackEvent", defaultValue = "") String StatusCallbackEvent,
+                                             @RequestParam(value = "AccountSid", defaultValue = "") String AccountSid,
+                                             @RequestParam(value = "RoomSid", defaultValue = "") String RoomSid,
+                                             @RequestParam(value = "RoomStatus", defaultValue = "") String RoomStatus,
+                                             @RequestParam(value = "RoomType", defaultValue = "") String RoomType,
+                                             @RequestParam(value = "Timestamp", defaultValue = "") String Timestamp,
+                                             @RequestParam(value = "ParticipantStatus", defaultValue = "") String ParticipantStatus,
+                                             @RequestParam(value = "ParticipantSid", defaultValue = "") String ParticipantSid,
+                                             @RequestParam(value = "ParticipantDuration", defaultValue = "") String ParticipantDuration,
                                              @RequestParam(value = "RoomDuration", defaultValue = "") String RoomDuration,
-                                             @RequestParam("SequenceNumber") String SequenceNumber,
+                                             @RequestParam(value = "SequenceNumber", defaultValue = "") String SequenceNumber,
                                              @RequestParam(value = "ParticipantTrackSidStatus", defaultValue = "") String ParticipantTrackSidStatus,
                                              @RequestParam(value = "TrackKind", defaultValue = "") String TrackKind) {
         log.info("Handling twilio callback ...");
 
         String roomName = RoomName;
-        int userId = Integer.parseInt(ParticipantIdentity);
-        User user = userService.getUserById(userId);
         int familyId = Integer.parseInt(roomName.split("_")[1]);
         Family family = familyService.findById(familyId);
         Helper helper = Helper.getInstance();
         String langCode = helper.getLangCode(family);
 
         if (StatusCallbackEvent.equals("participant-connected")) {
+            int userId = Integer.parseInt(ParticipantIdentity);
+            User user = userService.getUserById(userId);
+
             UserInCallRoom userInCallRoom = new UserInCallRoom(roomName, user);
             userInCallRoomService.saveUserInCallRoom(userInCallRoom);
         } else if (StatusCallbackEvent.equals("participant-disconnected")) {
-            userInCallRoomService.deleteUserFromRoom(roomName, userId);
-        } else if (StatusCallbackEvent.equals("room-ended")) {
-            ArrayList<Integer> userIds = userInCallRoomService.findAllUserIdInRoomCall(roomName);
-            List<User> users = userIds.stream().map(id -> userService.getUserById(id)).collect(Collectors.toList());
+            int userId = Integer.parseInt(ParticipantIdentity);
+            User user = userService.getUserById(userId);
 
-            firebaseMessageHelper.notifyUsers(
-                    users,
-                    family,
-                    helper.getMessageInLanguage("videoCallHasEndedTitle", langCode),
-                    helper.getMessageInLanguage("videoCallHasEndedBody", langCode),
-                    new HashMap<>() {{
-                        put("navigate", "END_VIDEO_CALL");
-                        put("id", roomName);
-                    }}
-            );
+            userInCallRoomService.deleteUserFromRoom(roomName, userId);
         }
+//        } else if (StatusCallbackEvent.equals("room-ended")) {
+//            ArrayList<Integer> userIds = userInCallRoomService.findAllUserIdInRoomCall(roomName);
+//            List<User> users = userIds.stream().map(id -> userService.getUserById(id)).collect(Collectors.toList());
+//
+//            firebaseMessageHelper.notifyUsers(
+//                    users,
+//                    family,
+//                    helper.getMessageInLanguage("videoCallHasEndedTitle", langCode),
+//                    helper.getMessageInLanguage("videoCallHasEndedBody", langCode),
+//                    new HashMap<>() {{
+//                        put("navigate", "END_VIDEO_CALL");
+//                        put("id", roomName);
+//                    }}
+//            );
+//        }
 
         return ResponseEntity.ok(new Response(null, new ArrayList<>()));
+    }
+
+    @PostMapping("/room_size")
+    public ResponseEntity<Response> checkRoomSize(@Valid @RequestBody RoomSizeReqBody reqBody) {
+        Family family = familyService.findById(reqBody.familyId);
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        if (family.checkIfUserExist(user)) {
+            int roomSize = userInCallRoomService.countPeopleLeftInRoom(reqBody.roomName);
+
+            return ResponseEntity.ok(new Response(new HashMap<>(){{
+                put("roomSize", roomSize);
+            }}, new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @PostMapping("/end_room")
+    public ResponseEntity<Response> endRoom(@Valid @RequestBody RoomSizeReqBody reqBody){
+        Family family = familyService.findById(reqBody.familyId);
+        User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
+
+        if(family.checkIfUserExist(user)){
+            twilioAccessTokenProvider.endRoom(reqBody.roomName);
+
+            return ResponseEntity.ok(new Response("End room successfully.", new ArrayList<>()));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
+                new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
     @PostMapping("/getUsersInChatRoom")

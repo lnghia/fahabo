@@ -34,4 +34,8 @@ public class UserInCallRoomService {
     public boolean checkIfUserIsInAVideoCall(int userId){
         return uSerInCallRoomRepo.checkIfUserISInAVideoCall(userId).isPresent();
     }
+
+    public int countPeopleLeftInRoom(String roomName){
+        return uSerInCallRoomRepo.countPeopleLeftInRoom(roomName);
+    }
 }

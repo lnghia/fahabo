@@ -28,4 +28,7 @@ public interface USerInCallRoomRepo extends JpaRepository<UserInCallRoom, UserIn
 
     @Query(value = "SELECT c.id FROM (users as a INNER JOIN users_in_call_rooms as b ON a.id=b.user_id) as c WHERE c.is_deleted=FALSE AND c.id=:userId", nativeQuery = true)
     Optional<Integer> checkIfUserISInAVideoCall(@Param("userId") int userId);
+
+    @Query(value = "SELECT COUNT(id) FROM users_in_call_rooms WHERE is_deleted=FALSE AND room_name=:roomName", nativeQuery = true)
+    int countPeopleLeftInRoom(@Param("roomName") String roomName);
 }
