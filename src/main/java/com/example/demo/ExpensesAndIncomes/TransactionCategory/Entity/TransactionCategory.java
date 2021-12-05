@@ -76,6 +76,8 @@ public class TransactionCategory {
         this.icon = icon;
     }
 
+
+
 //    public TransactionCategoryGroup getTransactionCategoryGroup() {
 //        return transactionCategoryGroup;
 //    }

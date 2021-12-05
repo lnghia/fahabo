@@ -289,6 +289,7 @@ public class TransactionController {
 //            ArrayList<Image> images = new ArrayList<>();
             for (var category : transactionCategories) {
                 HashMap<String, Object> tmp = new HashMap<>() {{
+                    put("translated", category.isTranslated());
                     put("categoryName", category.getTitle());
                     put("cost", new BigDecimal(0));
                 }};
@@ -303,6 +304,7 @@ public class TransactionController {
                     tmp.put("cost", temp.add(transaction.getCost()));
                 } else {
                     tmp = new HashMap<>() {{
+                        put("translated", transaction.getCategory().isTranslated());
                         put("categoryName", transaction.getCategory().getTitle());
                         put("cost", transaction.getCost());
                     }};
