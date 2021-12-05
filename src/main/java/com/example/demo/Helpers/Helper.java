@@ -188,10 +188,12 @@ public class Helper {
     }
 
     public String formatDateWithTimeAsTimezone(Date date, String timezone){
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         Date rs = calendar.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        formatter.setTimeZone(calendar.getTimeZone());
+        formatter.setTimeZone(TimeZone.getTimeZone(timezone));
         return formatter.format(rs);
     }
 
