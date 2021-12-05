@@ -188,12 +188,11 @@ public class Helper {
     }
 
     public String formatDateWithTimeAsTimezone(Date date, String timezone){
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timezone));
         calendar.setTime(date);
-        calendar.setTimeZone(TimeZone.getTimeZone(timezone));
-        date = calendar.getTime();
+        Date rs = calendar.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        return formatter.format(date);
+        return formatter.format(rs);
     }
 
     public ItemToUpload[] listOfImagesToArrOfItemToUploadWithGeneratedName(List<Image> images, List<Photo> photos, int albumId, int familyId) {
