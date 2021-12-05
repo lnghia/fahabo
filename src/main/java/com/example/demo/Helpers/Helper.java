@@ -187,6 +187,15 @@ public class Helper {
         return String.format("%d_%d_%d_%d.jpg", familyId, albumId, photoId, new Date().getTime());
     }
 
+    public String formatDateWithTimeAsTimezone(Date date, String timezone){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.setTimeZone(TimeZone.getTimeZone(timezone));
+        date = calendar.getTime();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        return formatter.format(date);
+    }
+
     public ItemToUpload[] listOfImagesToArrOfItemToUploadWithGeneratedName(List<Image> images, List<Photo> photos, int albumId, int familyId) {
         ItemToUpload[] rs = new ItemToUpload[images.size()];
 

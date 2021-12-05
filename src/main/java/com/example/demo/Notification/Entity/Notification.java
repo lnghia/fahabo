@@ -146,7 +146,7 @@ public class Notification {
         rs.put("type", type);
         rs.put("title", title);
         rs.put("description", description);
-        rs.put("created_at", helper.formatDateWithTime(createdAt));
+        rs.put("created_at", helper.formatDateWithTimeAsTimezone(createdAt, family.getTimezone()));
         rs.put("isClicked", isClicked);
         rs.put("data", new HashMap<String, Object>() {{
             put("navigate", navigate);

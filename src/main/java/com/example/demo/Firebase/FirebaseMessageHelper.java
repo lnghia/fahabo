@@ -140,7 +140,7 @@ public class FirebaseMessageHelper {
 
     public void notifyAllUsersInFamily(Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
-        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+        Date now = new Date();
 
         List<User> users = family.getUsersInFamily().stream().map(userInFamily -> {
             notificationHelper.createNotification(
@@ -166,7 +166,7 @@ public class FirebaseMessageHelper {
 
     public void notifyAllUsersInFamilyExceptUser(Family family, User user, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
-        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+        Date now = new Date();
 
         List<User> users = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUser().getId() != user.getId()).map(userInFamily -> {
             notificationHelper.createNotification(
@@ -192,7 +192,7 @@ public class FirebaseMessageHelper {
 
     public void notifyAllDevicesOfUser(User user, Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
-        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+        Date now = new Date();
 
         notificationHelper.createNotification(
                 user,
@@ -212,7 +212,7 @@ public class FirebaseMessageHelper {
 
     public void notifyUsers(List<User> users, Family family, String title, String body, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
-        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+        Date now = new Date();
 
         for (var user : users) {
             notificationHelper.createNotification(
@@ -234,7 +234,7 @@ public class FirebaseMessageHelper {
 
     public void notifyUsersWithDataOnly(List<User> users, Family family, HashMap<String, String> data) {
         List<String> tokens = new ArrayList<>();
-        Date now = Helper.getInstance().getNowAsTimeZone(family.getTimezone());
+        Date now = new Date();
 
         for (var user : users) {
             for (var userToken : user.getFirebaseTokenSet()) {
