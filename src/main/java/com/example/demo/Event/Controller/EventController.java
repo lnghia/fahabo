@@ -100,29 +100,20 @@ public class EventController {
                 users.add(tmp.getAssignee());
             }
             List<User> usersToNotify = new ArrayList<>();
-            if (users.size() > 1) {
+            if (users.size() >= 1) {
                 usersToNotify = users.stream().filter(user1 -> user1.getId() != user.getId()).collect(Collectors.toList());
-                firebaseMessageHelper.notifyUsers(
-                        usersToNotify,
-                        family,
-                        helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
-                        String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
-                        new HashMap<String, String>() {{
-                            put("navigate", "EVENT_DETAIL");
-                            put("id", Integer.toString(events.get(0).getId()));
-                        }});
             } else {
                 usersToNotify = family.getUsersInFamily().stream().filter(userInFamily -> userInFamily.getUserId() != user.getId()).map(userInFamily -> userInFamily.getUser()).collect(Collectors.toList());
-                firebaseMessageHelper.notifyUsers(
-                        usersToNotify,
-                        family,
-                        helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
-                        String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
-                        new HashMap<String, String>() {{
-                            put("navigate", "EVENT_DETAIL");
-                            put("id", Integer.toString(events.get(0).getId()));
-                        }});
             }
+            firebaseMessageHelper.notifyUsers(
+                    usersToNotify,
+                    family,
+                    helper.getMessageInLanguage("eventHasBeenAssignedTitle", langCode),
+                    String.format(helper.getMessageInLanguage("eventHasBeenAssignedBody", langCode), user.getName()),
+                    new HashMap<String, String>() {{
+                        put("navigate", "EVENT_DETAIL");
+                        put("id", Integer.toString(events.get(0).getId()));
+                    }});
 
             return ResponseEntity.ok(new Response(events.get(0).getJson(), new ArrayList<>(List.of())));
         } catch (ParseException e) {
