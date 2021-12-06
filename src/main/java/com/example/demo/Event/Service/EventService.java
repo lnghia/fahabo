@@ -69,7 +69,8 @@ public class EventService {
     }
 
     public ArrayList<Event> findAllUpComingEventsIn30Mins(String timezone){
-        Date now = Helper.getInstance().getNowAsTimeZone(timezone);
+//        Date now = Helper.getInstance().getNowAsTimeZone(timezone);
+        Date now = new Date();
         return eventRepo.findAllUpComingEventsIn30Mins(Helper.getInstance().formatDateWithTimeForQuery(now));
     }
 }
