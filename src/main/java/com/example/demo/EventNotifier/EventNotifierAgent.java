@@ -73,8 +73,6 @@ public class EventNotifierAgent {
                                 put("id", Integer.toString(event.getId()));
                             }}
                     );
-                    event.setNotified(true);
-                    eventService.saveEvent(event);
                 } else {
                     List<User> participants = event.getEventAssignUsers().stream().map(EventAssignUser::getAssignee).collect(Collectors.toList());
 
@@ -92,6 +90,8 @@ public class EventNotifierAgent {
                             }}
                     );
                 }
+                event.setNotified(true);
+                eventService.saveEvent(event);
             }
         }
 
