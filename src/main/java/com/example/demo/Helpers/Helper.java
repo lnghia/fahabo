@@ -412,7 +412,13 @@ public class Helper {
 
     public Date getNowAsTimeZone(String timezone) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone(timezone));
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        format.setTimeZone(TimeZone.getTimeZone(timezone));
+        try {
+            return format.parse(format.format(calendar.getTime()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         return calendar.getTime();
     }
 
