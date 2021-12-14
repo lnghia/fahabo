@@ -8,6 +8,9 @@ import com.example.demo.ExpensesAndIncomes.Transaction.Helper.TransactionHelper;
 import com.example.demo.ExpensesAndIncomes.Transaction.Service.TransactionService;
 import com.example.demo.Firebase.FirebaseMessageHelper;
 import com.example.demo.Helpers.Helper;
+import com.example.demo.HomeCook.Entity.CookPost;
+//import com.example.demo.HomeCook.Service.CookPostService;
+import com.example.demo.HomeCook.Service.CookPostService;
 import com.example.demo.Service.Family.FamilyService;
 import com.example.demo.domain.Family.Family;
 import com.example.demo.domain.User;
@@ -43,6 +46,9 @@ public class EventNotifierAgent {
     @Autowired
     private TransactionHelper transactionHelper;
 
+    @Autowired
+    private CookPostService cookPostService;
+
     @Scheduled(fixedDelay = 55000)
     public void notifyAboutUpComingEvents() {
         Date start = new Date();
@@ -53,7 +59,7 @@ public class EventNotifierAgent {
         Helper helper = Helper.getInstance();
 
         for (var family : families) {
-            if(family.getId() == 0) continue;
+            if (family.getId() == 0) continue;
             log.debug(TimeZone.getTimeZone(family.getTimezone()).getDisplayName());
             ArrayList<Event> eventsIn30Mins = eventService.findAllUpComingEventsIn30Mins(family.getTimezone());
             String langCode = helper.getLangCode(family);
@@ -68,7 +74,7 @@ public class EventNotifierAgent {
                                     helper.getMessageInLanguage("anUpComingEventIn30MinsBody", langCode),
                                     event.getFromAsString()
                             ),
-                            new HashMap<>(){{
+                            new HashMap<>() {{
                                 put("navigate", "EVENT_DETAIL");
                                 put("id", Integer.toString(event.getId()));
                             }}
@@ -84,7 +90,7 @@ public class EventNotifierAgent {
                                     helper.getMessageInLanguage("anUpComingEventIn30MinsBody", langCode),
                                     event.getFromAsString()
                             ),
-                            new HashMap<>(){{
+                            new HashMap<>() {{
                                 put("navigate", "EVENT_DETAIL");
                                 put("id", Integer.toString(event.getId()));
                             }}
@@ -110,8 +116,18 @@ public class EventNotifierAgent {
                 nowAsString + " 00:00:00",
                 nowAsString + " 59:59:59");
 
-        for (var transaction : transactions){
+        for (var transaction : transactions) {
             transactionHelper.createTransactionFromAvailableOne(transaction);
+        }
+    }
+
+    @Scheduled(fixedDelay = 45000)
+    public void reRankCookPosts() {
+        ArrayList<CookPost> cookPosts = cookPostService.findAll();
+
+        for (var item : cookPosts) {
+            item.calculateRank();
+            cookPostService.save(item);
         }
     }
 }

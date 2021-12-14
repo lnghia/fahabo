@@ -1,0 +1,18 @@
+package com.example.demo.HomeCook.Repo;
+
+import com.example.demo.HomeCook.Entity.CookPost;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+
+@Repository
+public interface CookPostRepo extends JpaRepository<CookPost, Integer> {
+    @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE", nativeQuery = true)
+    ArrayList<CookPost> findAll();
+
+    @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE AND id=:id", nativeQuery = true)
+    CookPost findById(@Param("id") int id);
+}

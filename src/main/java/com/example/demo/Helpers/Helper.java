@@ -16,8 +16,7 @@ import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLConnection;
@@ -40,6 +39,8 @@ public class Helper {
     public final String TEMP_FAMILY = "family rac de xoa family";
 
     public final int CHORE_PHOTO_MAX_NUM = 20;
+
+    public final String COOK_POST_CONTENT_DIR_ABSOLUTE_PATH = "/home/nghiale/html_contents/";
 
     ArrayList<Integer> dateNumInMonths = new ArrayList<>(List.of(
             0,
@@ -187,7 +188,7 @@ public class Helper {
         return String.format("%d_%d_%d_%d.jpg", familyId, albumId, photoId, new Date().getTime());
     }
 
-    public String formatDateWithTimeAsTimezone(Date date, String timezone){
+    public String formatDateWithTimeAsTimezone(Date date, String timezone) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         Date rs = calendar.getTime();
@@ -462,5 +463,21 @@ public class Helper {
             ++first;
             --second;
         }
+    }
+
+    public String readFileAsStr(String fileName) throws FileNotFoundException {
+        File file = new File(fileName);
+
+        BufferedReader br = new BufferedReader(new FileReader(file));
+
+        return br.lines().collect(Collectors.joining("\n"));
+    }
+
+    public void writeFile(String fileName, String fileExt, String fileContent) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName + fileExt));
+
+        writer.write(fileContent);
+
+        writer.close();
     }
 }
