@@ -153,6 +153,20 @@ public class CookPostController {
                     log.error("Couldn't upload cuisine post thumbnail.");
                     e.printStackTrace();
                 }
+            } else {
+                try {
+                    DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
+                    GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(
+                            List.of(new Image(Integer.toString(cookPost.getId()), cookPost.getThumbnail()))
+                    ));
+
+                    if (executionResult != null && !executionResult.getSuccessfulResults().isEmpty()) {
+                        thumbnailUri = executionResult.getSuccessfulResults().get(Integer.toString(cookPost.getId())).getUri();
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Couldn't get author avatar ready to view url.");
+                    e.printStackTrace();
+                }
             }
             cookPost.setUpdatedAt(now);
             cookPostService.save(cookPost);
