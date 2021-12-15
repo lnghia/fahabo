@@ -121,7 +121,7 @@ public class CookPostController {
 
         Date now = new Date();
 
-        CookPost cookPost = cookPostService.findById(reqBody.id);
+        CookPost cookPost = cookPostService.findById(reqBody.cuisinePostId);
         String thumbnailUri = null;
 
         if (cookPost != null) {
@@ -175,7 +175,7 @@ public class CookPostController {
                 e.printStackTrace();
             }
 
-            UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), reqBody.id);
+            UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), reqBody.cuisinePostId);
             int reactionType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
             return ResponseEntity.ok(new Response(cookPost.getJson(thumbnailUri, avatar, reactionType, "Asia/Saigon"), new ArrayList<>()));
