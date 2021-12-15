@@ -3,6 +3,9 @@ package com.example.demo.HomeCook.Service;
 import com.example.demo.HomeCook.Entity.CookPost;
 import com.example.demo.HomeCook.Repo.CookPostRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,5 +25,11 @@ public class CookPostService {
 
     public CookPost findById(int id){
         return cookPostRepo.findById(id);
+    }
+
+    public ArrayList<CookPost> findAll(String searchText, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+
+        return cookPostRepo.findAll(searchText, pageable);
     }
 }

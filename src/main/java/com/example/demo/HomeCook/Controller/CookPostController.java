@@ -265,11 +265,21 @@ public class CookPostController {
         ArrayList<CookPost> cookPosts = new ArrayList<>();
 
         ArrayList<CookPostPool> cookPostPools = cookPostPoolService.findAllByUser(user.getId(), reqBody.searchText, page, size);
+        ArrayList<CookPost> cookPostArrayList = new ArrayList<>();
+
+        if (cookPostPools.isEmpty()){
+            cookPostArrayList = cookPostService.findAll(reqBody.searchText, page, size);
+        } else {
+            cookPostArrayList = new ArrayList<>(
+                    cookPostPools.stream().map(CookPostPool::getCookposts).collect(Collectors.toList())
+            );
+        }
+
         ArrayList<Image> thumbnails = new ArrayList<>();
         ArrayList<Image> avatars = new ArrayList<>();
-        for (var item : cookPostPools) {
-            thumbnails.add(new Image(Integer.toString(item.getCookPostId()), item.getCookposts().getThumbnail()));
-            avatars.add(new Image(Integer.toString(item.getCookPostId()), item.getUsers().getAvatar()));
+        for (var item : cookPostArrayList) {
+            thumbnails.add(new Image(Integer.toString(item.getId()), item.getThumbnail()));
+            avatars.add(new Image(Integer.toString(item.getId()), item.getAuthor().getAvatar()));
         }
 
         ArrayList<HashMap<String, Object>> data = new ArrayList<>();
@@ -282,13 +292,13 @@ public class CookPostController {
             HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
 
             if (executionResultAvatar != null && executionResultAvatar != null) {
-                for (var item : cookPostPools) {
-                    String key = Integer.toString(item.getCookPostId());
+                for (var item : cookPostArrayList) {
+                    String key = Integer.toString(item.getId());
                     String thumbnail = (thumbnailSuccess != null && thumbnailSuccess.containsKey(key)) ? thumbnailSuccess.get(key).getUri() : null;
                     String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
-                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(item.getUserId(), item.getCookPostId());
+                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(item.getAuthor().getId(), item.getId());
                     int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    data.add(item.getCookposts().getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
+                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
                 }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
