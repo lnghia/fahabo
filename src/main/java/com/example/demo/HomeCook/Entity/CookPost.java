@@ -219,8 +219,8 @@ public class CookPost {
         rs.put("thumbnail", (thumbnailUri != null) ? thumbnailUri : thumbnail);
         rs.put("updatedAt", Helper.getInstance().formatDateWithTimeAsTimezone(updatedAt, timezone));
         rs.put("angryRatings", angry_vote);
-        rs.put("likeRatings", angry_vote);
-        rs.put("yummyRatings", angry_vote);
+        rs.put("likeRatings", like_vote);
+        rs.put("yummyRatings", yummy_vote);
         rs.put("author", author.getShortJson(avatarUri));
         rs.put("userReactedType", userReactedType);
 

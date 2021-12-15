@@ -126,7 +126,7 @@ public class CookPostController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
             }
 
-            if (reqBody.content != null) {
+            if (reqBody.content != null && !reqBody.content.isEmpty() && !reqBody.content.isBlank()) {
                 try {
                     cookPost.setContent(reqBody.content);
                 } catch (IOException e) {
@@ -138,7 +138,7 @@ public class CookPostController {
             if (reqBody.title != null && !reqBody.title.equals(cookPost.getTitle())) {
                 cookPost.setTitle(reqBody.title);
             }
-            if (reqBody.thumbnail != null) {
+            if (reqBody.thumbnail != null && !reqBody.thumbnail.isEmpty() && !reqBody.thumbnail.isBlank()) {
                 ItemToUpload[] items = new ItemToUpload[1];
                 items[0] = new ItemToUpload(cookPost.getId() + "_cuisine" + "_" + now.getTime() + ".jpg", reqBody.thumbnail);
                 try {
@@ -190,11 +190,41 @@ public class CookPostController {
         if (userReactCookPost != null) {
             userReactCookPost.setDeleted(true);
             userReactCookPostService.save(userReactCookPost);
+
+            switch (userReactCookPost.getReaction()) {
+                case 3:
+                    cookPost.setYummy_vote(cookPost.getYummy_vote() - 1);
+                    cookPostService.save(cookPost);
+                    break;
+                case 2:
+                    cookPost.setLike_vote(cookPost.getLike_vote() - 1);
+                    cookPostService.save(cookPost);
+                    break;
+                case 1:
+                    cookPost.setAngry_vote(cookPost.getAngry_vote() - 1);
+                    cookPostService.save(cookPost);
+                    break;
+            }
         }
         if (reqBody.voteId != null && reqBody.voteId != 0) {
             UserReactCookPost newReaction = new UserReactCookPost(user, cookPost);
             newReaction.setReaction(reqBody.voteId);
             userReactCookPostService.save(newReaction);
+
+            switch (reqBody.voteId) {
+                case 3:
+                    cookPost.setYummy_vote(cookPost.getYummy_vote() + 1);
+                    cookPostService.save(cookPost);
+                    break;
+                case 2:
+                    cookPost.setLike_vote(cookPost.getLike_vote() + 1);
+                    cookPostService.save(cookPost);
+                    break;
+                case 1:
+                    cookPost.setAngry_vote(cookPost.getAngry_vote() + 1);
+                    cookPostService.save(cookPost);
+                    break;
+            }
         }
 
         String avatar = null;
@@ -265,19 +295,19 @@ public class CookPostController {
         ArrayList<CookPost> cookPostArrayList = new ArrayList<>();
         HashSet<Integer> hashSet = new HashSet<>();
 
-        if (cookPostPools.isEmpty()){
+        if (cookPostPools.isEmpty()) {
             cookPostArrayList = cookPostService.findAll(reqBody.searchText, page, size);
         } else {
             cookPostArrayList = new ArrayList<>(
                     cookPostPools.stream().map(CookPostPool::getCookposts).collect(Collectors.toList())
             );
-            for (var item : cookPostArrayList){
+            for (var item : cookPostArrayList) {
                 hashSet.add(item.getId());
             }
-            if (cookPostPools.size() < 5){
+            if (cookPostPools.size() < 5) {
                 ArrayList<CookPost> tmp = cookPostService.findAll(reqBody.searchText, page, size);
-                for (var item : tmp){
-                    if (!hashSet.contains(item.getId())){
+                for (var item : tmp) {
+                    if (!hashSet.contains(item.getId())) {
                         cookPostArrayList.add(item);
                         hashSet.add(item.getId());
                     }
