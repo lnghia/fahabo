@@ -26,10 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -266,6 +263,7 @@ public class CookPostController {
 
         ArrayList<CookPostPool> cookPostPools = cookPostPoolService.findAllByUser(user.getId(), reqBody.searchText, page, size);
         ArrayList<CookPost> cookPostArrayList = new ArrayList<>();
+        HashSet<Integer> hashSet = new HashSet<>();
 
         if (cookPostPools.isEmpty()){
             cookPostArrayList = cookPostService.findAll(reqBody.searchText, page, size);
@@ -273,6 +271,18 @@ public class CookPostController {
             cookPostArrayList = new ArrayList<>(
                     cookPostPools.stream().map(CookPostPool::getCookposts).collect(Collectors.toList())
             );
+            for (var item : cookPostArrayList){
+                hashSet.add(item.getId());
+            }
+            if (cookPostPools.size() < 5){
+                ArrayList<CookPost> tmp = cookPostService.findAll(reqBody.searchText, page, size);
+                for (var item : tmp){
+                    if (!hashSet.contains(item.getId())){
+                        cookPostArrayList.add(item);
+                        hashSet.add(item.getId());
+                    }
+                }
+            }
         }
 
         ArrayList<Image> thumbnails = new ArrayList<>();

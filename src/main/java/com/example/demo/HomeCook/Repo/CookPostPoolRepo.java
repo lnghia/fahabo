@@ -14,11 +14,11 @@ import java.util.ArrayList;
 public interface CookPostPoolRepo extends JpaRepository<CookPostPool, UserReactCookPostIdClass> {
     @Query(value = "SELECT * FROM cook_post_pool WHERE cook_post_id IN " +
             "(SELECT a.cook_post_id FROM (cook_post_pool AS a LEFT JOIN cuisine_posts AS b ON b.id=a.cook_post_id) WHERE " +
-            "a.user_id=:userId AND (:searchText IS NULL OR :searchText='' OR LOWER(b.title) LIKE %:searchText%)) " +
+            "a.user_id=:userId AND b.is_deleted=FALSE AND (:searchText IS NULL OR :searchText='' OR LOWER(b.title) LIKE %:searchText%)) " +
             "ORDER BY added_date",
             countQuery = "SELECT * FROM cook_post_pool WHERE cook_post_id IN " +
                     "(SELECT a.cook_post_id FROM (cook_post_pool AS a LEFT JOIN cuisine_posts AS b ON b.id=a.cook_post_id) WHERE " +
-                    "a.user_id=:userId AND (:searchText IS NULL OR :searchText='' OR LOWER(b.title) LIKE %:searchText%)) " +
+                    "a.user_id=:userId AND b.is_deleted=FALSE AND (:searchText IS NULL OR :searchText='' OR LOWER(b.title) LIKE %:searchText%)) " +
                     "ORDER BY added_date",
             nativeQuery = true)
     ArrayList<CookPostPool> findAllByUser(@Param("userId") int userId,
