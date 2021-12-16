@@ -19,7 +19,7 @@ public interface CookPostRepo extends JpaRepository<CookPost, Integer> {
 
     @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE " +
             "AND (:searchText IS NULL OR :searchText='' OR LOWER(title) LIKE %:searchText%) ORDER BY ratings",
-            countQuery = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE " +
+            countQuery = "SELECT COUNT(*) FROM cuisine_posts WHERE is_deleted=FALSE " +
                     "AND (:searchText IS NULL OR :searchText='' OR LOWER(title) LIKE %:searchText%) ORDER BY ratings",
             nativeQuery = true)
     ArrayList<CookPost> findAll(@Param("searchText") String searchText,

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 @Repository
 public interface NotificationRepo extends JpaRepository<Notification, Integer> {
     @Query(value = "SELECT * FROM notifications WHERE user_id=:userId AND family_id=:familyId ORDER BY created_at DESC",
-            countQuery = "SELECT * FROM notifications WHERE user_id=:userId AND family_id=:familyId",
+            countQuery = "SELECT COUNT(*) FROM notifications WHERE user_id=:userId AND family_id=:familyId",
             nativeQuery = true)
     ArrayList<Notification> getNotificationsByUserIdAndFamilyId(@Param("userId") int userId,
                                                                 @Param("familyId") int familyId,
@@ -24,7 +24,7 @@ public interface NotificationRepo extends JpaRepository<Notification, Integer> {
                                   @Param("id") int id);
 
     @Query(value = "SELECT * FROM notifications WHERE user_id=:userId AND NOT type='CHAT' ORDER BY created_at DESC",
-            countQuery = "SELECT * FROM notifications WHERE user_id=:userId",
+            countQuery = "SELECT COUNT(*) FROM notifications WHERE user_id=:userId",
             nativeQuery = true)
     ArrayList<Notification> getNotificationsByUserId(@Param("userId") int userId,
                                                      Pageable pageable);
