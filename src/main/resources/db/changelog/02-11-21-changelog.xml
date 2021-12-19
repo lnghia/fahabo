@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="add_event_table" author="nghia">
+        <createTable tableName="events">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events"/>
+            </column>
+            <column name="repeat_type" type="varchar"></column>
+            <column name="family_id" type="int">
+                <constraints foreignKeyName="fk_events_families" references="families(id)"/>
+            </column>
+            <column name="title" type="nvarchar"></column>
+            <column name="description" type="nvarchar"></column>
+            <column name="from" type="datetime"></column>
+            <column name="to" type="datetime"></column>
+            <column name="is_deleted" type="boolean"></column>
+            <column name="created_at" type="datetime"></column>
+            <column name="updated_at" type="datetime"></column>
+            <column name="reporter" type="int">
+                <constraints foreignKeyName="fk_events_users" references="users(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_table_event_album" author="nghia">
+        <createTable tableName="events_albums">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_event_album"/>
+            </column>
+            <column name="event_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_event_album_event" references="events(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_table_photo_in_event" author="nghia">
+        <createTable tableName="photos_in_events">
+            <column name="photo_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_photos_in_event_albums_photos" references="photos(id)"/>
+            </column>
+            <column name="event_album_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_photos_in_event_albums_events" references="events_albums(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+        <addPrimaryKey tableName="photos_in_events" columnNames="photo_id, event_album_id" constraintName="pk_photos_in_events"/>
+    </changeSet>
+    
+<!--    <changeSet id="add_table_families_events" author="nghia">-->
+<!--        <createTable tableName="families_events">-->
+<!--            <column name="family_id" type="int">-->
+<!--                <constraints foreignKeyName="fk_families_events_families" references="families(id)"/>-->
+<!--            </column>-->
+<!--            <column name="event_id" type="int">-->
+<!--                <constraints foreignKeyName="fk_families_events_events" references="events(id)"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
+<!--        <addPrimaryKey tableName="families_events" columnNames="family_id, event_id" constraintName="pk_families_events"/>-->
+<!--    </changeSet>-->
+
+    <changeSet id="add_table_event_assign_user" author="nghia">
+        <createTable tableName="events_assign_users">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_events_assign_users_users" references="users(id)"/>
+            </column>
+            <column name="event_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_events_assign_users_events" references="events(id)"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="events_assign_users" columnNames="user_id, event_id" constraintName="pk_events_assign_users"/>
+    </changeSet>
+
+    <changeSet id="add_table_group_event" author="nghia">
+        <createTable tableName="group_event">
+            <column name="head_event_id" type="int"></column>
+            <column name="sub_event_id" type="int">
+                <constraints references="events(id)" foreignKeyName="fk_group_event_event"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false"></column>
+        </createTable>
+        <addPrimaryKey tableName="group_event" columnNames="head_event_id, sub_event_id" constraintName="pk_group_event"/>
+    </changeSet>
+    
+    <changeSet id="add_temp_family" author="nghia">
+        <insert tableName="families">
+            <column name="id" value="0"></column>
+            <column name="name" value="family rac de xoa family"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="add_table_user_firebase_token" author="nghia">
+        <createTable tableName="user_firebase_token">
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_user_firebase_token_users" references="users(id)"/>
+            </column>
+            <column name="token" type="varchar"></column>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+        <addPrimaryKey tableName="user_firebase_token" columnNames="user_id, token" constraintName="pk_user_firebase_token"/>
+    </changeSet>
+
+    <changeSet id="add_column_families" author="nghia">
+        <addColumn tableName="families">
+            <column name="is_deleted" type="boolean" defaultValue="false"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_events_notified" author="nghia">
+        <addColumn tableName="events">
+            <column name="notified" type="boolean" defaultValue="false"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_table_users_in_call_rooms" author="nghia">
+        <createTable tableName="users_in_call_rooms">
+            <column name="room_name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_users_in_call_rooms_users" references="users(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="users_in_call_rooms" columnNames="room_name, user_id" constraintName="pk_users_in_call_rooms"/>
+    </changeSet>
+
+    <changeSet id="add_table_notifications" author="nghia">
+        <createTable tableName="notifications">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_notifications"/>
+            </column>
+            <column name="type" type="varchar"></column>
+            <column name="title" type="varchar"/>
+            <column name="description" type="varchar"/>
+            <column name="is_clicked" type="boolean" defaultValue="false"/>
+            <column name="created_at" type="datetime"/>
+            <column name="navigate" type="varchar"/>
+            <column name="sub_id" type="varchar"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_column_count_chat_users_in_families" author="nghia">
+        <addColumn tableName="users_in_families">
+            <column name="count_chat" type="int" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_count_noti_users" author="nghia">
+        <addColumn tableName="users">
+            <column name="count_noti" type="int" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_recent_pos" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="longitude" type="float" defaultValue="0"></column>
+            <column name="altitude" type="float" defaultValue="0"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_column_updated_at_user_firebase_token" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="updated_at" type="datetime"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="delete_column_recent_pos" author="nghia">
+        <dropColumn tableName="user_firebase_token">
+            <column name="longitude"></column>
+            <column name="altitude"></column>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="alter_column_recent_pos" author="nghia">
+        <addColumn tableName="user_firebase_token">
+            <column name="longitude" type="java.math.BigDecimal"></column>
+            <column name="altitude" type="java.math.BigDecimal"></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_table_transaction_categories" author="nghia">
+        <createTable tableName="transaction_category_groups">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_transaction_category_groups"/>
+            </column>
+            <column name="translated" type="boolean" defaultValue="true"/>
+            <column name="title" type="nvarchar"></column>
+            <column name="is_deleted" type="boolean" defaultValue="false"></column>
+        </createTable>
+
+        <createTable tableName="transaction_categories">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_transaction_categories"/>
+            </column>
+            <column name="translated" type="boolean" defaultValue="true"/>
+            <column name="icon" type="varchar"/>
+            <column name="title" type="nvarchar"></column>
+            <column name="family_id" type="int"></column>
+            <column name="is_deleted" type="boolean" defaultValue="false"></column>
+        </createTable>
+
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="0"/>
+            <column name="title" value="transactionGroup.requiredExpenses"/>
+        </insert>
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="1"/>
+            <column name="title" value="transactionGroup.upAndComers"/>
+        </insert>
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="2"/>
+            <column name="title" value="transactionGroup.funAndRelax"/>
+        </insert>
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="3"/>
+            <column name="title" value="transactionGroup.InvestingAndDebt"/>
+        </insert>
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="4"/>
+            <column name="title" value="transactionGroup.income"/>
+        </insert>
+        <insert tableName="transaction_category_groups">
+            <column name="id" value="5"/>
+            <column name="title" value="transactionGroup.other"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="add_table_transactions" author="nghia">
+        <createTable tableName="transactions">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_transactions"/>
+            </column>
+            <column name="type" type="varchar"/>
+            <column name="title" type="nvarchar"/>
+            <column name="note" type="nvarchar"/>
+            <column name="repeat_type" type="varchar"/>
+            <column name="occurrences" type="int"/>
+            <column name="date" type="date"/>
+            <column name="cost" type="java.math.BigDecimal"/>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+            <column name="created_at" type="datetime"/>
+            <column name="updated_at" type="datetime"/>
+        </createTable>
+        
+        <createTable tableName="transaction_albums">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_transaction_albums"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+
+        <createTable tableName="photos_in_transactions">
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_table_transaction_group" author="nghia">
+        <createTable tableName="transaction_groups">
+            <column name="is_deleted" type="boolean" defaultValue="false"/>
+        </createTable>
+    </changeSet>
+
+<!--
+food and beverage - https://cdn-icons.flaticon.com/png/512/3655/premium/3655682.png?token=exp=1638462064~hmac=1b2a6c1def8cc1edc51c00080d6e9cc5
+transportation - https://cdn-icons-png.flaticon.com/512/2945/2945694.png
+rentals - https://cdn-icons-png.flaticon.com/512/6231/6231224.png
+water bill - https://cdn-icons-png.flaticon.com/512/1558/1558896.png
+phone bill - https://cdn-icons-png.flaticon.com/512/6145/6145379.png
+electricity bill - https://cdn-icons.flaticon.com/png/512/5356/premium/5356479.png?token=exp=1638462369~hmac=95578d61c0792db3b81ea39f59e28a26
+gas bill - https://cdn-icons-png.flaticon.com/512/3144/3144737.png
+television bill - https://cdn-icons-png.flaticon.com/512/6291/6291071.png
+internet bill - https://cdn-icons-png.flaticon.com/512/929/929464.png
+vehicle maintenances - https://cdn-icons-png.flaticon.com/512/887/887226.png
+medical checkup - https://cdn-icons.flaticon.com/png/512/3061/premium/3061427.png?token=exp=1638462782~hmac=04e512bbcefca2b79bd9093e86e97ad5
+insurances - https://cdn-icons.flaticon.com/png/512/1962/premium/1962584.png?token=exp=1638462834~hmac=8ba27b0b1f84d298099234dace422483
+education - https://cdn-icons-png.flaticon.com/512/2987/2987867.png
+fitness - https://cdn-icons.flaticon.com/png/512/2749/premium/2749673.png?token=exp=1638462945~hmac=7814bb0e850388d11286d67e6e2f8fa9
+fun money - https://cdn-icons-png.flaticon.com/512/2997/2997154.png
+salary - https://cdn-icons.flaticon.com/png/512/2936/premium/2936669.png?token=exp=1638463060~hmac=0b6bdb60a77043b5f7dbdf2c54e237d9
+investment - https://cdn-icons.flaticon.com/png/512/4064/premium/4064843.png?token=exp=1638463115~hmac=f590289d38fb3fb833b4c7729bfbd30a
+pets - https://cdn-icons-png.flaticon.com/512/616/616408.png
+-->
+
+</databaseChangeLog>
