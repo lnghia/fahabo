@@ -350,7 +350,7 @@ public class CookPostController {
                     String key = Integer.toString(item.getId());
                     String thumbnail = (thumbnailSuccess != null && thumbnailSuccess.containsKey(key)) ? thumbnailSuccess.get(key).getUri() : null;
                     String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
-                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(item.getAuthor().getId(), item.getId());
+                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), item.getId());
                     int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
                     data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
                 }
