@@ -6,10 +6,7 @@ import com.example.demo.HomeCook.Entity.CookPost;
 import com.example.demo.HomeCook.Entity.CookPostPool;
 import com.example.demo.HomeCook.Entity.UserBookmarkCuisinePost;
 import com.example.demo.HomeCook.Entity.UserReactCookPost;
-import com.example.demo.HomeCook.RequestBody.CreateCuisinePostReqBody;
-import com.example.demo.HomeCook.RequestBody.DeleteCuisinePostReqBody;
-import com.example.demo.HomeCook.RequestBody.GetAllCookPostReqBody;
-import com.example.demo.HomeCook.RequestBody.VoteReqBody;
+import com.example.demo.HomeCook.RequestBody.*;
 import com.example.demo.HomeCook.Service.CookPostPoolService;
 import com.example.demo.HomeCook.Service.CookPostService;
 import com.example.demo.HomeCook.Service.UserReactCookPostService;
@@ -114,7 +111,7 @@ public class CookPostController {
         cookPostPool.setAddedDate(now);
         cookPostPoolService.save(cookPostPool);
 
-        return ResponseEntity.ok(new Response(cookPost.getJson(thumbnailUri, avatar, 0, "Asia/Saigon"), new ArrayList<>()));
+        return ResponseEntity.ok(new Response(cookPost.getJson(thumbnailUri, avatar, 0, "Asia/Saigon", false), new ArrayList<>()));
     }
 
     @PostMapping("/update")
@@ -194,7 +191,9 @@ public class CookPostController {
             UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), reqBody.cuisinePostId);
             int reactionType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
-            return ResponseEntity.ok(new Response(cookPost.getJson(thumbnailUri, avatar, reactionType, "Asia/Saigon"), new ArrayList<>()));
+            UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), reqBody.cuisinePostId);
+
+            return ResponseEntity.ok(new Response(cookPost.getJson(thumbnailUri, avatar, reactionType, "Asia/Saigon", userBookmarkCuisinePost != null), new ArrayList<>()));
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.cuisinePostNotExist"))));
@@ -268,7 +267,9 @@ public class CookPostController {
         userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), reqBody.cuisinePostId);
         int reactionType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
-        return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, reactionType, "Asia/Saigon"), new ArrayList<>()));
+        UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), reqBody.cuisinePostId);
+
+        return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, reactionType, "Asia/Saigon", userBookmarkCuisinePost != null), new ArrayList<>()));
     }
 
     @PostMapping("/delete")
@@ -357,7 +358,8 @@ public class CookPostController {
                     String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
                     UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), item.getId());
                     int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
+                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getId());
+                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", userBookmarkCuisinePost != null));
                 }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -384,6 +386,9 @@ public class CookPostController {
         UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), id);
         int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
+        UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), id);
+        boolean isBookmarked = userBookmarkCuisinePost != null;
+
         ArrayList<Image> thumbnails = new ArrayList<>();
         ArrayList<Image> avatars = new ArrayList<>();
         thumbnails.add(new Image(Integer.toString(cookPost.getId()), cookPost.getThumbnail()));
@@ -400,13 +405,13 @@ public class CookPostController {
             String thumbnail = thumbnailSuccess.containsKey(key) ? thumbnailSuccess.get(key).getUri() : null;
             String avatar = avatarSuccess.containsKey(key) ? avatarSuccess.get(key).getUri() : null;
 
-            return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"), null));
+            return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked), null));
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't get author avatar ready to view url.");
             e.printStackTrace();
         }
 
-        return ResponseEntity.ok(new Response(cookPost.getJson(null, null, userReactType, "Asia/Saigon"), null));
+        return ResponseEntity.ok(new Response(cookPost.getJson(null, null, userReactType, "Asia/Saigon", isBookmarked), null));
     }
 
     @PostMapping("/bookmark")
@@ -419,7 +424,7 @@ public class CookPostController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.cuisinePostNotExist"))));
         }
 
-        ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), 0, 1);
+        ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), "", 0, 1);
 
         if (rs.isEmpty()) {
             Date now = new Date();
@@ -435,10 +440,11 @@ public class CookPostController {
 
     @PostMapping("/bookmark/list")
     public ResponseEntity<Response> bookmarkList(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                 @RequestParam(value = "size", defaultValue = "5") Integer size) {
+                                                 @RequestParam(value = "size", defaultValue = "5") Integer size,
+                                                 @RequestBody SearchText reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), page, size);
+        ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), reqBody.searchText, page, size);
 
         ArrayList<Image> thumbnails = new ArrayList<>();
         ArrayList<Image> avatars = new ArrayList<>();
@@ -465,7 +471,9 @@ public class CookPostController {
                     String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
                     UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), cookPost.getId());
                     int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    data.add(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
+                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getCookPost().getId());
+                    boolean isBookmarked = userBookmarkCuisinePost != null;
+                    data.add(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked));
                 }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));
@@ -481,10 +489,11 @@ public class CookPostController {
 
     @PostMapping("/writtenPosts")
     public ResponseEntity<Response> listWrittenPosts(@RequestParam(value = "page", defaultValue = "0") Integer page,
-                                                     @RequestParam(value = "size", defaultValue = "5") Integer size) {
+                                                     @RequestParam(value = "size", defaultValue = "5") Integer size,
+                                                     @RequestBody SearchText reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        ArrayList<CookPost> rs = cookPostService.findAllByAuthor(user.getId(), page, size);
+        ArrayList<CookPost> rs = cookPostService.findAllByAuthor(user.getId(), reqBody.searchText, page, size);
 
         ArrayList<Image> thumbnails = new ArrayList<>();
         ArrayList<Image> avatars = new ArrayList<>();
@@ -509,7 +518,8 @@ public class CookPostController {
                     String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
                     UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), item.getId());
                     int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon"));
+                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getId());
+                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", userBookmarkCuisinePost != null));
                 }
 
                 return ResponseEntity.ok(new Response(data, new ArrayList<>()));

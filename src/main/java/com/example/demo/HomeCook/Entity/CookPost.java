@@ -203,7 +203,7 @@ public class CookPost {
         return rs;
     }
 
-    public HashMap<String, Object> getJson(String thumbnailUri, String avatarUri, int userReactedType, String timezone) {
+    public HashMap<String, Object> getJson(String thumbnailUri, String avatarUri, int userReactedType, String timezone, boolean isBookmarked) {
         HashMap<String, Object> rs = new HashMap<>();
         String postContent = null;
 
@@ -223,6 +223,7 @@ public class CookPost {
         rs.put("yummyRatings", yummy_vote);
         rs.put("author", author.getShortJson(avatarUri));
         rs.put("userReactedType", userReactedType);
+        rs.put("isBookmarked", isBookmarked);
 
         return rs;
     }

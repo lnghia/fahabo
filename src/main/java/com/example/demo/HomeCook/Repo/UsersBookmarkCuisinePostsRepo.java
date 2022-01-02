@@ -11,9 +11,17 @@ import java.util.ArrayList;
 
 @Repository
 public interface UsersBookmarkCuisinePostsRepo extends JpaRepository<UserBookmarkCuisinePost, Integer> {
-    @Query(value = "SELECT * FROM users_bookmark_cuisinepost WHERE users=:userId AND is_deleted=FALSE ORDER BY created_date DESC",
-            countQuery = "SELECT * FROM users_bookmark_cuisinepost WHERE users=:userId AND is_deleted=FALSE",
+    @Query(value = "SELECT * FROM ((SELECT * FROM users_bookmark_cuisinepost ubc WHERE is_deleted=false and users=:userId) as a LEFT JOIN cuisine_posts cp ON a.posts=cp.id) as c " +
+            "WHERE (:searchText IS NULL OR :searchText='' OR LOWER(c.title) LIKE %:searchText%) " +
+            "ORDER BY created_date DESC",
+            countQuery = "SELECT * FROM ((SELECT * FROM users_bookmark_cuisinepost ubc WHERE is_deleted=false and users=:userId) as a LEFT JOIN cuisine_posts cp ON a.posts=cp.id) as c " +
+                    "WHERE (:searchText IS NULL OR :searchText='' OR LOWER(c.title) LIKE %:searchText%) ",
             nativeQuery = true)
     ArrayList<UserBookmarkCuisinePost> findAllByUserSortByCreatedDate(@Param("userId") int userId,
-                                                                            Pageable pageable);
+                                                                      @Param("searchText") String searchText,
+                                                                      Pageable pageable);
+
+    @Query(value = "SELECT * FROM users_bookmark_cuisinepost WHERE users=:userId AND is_deleted=FALSE AND posts=:postId", nativeQuery = true)
+    UserBookmarkCuisinePost findByUserAndPost(@Param("userId") int userId,
+                                              @Param("postId") int postId);
 }

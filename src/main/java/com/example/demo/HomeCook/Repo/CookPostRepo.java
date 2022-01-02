@@ -17,9 +17,14 @@ public interface CookPostRepo extends JpaRepository<CookPost, Integer> {
     @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE AND id=:id", nativeQuery = true)
     CookPost findById(@Param("id") int id);
 
-    @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE AND author=:userId ORDER BY created_at DESC",
-            countQuery = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE AND author=:userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE AND author=:userId " +
+            "AND (:searchText IS NULL OR :searchText='' OR LOWER(title) LIKE %:searchText%) " +
+            "ORDER BY created_at DESC",
+            countQuery = "SELECT * FROM cuisine_posts " +
+                    "WHERE is_deleted=FALSE AND author=:userId " +
+                    "AND (:searchText IS NULL OR :searchText='' OR LOWER(title) LIKE %:searchText%)", nativeQuery = true)
     ArrayList<CookPost> findAllByAuthor(@Param("userId") int userId,
+                                        @Param("searchText") String searchText,
                                         Pageable pageable);
 
     @Query(value = "SELECT * FROM cuisine_posts WHERE is_deleted=FALSE " +

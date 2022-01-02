@@ -3,6 +3,7 @@ package com.example.demo.HomeCook.Service;
 import com.example.demo.HomeCook.Entity.CookPost;
 import com.example.demo.HomeCook.Repo.CookPostRepo;
 import com.example.demo.domain.User;
+import com.google.firebase.database.snapshot.StringNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,9 +35,9 @@ public class CookPostService {
         return cookPostRepo.findAll(searchText, pageable);
     }
 
-    public ArrayList<CookPost> findAllByAuthor(int userId, int page, int size) {
+    public ArrayList<CookPost> findAllByAuthor(int userId, String searchText, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return cookPostRepo.findAllByAuthor(userId, pageable);
+        return cookPostRepo.findAllByAuthor(userId, searchText, pageable);
     }
 }

@@ -18,9 +18,13 @@ public class UsersBookmarkCuisinePostsService {
         return usersBookmarkCuisinePostsRepo.save(userBookmarkCuisinePost);
     }
 
-    public ArrayList<UserBookmarkCuisinePost> findAllByUserSortByCreatedDate(int userId, int page, int size) {
+    public UserBookmarkCuisinePost findByUserAndPost(int userId, int postId) {
+        return usersBookmarkCuisinePostsRepo.findByUserAndPost(userId, postId);
+    }
+
+    public ArrayList<UserBookmarkCuisinePost> findAllByUserSortByCreatedDate(int userId, String searchText, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return usersBookmarkCuisinePostsRepo.findAllByUserSortByCreatedDate(userId, pageable);
+        return usersBookmarkCuisinePostsRepo.findAllByUserSortByCreatedDate(userId, searchText, pageable);
     }
 }
