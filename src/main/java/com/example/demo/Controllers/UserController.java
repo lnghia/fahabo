@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -208,55 +209,73 @@ public class UserController {
     public ResponseEntity<Response> updateAvatar(@RequestBody UpdateAvatarReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        DbxClientV2 dbxClientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+//        DbxClientV2 dbxClientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
 
-        DropBoxUploader uploader = new DropBoxUploader(dbxClientV2);
+//        DropBoxUploader uploader = new DropBoxUploader(dbxClientV2);
 
         requestBody.getAvatar().setName(userService.generateImgUploadId(user));
 
+        ItemToUpload itemToUpload = new ItemToUpload(requestBody.getAvatar().getName(), requestBody.getAvatar().getBase64Data());
+
         try {
-            UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.getAvatar()));
-
-            if (executionResult == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
-            }
-
             HashMap<String, Object> data = new HashMap<>();
-            ArrayList<Image> successUploads = new ArrayList<>();
-            ArrayList<Image> failUploads = new ArrayList<>();
+            Helper.getInstance().saveImg("/home/nghiale/photos/" + requestBody.getAvatar().getName(), "jpeg", itemToUpload.getInputStream());
 
-            executionResult.getCreationResults().forEach((k, v) -> {
-                if (v.isOk()) {
-                    successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                } else {
-                    failUploads.add(new Image(k, v.metadata));
-                }
-            });
-
-            if (successUploads.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
-            }
-
-            user.setAvatar(successUploads.get(0).getMetadata().getUrl());
+            user.setAvatar("/api/v1/photos/" + requestBody.getAvatar().getName());
             userService.updateUser(user);
 
-//            executionResult.getSuccessfulUploads().forEach((k, v) -> {
-//                successUploads.add(new Image(v.getName(), v.getUri()));
-//            });
-//            executionResult.getFailedUploads().forEach((k, v) -> {
-//                failUploads.add(new Image(v.getName(), v.getUri()));
-//            });
-
-            data.put("avatar", successUploads.get(0).toJson());
-//            data.put("fail", failUploads.stream().map(Image::toJson).collect(Collectors.toList()));
+            data.put("avatar", user.getAvatar());
 
             return ResponseEntity.ok(new Response(data, new ArrayList<>()));
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("Threading exception while initializing client: " + e.getMessage());
+        } catch (IOException e) {
             e.printStackTrace();
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
         }
+
+//        try {
+//            UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.getAvatar()));
+//
+//            if (executionResult == null) {
+//                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+//            }
+//
+//            HashMap<String, Object> data = new HashMap<>();
+//            ArrayList<Image> successUploads = new ArrayList<>();
+//            ArrayList<Image> failUploads = new ArrayList<>();
+//
+//            executionResult.getCreationResults().forEach((k, v) -> {
+//                if (v.isOk()) {
+//                    successUploads.add(new Image(k, v.metadata, v.uri.get()));
+//                } else {
+//                    failUploads.add(new Image(k, v.metadata));
+//                }
+//            });
+//
+//            if (successUploads.isEmpty()) {
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+//            }
+//
+//            user.setAvatar(successUploads.get(0).getMetadata().getUrl());
+//            userService.updateUser(user);
+//
+////            executionResult.getSuccessfulUploads().forEach((k, v) -> {
+////                successUploads.add(new Image(v.getName(), v.getUri()));
+////            });
+////            executionResult.getFailedUploads().forEach((k, v) -> {
+////                failUploads.add(new Image(v.getName(), v.getUri()));
+////            });
+//
+//            data.put("avatar", successUploads.get(0).toJson());
+////            data.put("fail", failUploads.stream().map(Image::toJson).collect(Collectors.toList()));
+//
+//            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
+//        } catch (InterruptedException | ExecutionException e) {
+//            log.error("Threading exception while initializing client: " + e.getMessage());
+//            e.printStackTrace();
+//
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+//        }
     }
 
     @PostMapping("/join_family")

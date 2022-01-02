@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import liquibase.pro.packaged.C;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -479,5 +480,12 @@ public class Helper {
         writer.write(fileContent);
 
         writer.close();
+    }
+
+    public void saveImg(String fileName, String fileExt, InputStream inputStream) throws IOException {
+        File file = new File(fileName);
+        OutputStream outputStream = new FileOutputStream(file);
+        IOUtils.copy(inputStream, outputStream);
+        IOUtils.closeQuietly(outputStream);
     }
 }

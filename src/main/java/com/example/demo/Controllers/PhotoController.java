@@ -17,12 +17,17 @@ import com.example.demo.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,7 +61,7 @@ public class PhotoController {
     public ResponseEntity<Response> deletePhoto(@Valid @RequestBody DeletePhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
-        if(requestBody.photoIds == null)
+        if (requestBody.photoIds == null)
             return ResponseEntity.ok(new Response("no data to delete.", new ArrayList<>()));
 
         for (int photoId : requestBody.photoIds) {
@@ -155,7 +160,7 @@ public class PhotoController {
                             familyId
                     ));
 
-                    if(result == null){
+                    if (result == null) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
                     }
 
@@ -170,7 +175,7 @@ public class PhotoController {
                         }
                     });
 
-                    if(successUploads.isEmpty()){
+                    if (successUploads.isEmpty()) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
                     }
 
@@ -187,5 +192,21 @@ public class PhotoController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.unauthorized"))));
+    }
+
+    @GetMapping(value = "/{id:.+}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
+        File file = new File("/home/nghiale/photos/" + id);
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(fileInputStream.readAllBytes());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 }

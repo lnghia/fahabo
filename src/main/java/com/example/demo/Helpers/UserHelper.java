@@ -26,10 +26,12 @@ public class UserHelper {
         DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
         DropBoxUploader uploader = new DropBoxUploader(clientV2);
 
-        return uploader.createSharedLink(uri);
+        String ans = uploader.createSharedLink(uri);
+
+        return (ans == null) ? uri : ans;
     }
 
-    public HashMap<String, Object> UserToJson(User user){
+    public HashMap<String, Object> UserToJson(User user) {
         HashMap<String, Object> rs = new HashMap<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
