@@ -425,8 +425,12 @@ public class CookPostController {
         }
 
         ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), "", 0, 1);
+        boolean isBookmarked = false;
+        UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), cookPost.getId());
+        int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
         if (rs.isEmpty()) {
+            isBookmarked = true;
             Date now = new Date();
             UserBookmarkCuisinePost userBookmarkCuisinePost = new UserBookmarkCuisinePost(user, cookPost, now);
             usersBookmarkCuisinePostsService.save(userBookmarkCuisinePost);
@@ -435,7 +439,30 @@ public class CookPostController {
             usersBookmarkCuisinePostsService.save(rs.get(0));
         }
 
-        return ResponseEntity.ok(new Response("success!", null));
+        ArrayList<Image> thumbnails = new ArrayList<>();
+        ArrayList<Image> avatars = new ArrayList<>();
+        String key = Integer.toString(cookPost.getId());
+        thumbnails.add(new Image(key, cookPost.getThumbnail()));
+        avatars.add(new Image(key, cookPost.getAuthor().getAvatar()));
+        DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
+        DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
+        String thumbnail = null;
+        String avatar = null;
+        try {
+            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
+            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
+            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
+            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
+            thumbnail = thumbnailSuccess.containsKey(key) ? thumbnailSuccess.get(key).getUri() : null;
+            avatar = avatarSuccess.containsKey(key) ? avatarSuccess.get(key).getUri() : cookPost.getAuthor().getAvatar();
+
+            return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked), null));
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Couldn't get post thumbnail ready to view url.");
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok(new Response(cookPost.getJson(null, null, userReactType, "Asia/Saigon", isBookmarked), null));
     }
 
     @PostMapping("/bookmark/list")
