@@ -424,19 +424,19 @@ public class CookPostController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.cuisinePostNotExist"))));
         }
 
-        ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), "", 0, 1);
+        UserBookmarkCuisinePost rs = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), cookPost.getId());
         boolean isBookmarked = false;
         UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), cookPost.getId());
         int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
 
-        if (rs.isEmpty()) {
+        if (rs == null) {
             isBookmarked = true;
             Date now = new Date();
             UserBookmarkCuisinePost userBookmarkCuisinePost = new UserBookmarkCuisinePost(user, cookPost, now);
             usersBookmarkCuisinePostsService.save(userBookmarkCuisinePost);
         } else {
-            rs.get(0).setDeleted(true);
-            usersBookmarkCuisinePostsService.save(rs.get(0));
+            rs.setDeleted(true);
+            usersBookmarkCuisinePostsService.save(rs);
         }
 
         ArrayList<Image> thumbnails = new ArrayList<>();
