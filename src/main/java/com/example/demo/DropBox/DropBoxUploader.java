@@ -3,6 +3,8 @@ package com.example.demo.DropBox;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.sharing.PathLinkMetadata;
+import com.example.demo.Helpers.Helper;
+import com.example.demo.domain.Image;
 import javassist.compiler.ast.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,8 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
-public class DropBoxUploader implements AutoCloseable{
-//    @Value("${THREAD_NUM}")
+public class DropBoxUploader implements AutoCloseable {
+    //    @Value("${THREAD_NUM}")
     private int THREAD_NUM = 15;
 
 //    @Autowired
@@ -51,14 +53,14 @@ public class DropBoxUploader implements AutoCloseable{
     private final HashMap<String, ByteUploadTask.ByteUploadResult> failedUploads = new HashMap<>();
 
 
-    public DropBoxUploader(){
+    public DropBoxUploader() {
         uploadExecutor = Executors.newFixedThreadPool(THREAD_NUM);
         uploadService = new ExecutorCompletionService<>(uploadExecutor);
         creationQueue = new ArrayList<>(40);
         itemCreationResults = new HashMap<>();
     }
 
-    public DropBoxUploader(DbxClientV2 client){
+    public DropBoxUploader(DbxClientV2 client) {
         dbxClientV2 = client;
         uploadExecutor = Executors.newFixedThreadPool(THREAD_NUM);
         redirectExecutor = Executors.newFixedThreadPool(THREAD_NUM);
@@ -70,13 +72,13 @@ public class DropBoxUploader implements AutoCloseable{
 
     @Override
     public void close() throws Exception {
-        if(uploadExecutor != null){
+        if (uploadExecutor != null) {
             uploadExecutor.shutdown();
         }
     }
 
     public UploadExecutionResult uploadItems(ItemToUpload[] items) throws InterruptedException, ExecutionException {
-        if(dbxClientV2 == null){
+        if (dbxClientV2 == null) {
             log.error("Dropbox client was not initialized.");
             return null;
         }
@@ -88,15 +90,14 @@ public class DropBoxUploader implements AutoCloseable{
 
         log.info("All byte uploads tasks have been scheduled.");
 
-        for(int finished = 0; finished < items.length; ++finished){
+        for (int finished = 0; finished < items.length; ++finished) {
             Future<ByteUploadTask.ByteUploadResult> resultFuture = uploadService.take();
             ByteUploadTask.ByteUploadResult byteUploadResult = resultFuture.get();
 
-            if(byteUploadResult.isOk()){
+            if (byteUploadResult.isOk()) {
                 successfulUploads.put(byteUploadResult.name, byteUploadResult);
                 creationQueue.add(byteUploadResult);
-            }
-            else{
+            } else {
 //                log.info(byteUploadResult.getError().getMessage());
                 log.error(byteUploadResult.getName(), byteUploadResult.getError());
                 log.info("Preparing to retry: ", byteUploadResult.getName());
@@ -110,11 +111,11 @@ public class DropBoxUploader implements AutoCloseable{
             }
         }
 
-        if(!uploadToRetry.isEmpty()){
+        if (!uploadToRetry.isEmpty()) {
             retryUploadItems();
         }
 
-        if(creationQueue.size() >= 40 || successfulUploads.size() + failedUploads.size() >= items.length){
+        if (creationQueue.size() >= 40 || successfulUploads.size() + failedUploads.size() >= items.length) {
             log.info("Starting getSharedLink call.");
             createSharedLinks();
         }
@@ -131,15 +132,14 @@ public class DropBoxUploader implements AutoCloseable{
 
         log.info("All byte upload retry tasks have been scheduled.");
 
-        for(int finished = 0; finished < uploadToRetry.size(); ++finished){
+        for (int finished = 0; finished < uploadToRetry.size(); ++finished) {
             Future<ByteUploadTask.ByteUploadResult> resultFuture = uploadService.take();
             ByteUploadTask.ByteUploadResult byteUploadResult = resultFuture.get();
 
-            if(byteUploadResult.isOk()){
+            if (byteUploadResult.isOk()) {
                 successfulUploads.put(byteUploadResult.name, byteUploadResult);
                 creationQueue.add(byteUploadResult);
-            }
-            else{
+            } else {
 //                log.info(byteUploadResult.getError().getMessage());
                 log.error(byteUploadResult.getName(), byteUploadResult.getError());
                 failedUploads.put(byteUploadResult.name, byteUploadResult);
@@ -149,10 +149,14 @@ public class DropBoxUploader implements AutoCloseable{
         log.info("Execution complete.");
     }
 
-    public String createSharedLink(String uri){
-        if(uri == null || uri.isEmpty() || uri.isBlank()){
+    public String createSharedLink(String uri) {
+        if (uri == null || uri.isEmpty() || uri.isBlank()) {
             log.info("No item to create.");
             return null;
+        }
+
+        if (!Helper.getInstance().isDropboxUri(uri)) {
+            return uri;
         }
 
         URLConnection con = null;
@@ -172,7 +176,7 @@ public class DropBoxUploader implements AutoCloseable{
     }
 
     private void createSharedLinks() throws InterruptedException, ExecutionException {
-        if(creationQueue.isEmpty()){
+        if (creationQueue.isEmpty()) {
             log.info("No items to create.");
             return;
         }
@@ -181,7 +185,7 @@ public class DropBoxUploader implements AutoCloseable{
         List<ByteUploadTask.ByteUploadResult> itemsToCreate = new ArrayList<>(creationQueue);
         creationQueue.clear();
 
-        for(var item : itemsToCreate){
+        for (var item : itemsToCreate) {
             initialItems.put(item.name, item);
         }
 
@@ -189,14 +193,13 @@ public class DropBoxUploader implements AutoCloseable{
 
         log.info("All redirect tasks have been scheduled.");
 
-        for(int finished = 0; finished < itemsToCreate.size(); ++finished){
+        for (int finished = 0; finished < itemsToCreate.size(); ++finished) {
             Future<ItemCreationTask.ItemCreationResult> resultFuture = redirectService.take();
             ItemCreationTask.ItemCreationResult redirectResult = resultFuture.get();
 
-            if(redirectResult.isOk()){
+            if (redirectResult.isOk()) {
                 creationResult.put(redirectResult.name, redirectResult);
-            }
-            else{
+            } else {
 //                log.info(byteUploadResult.getError().getMessage());
                 log.error(redirectResult.name, redirectResult.error);
                 log.info("Preparing to retry: ", redirectResult.name);
@@ -206,7 +209,7 @@ public class DropBoxUploader implements AutoCloseable{
             }
         }
 
-        if(creationToRetry.size() > 0){
+        if (creationToRetry.size() > 0) {
             retryCreateSharedLinks();
         }
 
@@ -214,14 +217,14 @@ public class DropBoxUploader implements AutoCloseable{
     }
 
     private void retryCreateSharedLinks() throws InterruptedException, ExecutionException {
-        if(creationToRetry.isEmpty()){
+        if (creationToRetry.isEmpty()) {
             log.info("No items to create.");
             return;
         }
 
         Map<String, ByteUploadTask.ByteUploadResult> initialItems = new HashMap<>();
 
-        for(var item : creationToRetry){
+        for (var item : creationToRetry) {
             initialItems.put(item.name, item);
         }
 
@@ -229,14 +232,13 @@ public class DropBoxUploader implements AutoCloseable{
 
         log.info("All redirect retry tasks have been scheduled.");
 
-        for(int finished = 0; finished < creationToRetry.size(); ++finished){
+        for (int finished = 0; finished < creationToRetry.size(); ++finished) {
             Future<ItemCreationTask.ItemCreationResult> resultFuture = redirectService.take();
             ItemCreationTask.ItemCreationResult redirectResult = resultFuture.get();
 
-            if(redirectResult.isOk()){
+            if (redirectResult.isOk()) {
                 creationResult.put(redirectResult.name, redirectResult);
-            }
-            else{
+            } else {
 //                log.info(byteUploadResult.getError().getMessage());
                 log.error(redirectResult.name, redirectResult.error);
 //                failedUploads.put(redirectResult.name, initialItems.get(redirectResult.name));
@@ -244,23 +246,23 @@ public class DropBoxUploader implements AutoCloseable{
         }
     }
 
-    private void scheduleUploadItemBytes(ItemToUpload[] items){
-        for(var item : items){
+    private void scheduleUploadItemBytes(ItemToUpload[] items) {
+        for (var item : items) {
             log.info("Scheduling byte upload for: " + item.getName());
             ByteUploadTask task = new ByteUploadTask(item.getInputStream(), item.getName(), dbxClientV2);
             uploadService.submit(task);
         }
     }
 
-    private void scheduleRedirects(List<ByteUploadTask.ByteUploadResult> itemsToCreate){
-        for(var uploadResult : itemsToCreate){
+    private void scheduleRedirects(List<ByteUploadTask.ByteUploadResult> itemsToCreate) {
+        for (var uploadResult : itemsToCreate) {
             log.info("Scheduling redirect for: " + uploadResult.name);
             ItemCreationTask itemCreationTask = new ItemCreationTask(dbxClientV2, uploadResult);
             redirectService.submit(itemCreationTask);
         }
     }
 
-    public void printState(){
+    public void printState() {
         log.error("The following " + failedUploads.size() + " files could not be uploaded:");
 
         for (ByteUploadTask.ByteUploadResult uploadResult : failedUploads.values()) {
