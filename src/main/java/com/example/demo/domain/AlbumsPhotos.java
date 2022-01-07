@@ -24,7 +24,7 @@ public class AlbumsPhotos {
     @JoinColumn(name = "albums", referencedColumnName = "id")
     private Album album;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @ManyToOne
     @JoinColumn(name = "photos", referencedColumnName = "id")
     private Photo photo;
 

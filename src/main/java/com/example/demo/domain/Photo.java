@@ -42,7 +42,7 @@ public class Photo {
 ////    @CreatedBy
 //    private User createdBy;
 
-    @OneToMany(mappedBy = "photo", cascade = {CascadeType.PERSIST})
+    @OneToMany(mappedBy = "photo")
     private Set<AlbumsPhotos> photoInAlbums = new HashSet<>();
 
     @Column(name = "description")

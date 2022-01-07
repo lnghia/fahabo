@@ -165,6 +165,8 @@ public class AlbumController {
     public ResponseEntity<Response> addPhoto(@Valid @RequestBody AddPhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Album album = albumService.findById(requestBody.albumId);
+        Family family = album.getFamily();
+        Album defaultAlbum = family.getDefaultAlbum();
 
         if (userAlbumHelper.checkUserAlbumRelationship(user, album)) {
             List<Photo> photos = new ArrayList<>();
@@ -181,6 +183,11 @@ public class AlbumController {
                     AlbumsPhotos albumsPhotos = new AlbumsPhotos(album, photos.get(i));
                     albumsPhotosService.saveAlbumsPhotos(albumsPhotos);
                     photos.get(i).getPhotoInAlbums().add(albumsPhotos);
+                    if(album.getId() != defaultAlbum.getId()){
+                        AlbumsPhotos albumsPhotosDefault = new AlbumsPhotos(defaultAlbum, photos.get(i));
+                        albumsPhotosService.saveAlbumsPhotos(albumsPhotosDefault);
+                        photos.get(i).getPhotoInAlbums().add(albumsPhotosDefault);
+                    }
                     photoService.savePhoto(photos.get(i));
                 }
 
