@@ -106,49 +106,50 @@ public class ChoreController {
             chore.setUpdatedAt(now);
 
             if (requestBody.photos != null && requestBody.photos.length != 0) {
-                ChoreAlbum choreAlbum = new ChoreAlbum();
-                choreAlbum.setChore(chore);
-                choreAlbumService.saveChoreAlbum(choreAlbum);
-                chore.getChoreAlbumSet().add(choreAlbum);
-
-                ItemToUpload[] items = new ItemToUpload[requestBody.photos.length];
-                HashMap<String, Photo> newPhotos = new HashMap<>();
-
-                for (int i = 0; i < requestBody.photos.length; ++i) {
-                    Photo photo = new Photo();
-                    PhotoInChore photoInChore = new PhotoInChore();
-
-                    photo.setCreatedAt(now);
-                    photo.setUpdatedAt(now);
-
-                    photoService.savePhoto(photo);
-                    photoInChore.setPhoto(photo);
-                    photoInChore.setAlbum(choreAlbum);
-                    photoInChoreService.savePhotoInChore(photoInChore);
-                    photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
-                            family.getId(),
-                            choreAlbum.getId(),
-                            photo.getId()));
-                    photoService.savePhoto(photo);
-                    newPhotos.put(photo.getName(), photo);
-
-                    items[i] = new ItemToUpload(photo.getName(), requestBody.photos[i]);
-                }
-
-                UploadResult result = dropBoxHelper.uploadImages(items, choreAlbum.getId(), 1);
-                ArrayList<Image> success = result.successUploads;
-
-                for (var image : success) {
-                    Photo photo = newPhotos.get(image.getName());
-                    photo.setUri(image.getMetadata().getUrl());
-                    photoService.savePhoto(photo);
-                }
+                choreHelper.addPhotos(chore, requestBody.photos, family);
+//                ChoreAlbum choreAlbum = new ChoreAlbum();
+//                choreAlbum.setChore(chore);
+//                choreAlbumService.saveChoreAlbum(choreAlbum);
+//                chore.getChoreAlbumSet().add(choreAlbum);
+//
+//                ItemToUpload[] items = new ItemToUpload[requestBody.photos.length];
+//                HashMap<String, Photo> newPhotos = new HashMap<>();
+//
+//                for (int i = 0; i < requestBody.photos.length; ++i) {
+//                    Photo photo = new Photo();
+//                    PhotoInChore photoInChore = new PhotoInChore();
+//
+//                    photo.setCreatedAt(now);
+//                    photo.setUpdatedAt(now);
+//
+//                    photoService.savePhoto(photo);
+//                    photoInChore.setPhoto(photo);
+//                    photoInChore.setAlbum(choreAlbum);
+//                    photoInChoreService.savePhotoInChore(photoInChore);
+//                    photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
+//                            family.getId(),
+//                            choreAlbum.getId(),
+//                            photo.getId()));
+//                    photoService.savePhoto(photo);
+//                    newPhotos.put(photo.getName(), photo);
+//
+//                    items[i] = new ItemToUpload(photo.getName(), requestBody.photos[i]);
+//                }
+//
+//                UploadResult result = dropBoxHelper.uploadImages(items, choreAlbum.getId(), 1);
+//                ArrayList<Image> success = result.successUploads;
+//
+//                for (var image : success) {
+//                    Photo photo = newPhotos.get(image.getName());
+//                    photo.setUri(image.getMetadata().getUrl());
+//                    photoService.savePhoto(photo);
+//                }
             }
             family.getChores().add(chore);
             chore.setFamily(family);
             familyService.saveFamily(family);
 
-            if(!users.isEmpty()){
+            if (!users.isEmpty()) {
                 firebaseMessageHelper.notifyUsers(
                         users,
                         family,
@@ -164,7 +165,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -220,7 +223,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -245,7 +250,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", chore.getFamily().getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -253,7 +260,7 @@ public class ChoreController {
     public ResponseEntity<Response> updateChore(@Valid @RequestBody UpdateChoreReqForm requestBody) throws ParseException, ExecutionException, InterruptedException {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
         Chore chore = choreService.getById(requestBody.choreId);
-        HashSet<Integer> assignedUsers = new HashSet<>();
+//        HashSet<Integer> assignedUsers = new HashSet<>();
         Helper helper = Helper.getInstance();
         String langCode = (chore.getFamily().getTimezone() == null) ? "en" : ((chore.getFamily().getTimezone().equals("Asia/Ho_Chi_Minh") || chore.getFamily().getTimezone().equals("Asia/Saigon")) ? "vi" : "en");
 
@@ -265,48 +272,11 @@ public class ChoreController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.photosNumInChoreExceeded"))));
         }
 
-
         if (chore.getFamily().checkIfUserExist(user)) {
             List<User> users = new ArrayList<>();
 
             if (requestBody.status != null && !requestBody.status.isEmpty() && !requestBody.status.isBlank()) {
-                String repeat = chore.getRepeatType();
-
-                if (repeat != null && !repeat.isBlank() && !repeat.isEmpty() && requestBody.status.equals("DONE") && !chore.getStatus().equals("DONE")) {
-                    Chore repeatChore = new Chore(
-                            chore.getFamily(),
-                            "IN_PROGRESS",
-                            chore.getTitle(),
-                            chore.getDescription(),
-                            choreHelper.getNewDeadline(new Date(), chore.getRepeatType()),
-                            chore.getReporter(),
-                            chore.getRepeatType(),
-                            false);
-                    repeatChore.setCreatedAt(chore.getCreatedAtAsDate());
-                    repeatChore.setUpdatedAt(chore.getUpdatedAtAsDate());
-                    choreService.saveChore(repeatChore);
-                    int[] ids = new int[chore.getChoresAssignUsers().size()];
-                    Iterator<ChoresAssignUsers> iterator = chore.getChoresAssignUsers().iterator();
-                    for (int i = 0; i < chore.getChoresAssignUsers().size(); ++i) {
-                        ids[i] = iterator.next().getAssignee().getId();
-                    }
-                    choreHelper.assignUser(ids, repeatChore);
-
-                    if (!chore.getChoreAlbumSet().isEmpty()) {
-                        ChoreAlbum choreAlbum = new ChoreAlbum(repeatChore);
-                        choreAlbumService.saveChoreAlbum(choreAlbum);
-                        ArrayList<PhotoInChore> photoInChore = photoInChoreService.findAllByChoreAlbumId(chore.getChoreAlbumSet().iterator().next().getId());
-                        for (var item : photoInChore) {
-                            PhotoInChore newOne = new PhotoInChore();
-                            newOne.setAlbum(choreAlbum);
-                            newOne.setPhoto(item.getPhoto());
-                            photoInChoreService.savePhotoInChore(newOne);
-                        }
-                        repeatChore.getChoreAlbumSet().add(choreAlbum);
-                        choreService.saveChore(repeatChore);
-                    }
-                }
-                chore.setStatus(requestBody.status);
+                choreHelper.updateStatus(chore, requestBody.status);
             }
             if (requestBody.title != null && !requestBody.title.isBlank() && !requestBody.status.isBlank()) {
                 chore.setTitle(requestBody.title);
@@ -318,91 +288,34 @@ public class ChoreController {
                 chore.setRepeatType(requestBody.repeatType);
             }
             if (requestBody.deadline != null && !requestBody.deadline.isEmpty() && !requestBody.deadline.isBlank()) {
-                chore.setDeadline(Helper.getInstance().formatDateWithoutTime(requestBody.deadline));
-                chore.setStatus("IN_PROGRESS");
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeZone(TimeZone.getTimeZone(chore.getFamily().getTimezone()));
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                if (Helper.getInstance().formatDateWithoutTime(requestBody.deadline).before(calendar.getTime())) {
-                    chore.setStatus("EXPIRED");
-                }
+                choreHelper.setDeadLine(chore, requestBody.deadline);
             }
             if (requestBody.assigneeIds != null) {
-                chore.getChoresAssignUsers().forEach(choresAssignUsers -> {
-                    assignedUsers.add(choresAssignUsers.getUserId());
-                    choresAssignUsers.setDeleted(true);
-                    choresAssignUsersService.saveChoresAssignUsers(choresAssignUsers);
-                });
-                for (var id : requestBody.assigneeIds) {
-                    User assignee = userService.getUserById(id);
-                    if(!assignedUsers.contains(id)){
-                        users.add(assignee);
-                    }
-                    ChoresAssignUsers choresAssignUsers = new ChoresAssignUsers();
-                    choresAssignUsers.setChore(chore);
-                    choresAssignUsers.setAssignee(assignee);
-                    choresAssignUsersService.saveChoresAssignUsers(choresAssignUsers);
-                }
+                users = choreHelper.assignUsers(chore, requestBody.assigneeIds);
+//                chore.getChoresAssignUsers().forEach(choresAssignUsers -> {
+//                    assignedUsers.add(choresAssignUsers.getUserId());
+//                    choresAssignUsers.setDeleted(true);
+//                    choresAssignUsersService.saveChoresAssignUsers(choresAssignUsers);
+//                });
+//                for (var id : requestBody.assigneeIds) {
+//                    User assignee = userService.getUserById(id);
+//                    if (!assignedUsers.contains(id)) {
+//                        users.add(assignee);
+//                    }
+//                    ChoresAssignUsers choresAssignUsers = new ChoresAssignUsers();
+//                    choresAssignUsers.setChore(chore);
+//                    choresAssignUsers.setAssignee(assignee);
+//                    choresAssignUsersService.saveChoresAssignUsers(choresAssignUsers);
+//                }
             }
 
             ArrayList<String> uris = new ArrayList<>();
 
             if (requestBody.photos != null && requestBody.photos.length > 0) {
-                ChoreAlbum choreAlbum;
-                boolean hasNoAlbum = chore.getChoreAlbumSet().isEmpty();
-                if (hasNoAlbum) {
-                    choreAlbum = new ChoreAlbum();
-                    choreAlbum.setChore(chore);
-                    choreAlbumService.saveChoreAlbum(choreAlbum);
-                    chore.getChoreAlbumSet().add(choreAlbum);
-                } else {
-                    choreAlbum = chore.getChoreAlbumSet().iterator().next();
-                }
-                Date now = new Date();
-                ItemToUpload[] items = new ItemToUpload[requestBody.photos.length];
-                HashMap<String, Photo> newPhotos = new HashMap<>();
-
-                for (int i = 0; i < requestBody.photos.length; ++i) {
-                    Photo photo = new Photo();
-                    PhotoInChore photoInChore = new PhotoInChore();
-
-                    photo.setCreatedAt(now);
-                    photo.setUpdatedAt(now);
-
-                    photoService.savePhoto(photo);
-                    photoInChore.setPhoto(photo);
-                    photoInChore.setAlbum(choreAlbum);
-                    photoInChoreService.savePhotoInChore(photoInChore);
-                    photo.setName(Helper.getInstance().generatePhotoNameToUploadToAlbum(
-                            chore.getFamily().getId(),
-                            choreAlbum.getId(),
-                            photo.getId()));
-                    photoService.savePhoto(photo);
-                    newPhotos.put(photo.getName(), photo);
-
-                    items[i] = new ItemToUpload(photo.getName(), requestBody.photos[i]);
-                }
-
-                UploadResult result = dropBoxHelper.uploadImages(items, choreAlbum.getId(), 1);
-                ArrayList<Image> success = result.successUploads;
-
-                for (var image : success) {
-                    Photo photo = newPhotos.get(image.getName());
-                    photo.setUri(image.getMetadata().getUrl());
-                    photoService.savePhoto(photo);
-                    uris.add(image.getUri());
-                }
+                choreHelper.addPhotos(chore, requestBody.photos, chore.getFamily());
             }
             if (requestBody.deletePhotos != null && requestBody.deletePhotos.length > 0) {
-                ChoreAlbum choreAlbum = chore.getChoreAlbumSet().iterator().next();
-                for (var id : requestBody.deletePhotos) {
-                    Photo photo = photoService.getById(id);
-                    PhotoInChore photoInChore = photoInChoreService.getPhotoInChoreByAlbumIdAndPhotoId(choreAlbum.getId(), id);
-                    photoInChore.setDeleted(true);
-                    photo.setDeleted(true);
-                    photoInChoreService.savePhotoInChore(photoInChore);
-                    photoService.savePhoto(photo);
-                }
+                choreHelper.deletePhotos(chore, requestBody.deletePhotos);
             }
             String timezone = chore.getFamily().getTimezone();
             Calendar calendar = Calendar.getInstance();
@@ -417,7 +330,7 @@ public class ChoreController {
                 }};
             }).collect(Collectors.toList()));
 
-            if(!users.isEmpty()){
+            if (!users.isEmpty()) {
                 firebaseMessageHelper.notifyUsers(
                         users,
                         chore.getFamily(),
@@ -433,7 +346,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", chore.getFamily().getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -487,7 +402,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", chore.getFamily().getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -497,7 +414,7 @@ public class ChoreController {
         Helper helper = Helper.getInstance();
         Chore chore = choreService.getById(reqForm.choreId);
 
-        if(chore == null){
+        if (chore == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.choreIdNotExist"))));
         }
 
@@ -506,7 +423,9 @@ public class ChoreController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", chore.getFamily().getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", chore.getFamily().getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

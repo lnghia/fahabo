@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 @Component
@@ -43,5 +44,15 @@ public class AlbumHelper {
         }
         family.getDefaultAlbum().setFamily(tmpFamily);
         albumService.saveAlbum(family.getDefaultAlbum());
+    }
+
+    public Album createDefaultAlbum(Family family, Date now){
+        Album newAlbum = new Album("Default album");
+        newAlbum.setFamily(family);
+        newAlbum.setCreatedAt(now);
+        newAlbum.setUpdatedAt(now);
+        albumService.saveAlbum(newAlbum);
+
+        return newAlbum;
     }
 }

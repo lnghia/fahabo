@@ -41,7 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        if (!Helper.getInstance().getUnauthenticatedEndpoints().contains(httpServletRequest.getServletPath())) {
+        String IMG_VIEW_URI_REGEX = Helper.getInstance().IMG_VIEW_URI_FORMAT;
+        if (!Helper.getInstance().getUnauthenticatedEndpoints().contains(httpServletRequest.getServletPath()) && !httpServletRequest.getServletPath().matches(IMG_VIEW_URI_REGEX)) {
             try {
                 String jwt = getJwtFromRequest(httpServletRequest);
 

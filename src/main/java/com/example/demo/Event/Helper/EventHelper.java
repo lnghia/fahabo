@@ -5,6 +5,7 @@ import com.example.demo.Event.Entity.*;
 import com.example.demo.Event.RequestBody.CreateEventReqBody;
 import com.example.demo.Event.RequestBody.UpdateEventReqBody;
 import com.example.demo.Event.Service.*;
+import com.example.demo.FileUploader.FileUploader;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Service.Family.FamilyService;
@@ -148,12 +149,14 @@ public class EventHelper {
                 items[i] = new ItemToUpload(photo.getName(), photos[i]);
             }
 
-            UploadResult result = dropBoxHelper.uploadImages(items, eventAlbum.getId(), 1);
-            ArrayList<Image> success = result.successUploads;
+            FileUploader fileUploader = new FileUploader();
+            UploadExecutionResult result = fileUploader.uploadItems(items);
+            UploadResult rs = fileUploader.getSuccessesAndFails(result);
+            ArrayList<Image> success = rs.getSuccessUploads();
 
             for (var image : success) {
                 Photo photo = newPhotos.get(image.getName());
-                photo.setUri(image.getMetadata().getUrl());
+                photo.setUri(image.getUri());
                 photoService.savePhoto(photo);
             }
 
@@ -206,12 +209,14 @@ public class EventHelper {
                 items[i] = new ItemToUpload(photo.getName(), photos[i]);
             }
 
-            UploadResult result = dropBoxHelper.uploadImages(items, eventAlbum.getId(), 1);
-            ArrayList<Image> success = result.successUploads;
+            FileUploader fileUploader = new FileUploader();
+            UploadExecutionResult result = fileUploader.uploadItems(items);
+            UploadResult rs = fileUploader.getSuccessesAndFails(result);
+            ArrayList<Image> success = rs.getSuccessUploads();
 
             for (var image : success) {
                 Photo photo = newPhotos.get(image.getName());
-                photo.setUri(image.getMetadata().getUrl());
+                photo.setUri(image.getUri());
                 photoService.savePhoto(photo);
             }
 

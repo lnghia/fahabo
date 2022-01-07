@@ -1,48 +1,37 @@
-package com.example.demo.HomeCook.Helper;
+package com.example.demo.Helpers;
 
 import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.DropBox.UploadResult;
 import com.example.demo.FileUploader.FileUploader;
-import com.example.demo.Helpers.MediaFileHelper;
-import com.example.demo.HomeCook.Entity.CookPost;
-import com.example.demo.HomeCook.Service.CookPostService;
 import com.example.demo.domain.Image;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.crypto.Data;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 @Component
-public class CookPostHelper {
+@Data
+public class CTransactionHelper {
     @Autowired
     private MediaFileHelper mediaFileHelper;
 
-    @Autowired
-    private CookPostService cookPostService;
-
-    public String saveThumbnail(String thumbnailInBytes, CookPost cookPost) throws ExecutionException, InterruptedException {
+    public String addIconToCategory(String iconInBytes, String name, int familyId) throws ExecutionException, InterruptedException {
         Date now = new Date();
         ItemToUpload[] items = new ItemToUpload[1];
-        items[0] = new ItemToUpload(cookPost.getId() + "_cuisine" + "_" + now.getTime() + ".jpg", thumbnailInBytes);
-        String thumbnailUri = null;
+        items[0] = new ItemToUpload(name + "_" + Integer.toString(familyId) + "_" + now.getTime() + ".jpg", iconInBytes);
 
         FileUploader fileUploader = new FileUploader();
-
         UploadExecutionResult result = fileUploader.uploadItems(items);
         UploadResult rs = fileUploader.getSuccessesAndFails(result);
         ArrayList<Image> success = rs.getSuccessUploads();
 
-        if (!success.isEmpty()) {
-            thumbnailUri = success.get(0).getUri();
-            cookPost.setThumbnail(success.get(0).getUri());
-            cookPostService.save(cookPost);
-        }
+        if (success.isEmpty()) return null;
 
-        return thumbnailUri;
+        return success.get(0).getUri();
     }
 }
-

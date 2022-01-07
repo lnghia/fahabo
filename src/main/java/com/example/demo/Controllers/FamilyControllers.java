@@ -2,8 +2,8 @@ package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
-import com.example.demo.Helpers.Helper;
-import com.example.demo.Helpers.UserHelper;
+import com.example.demo.FileUploader.FileUploader;
+import com.example.demo.Helpers.*;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Album.AlbumService;
@@ -53,6 +53,15 @@ public class FamilyControllers {
     @Autowired
     private FamilyService familyService;
 
+    @Autowired
+    private AlbumHelper albumHelper;
+
+    @Autowired
+    private FamilyHelper familyHelper;
+
+    @Autowired
+    private MediaFileHelper mediaFileHelper;
+
     @PostMapping("/new_family")
     public ResponseEntity<Response> createFamily(@Valid @RequestBody CreateFamilyReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
@@ -61,11 +70,12 @@ public class FamilyControllers {
         Family family = new Family(requestBody.familyName);
         familyService.saveFamily(family);
 
-        Album newAlbum = new Album("Default album");
-        newAlbum.setFamily(family);
-        newAlbum.setCreatedAt(now);
-        newAlbum.setUpdatedAt(now);
-        albumService.saveAlbum(newAlbum);
+        Album newAlbum = albumHelper.createDefaultAlbum(family, now);
+//        Album newAlbum = new Album("Default album");
+//        newAlbum.setFamily(family);
+//        newAlbum.setCreatedAt(now);
+//        newAlbum.setUpdatedAt(now);
+//        albumService.saveAlbum(newAlbum);
 
         family.setTimezone(requestBody.timezone);
         family.addAlbum(newAlbum);
@@ -73,71 +83,24 @@ public class FamilyControllers {
         familyService.saveFamily(family);
 
         if (requestBody.ids != null) {
-            requestBody.ids.forEach(id -> {
-                User tmpUser = userService.getUserById(id);
-
-                UserInFamily userInFamily = new UserInFamily(tmpUser, family);
-                userInFamily.setRole(roleService.findByName("MEMBER"));
-                userInFamilyService.saveUserInFamily(userInFamily);
-
-                tmpUser.addFamily(userInFamily);
-                family.addUser(userInFamily);
-                userService.updateUser(tmpUser);
-                familyService.saveFamily(family);
-            });
+            familyHelper.addMember(requestBody.ids, family);
         }
-        UserInFamily userInFamily = new UserInFamily(user, family);
-        userInFamily.setRole(roleService.findByName("HOST"));
-        userInFamilyService.saveUserInFamily(userInFamily);
-        user.addFamily(userInFamily);
-        family.addUser(userInFamily);
-        userService.updateUser(user);
-        familyService.saveFamily(family);
+        familyHelper.assignHost(user, family);
 
         HashMap<String, Object> data = new HashMap<>() {{
             put("alreadyHadFamily", (user.getUserInFamilies().size() > 1));
         }};
 
         if (requestBody.thumbnail != null && !requestBody.thumbnail.getBase64Data().isBlank() && !requestBody.thumbnail.getBase64Data().isEmpty() && requestBody.thumbnail.getBase64Data() != null) {
-            DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
-
-            DropBoxUploader uploader = new DropBoxUploader(clientV2);
-
             requestBody.thumbnail.setName(familyService.generateImgUploadId(family.getId()));
 
             try {
-                UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.thumbnail));
+                String thumbnailUri = familyHelper.saveThumbnail(requestBody.thumbnail, family);
 
-                if (executionResult == null) {
-                    family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
-                    familyService.saveFamily(family);
-
-                    data.put("family", family.getJson(false));
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
-                }
-
-//                HashMap<String, Object> data = new HashMap<>();
-                ArrayList<Image> successUploads = new ArrayList<>();
-                ArrayList<Image> failUploads = new ArrayList<>();
-
-                executionResult.getCreationResults().forEach((k, v) -> {
-                    if (v.isOk()) {
-                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                    } else {
-                        failUploads.add(new Image(k, v.metadata));
-                    }
-                });
-
-                if (successUploads.isEmpty()) {
-                    family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
-                    familyService.saveFamily(family);
-
+                if (thumbnailUri == null) {
                     data.put("family", family.getJson(false));
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
                 }
-
-                family.setThumbnail(successUploads.get(0).getMetadata().getUrl());
-                familyService.saveFamily(family);
             } catch (ExecutionException | InterruptedException e) {
                 family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
                 familyService.saveFamily(family);
@@ -146,6 +109,48 @@ public class FamilyControllers {
                 data.put("family", family.getJson(false));
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
             }
+
+//            try {
+//                UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.thumbnail));
+//
+//                if (executionResult == null) {
+//                    family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+//                    familyService.saveFamily(family);
+//
+//                    data.put("family", family.getJson(false));
+//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
+//                }
+//
+////                HashMap<String, Object> data = new HashMap<>();
+//                ArrayList<Image> successUploads = new ArrayList<>();
+//                ArrayList<Image> failUploads = new ArrayList<>();
+//
+//                executionResult.getCreationResults().forEach((k, v) -> {
+//                    if (v.isOk()) {
+//                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
+//                    } else {
+//                        failUploads.add(new Image(k, v.metadata));
+//                    }
+//                });
+//
+//                if (successUploads.isEmpty()) {
+//                    family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+//                    familyService.saveFamily(family);
+//
+//                    data.put("family", family.getJson(false));
+//                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
+//                }
+//
+//                family.setThumbnail(successUploads.get(0).getMetadata().getUrl());
+//                familyService.saveFamily(family);
+//            } catch (ExecutionException | InterruptedException e) {
+//                family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
+//                familyService.saveFamily(family);
+//                log.error("Threading exception while initializing client: " + e.getMessage());
+//                e.printStackTrace();
+//                data.put("family", family.getJson(false));
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(data, new ArrayList<>(List.of("upload.fail"))));
+//            }
         } else {
             family.setThumbnail(Helper.getInstance().DEFAULT_FAMILY_THUMBNAIL);
             familyService.saveFamily(family);
@@ -165,7 +170,9 @@ public class FamilyControllers {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -215,7 +222,9 @@ public class FamilyControllers {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -234,7 +243,9 @@ public class FamilyControllers {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 
@@ -252,37 +263,16 @@ public class FamilyControllers {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.invalidFile"))));
 
             }
-            DbxClientV2 dbxClientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
-            DropBoxUploader uploader = new DropBoxUploader(dbxClientV2);
-
             requestBody.thumbnail.setName(familyService.generateImgUploadId(family.getId()));
 
             try {
-                UploadExecutionResult executionResult = uploader.uploadItems(Helper.getInstance().convertAImgToParaForUploadImgs(requestBody.thumbnail));
+                String thumbnailUri = familyHelper.saveThumbnail(requestBody.thumbnail, family);
 
-                if (executionResult == null) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
-                }
-
-                ArrayList<Image> successUploads = new ArrayList<>();
-                ArrayList<Image> failUploads = new ArrayList<>();
-
-                executionResult.getCreationResults().forEach((k, v) -> {
-                    if (v.isOk()) {
-                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                    } else {
-                        failUploads.add(new Image(k, v.metadata));
-                    }
-                });
-
-                if (successUploads.isEmpty()) {
+                if(thumbnailUri == null){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
                 }
 
-                family.setThumbnail(successUploads.get(0).getMetadata().getUrl());
-                familyService.saveFamily(family);
-
-                return ResponseEntity.ok(new Response(family.getJson(successUploads.get(0).getUri()), new ArrayList<>()));
+                return ResponseEntity.ok(new Response(family.getJson(thumbnailUri), new ArrayList<>()));
             } catch (InterruptedException | ExecutionException e) {
                 log.error("Threading exception while initializing client: " + e.getMessage());
                 e.printStackTrace();
@@ -292,7 +282,9 @@ public class FamilyControllers {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(
-                new HashMap<String, String>(){{ put("familyName", family.getFamilyName()); }},
+                new HashMap<String, String>() {{
+                    put("familyName", family.getFamilyName());
+                }},
                 new ArrayList<>(List.of("validation.unauthorized"))));
     }
 }

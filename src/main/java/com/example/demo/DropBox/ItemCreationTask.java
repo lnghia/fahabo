@@ -120,7 +120,7 @@ public class ItemCreationTask implements Callable<ItemCreationTask.ItemCreationR
         }
 
         public boolean isOk(){
-            return !error.isPresent() && metadata.isPresent() && uri.isPresent();
+            return !error.isPresent() && uri.isPresent();
         }
 
 //        @Override

@@ -219,9 +219,9 @@ public class UserController {
 
         try {
             HashMap<String, Object> data = new HashMap<>();
-            Helper.getInstance().saveImg("/home/nghiale/photos/" + requestBody.getAvatar().getName(), "jpeg", itemToUpload.getInputStream());
+            Helper.getInstance().saveImg("/home/nghiale/images/" + requestBody.getAvatar().getName(), "jpeg", itemToUpload.getInputStream());
 
-            user.setAvatar("/api/v1/photos/" + requestBody.getAvatar().getName());
+            user.setAvatar("/api/v1/images/" + requestBody.getAvatar().getName());
             userService.updateUser(user);
 
             data.put("avatar", user.getAvatar());

@@ -2,6 +2,7 @@ package com.example.demo.ExpensesAndIncomes.Transaction.Helper;
 
 import com.example.demo.DropBox.DropBoxHelper;
 import com.example.demo.DropBox.ItemToUpload;
+import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.DropBox.UploadResult;
 import com.example.demo.Event.Entity.PhotoInEvent;
 import com.example.demo.ExpensesAndIncomes.Transaction.Entity.PhotosInTransactions;
@@ -16,6 +17,7 @@ import com.example.demo.ExpensesAndIncomes.Transaction.Service.TransactionGroupS
 import com.example.demo.ExpensesAndIncomes.Transaction.Service.TransactionService;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.TransactionCategory;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Service.TransactionCategoryService;
+import com.example.demo.FileUploader.FileUploader;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.Service.Photo.PhotoService;
 import com.example.demo.domain.Family.Family;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -205,14 +208,15 @@ public class TransactionHelper {
                 items[i] = new ItemToUpload(photo.getName(), reqBody.photos[i]);
             }
 
-            UploadResult result = null;
-            result = dropBoxHelper.uploadImages(items, 0, 0);
-            ArrayList<Image> success = result.getSuccessUploads();
-            ArrayList<Image> fail = result.getFailUploads();
+            FileUploader fileUploader = new FileUploader();
+            UploadExecutionResult result = fileUploader.uploadItems(items);
+            UploadResult rs = fileUploader.getSuccessesAndFails(result);
+            ArrayList<Image> success = rs.getSuccessUploads();
+            ArrayList<Image> fail = rs.getFailUploads();
 
             for (var image : success) {
                 Photo photo = newPhotos.get(image.getName());
-                photo.setUri(image.getMetadata().getUrl());
+                photo.setUri(image.getUri());
                 photoService.savePhoto(photo);
                 photos.add(photo);
             }
@@ -313,14 +317,15 @@ public class TransactionHelper {
                 items[i] = new ItemToUpload(photo.getName(), reqBody.photos[i]);
             }
 
-            UploadResult result = null;
-            result = dropBoxHelper.uploadImages(items, 0, 0);
-            ArrayList<Image> success = result.getSuccessUploads();
-            ArrayList<Image> fail = result.getFailUploads();
+            FileUploader fileUploader = new FileUploader();
+            UploadExecutionResult result = fileUploader.uploadItems(items);
+            UploadResult rs = fileUploader.getSuccessesAndFails(result);
+            ArrayList<Image> success = rs.getSuccessUploads();
+            ArrayList<Image> fail = rs.getFailUploads();
 
             for (var image : success) {
                 Photo photo = newPhotos.get(image.getName());
-                photo.setUri(image.getMetadata().getUrl());
+                photo.setUri(image.getUri());
                 photoService.savePhoto(photo);
                 ans.add(photo);
             }

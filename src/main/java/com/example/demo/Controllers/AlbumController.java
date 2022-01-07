@@ -2,10 +2,7 @@ package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
-import com.example.demo.Helpers.AlbumFamilyHelper;
-import com.example.demo.Helpers.AlbumHelper;
-import com.example.demo.Helpers.Helper;
-import com.example.demo.Helpers.UserAlbumHelper;
+import com.example.demo.Helpers.*;
 import com.example.demo.RequestForm.*;
 import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Album.AlbumService;
@@ -64,6 +61,9 @@ public class AlbumController {
 
     @Autowired
     private AlbumHelper albumHelper;
+
+    @Autowired
+    private MediaFileHelper mediaFileHelper;
 
     @PostMapping("/new_album")
     public ResponseEntity<Response> createAlbum(@Valid @RequestBody CreateAlbumReqForm requestBody) {
@@ -172,8 +172,8 @@ public class AlbumController {
             try {
                 Date now = new Date();
 
-                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
-                DropBoxUploader uploader = new DropBoxUploader(clientV2);
+//                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
+//                DropBoxUploader uploader = new DropBoxUploader(clientV2);
 
                 for (int i = 0; i < requestBody.photos.size(); ++i) {
                     photos.add(new Photo(now, now));
@@ -184,31 +184,35 @@ public class AlbumController {
                     photoService.savePhoto(photos.get(i));
                 }
 
-                ItemToUpload[] itemsToUpload = Helper.getInstance().listOfImagesToArrOfItemToUploadWithGeneratedName(requestBody.photos, photos, album.getId(), album.getFamily().getId());
+                UploadResult rs = mediaFileHelper.saveImages(requestBody.photos, (ArrayList<Photo>) photos, requestBody.albumId, album.getFamily().getId());
+                ArrayList<Image> successUploads = rs.getSuccessUploads();
+                ArrayList<Image> failUploads = rs.getFailUploads();
 
-                UploadExecutionResult result = uploader.uploadItems(itemsToUpload);
-
-                if (result == null) {
-                    for (var photo : photos) {
-                        photo.setDeleted(true);
-                        photo.getPhotoInAlbums().forEach(albumsPhotos -> albumsPhotos.setDeleted(true));
-                        photoService.savePhoto(photo);
-                    }
-
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
-                }
-
-//                HashMap<String, Object> data = new HashMap<>();
-                ArrayList<Image> successUploads = new ArrayList<>();
-                ArrayList<Image> failUploads = new ArrayList<>();
-
-                result.getCreationResults().forEach((k, v) -> {
-                    if (v.isOk()) {
-                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                    } else {
-                        failUploads.add(new Image(k, v.metadata));
-                    }
-                });
+//                ItemToUpload[] itemsToUpload = Helper.getInstance().listOfImagesToArrOfItemToUploadWithGeneratedName(requestBody.photos, photos, album.getId(), album.getFamily().getId());
+//
+//                UploadExecutionResult result = uploader.uploadItems(itemsToUpload);
+//
+//                if (result == null) {
+//                    for (var photo : photos) {
+//                        photo.setDeleted(true);
+//                        photo.getPhotoInAlbums().forEach(albumsPhotos -> albumsPhotos.setDeleted(true));
+//                        photoService.savePhoto(photo);
+//                    }
+//
+//                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
+//                }
+//
+////                HashMap<String, Object> data = new HashMap<>();
+//                ArrayList<Image> successUploads = new ArrayList<>();
+//                ArrayList<Image> failUploads = new ArrayList<>();
+//
+//                result.getCreationResults().forEach((k, v) -> {
+//                    if (v.isOk()) {
+//                        successUploads.add(new Image(k, v.metadata, v.uri.get()));
+//                    } else {
+//                        failUploads.add(new Image(k, v.metadata));
+//                    }
+//                });
 
                 if (successUploads.isEmpty()) {
                     for (var photo : photos) {
@@ -220,10 +224,19 @@ public class AlbumController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("upload.fail"))));
                 }
 
+//                ArrayList<HashMap<String, Object>> data = new ArrayList<>();
+//                for (var item : successUploads) {
+//                    Photo photo = photoService.getByName(item.getName());
+//                    photo.setUri(item.getMetadata().getUrl());
+//                    photoService.savePhoto(photo);
+//
+//                    data.add(photo.getJsonWithRedirectedUri(item.getUri()));
+//                }
+
                 ArrayList<HashMap<String, Object>> data = new ArrayList<>();
                 for (var item : successUploads) {
                     Photo photo = photoService.getByName(item.getName());
-                    photo.setUri(item.getMetadata().getUrl());
+                    photo.setUri(item.getUri());
                     photoService.savePhoto(photo);
 
                     data.add(photo.getJsonWithRedirectedUri(item.getUri()));

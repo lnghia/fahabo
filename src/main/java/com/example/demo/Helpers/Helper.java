@@ -43,6 +43,8 @@ public class Helper {
 
     public final String COOK_POST_CONTENT_DIR_ABSOLUTE_PATH = "/home/nghiale/html_contents/";
 
+    public final String IMAGE_DIR_PATH = "/home/nghiale/images/";
+
     ArrayList<Integer> dateNumInMonths = new ArrayList<>(List.of(
             0,
             31,
@@ -148,6 +150,8 @@ public class Helper {
                         "/api/v1/callback"));
     }
 
+    public String IMG_VIEW_URI_FORMAT = "/api/v1/photos/.*";
+
     public String mapToJsonString(HashMap<Object, Object> map) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(map);
@@ -186,7 +190,7 @@ public class Helper {
     }
 
     public String generatePhotoNameToUploadToAlbum(int familyId, int albumId, int photoId) {
-        return String.format("%d_%d_%d_%d.jpg", familyId, albumId, photoId, new Date().getTime());
+        return String.format("%d_%d_%d_%d.png", familyId, albumId, photoId, new Date().getTime());
     }
 
     public String formatDateWithTimeAsTimezone(Date date, String timezone) {
@@ -480,6 +484,17 @@ public class Helper {
         writer.write(fileContent);
 
         writer.close();
+    }
+
+    public void writeImgFile(String fileName, String fileExt, InputStream inputStream) throws IOException {
+        String filePath = String.format("%s" + fileName, IMAGE_DIR_PATH);
+        if (!fileExt.equals("")) {
+            filePath = String.format("%s.%s", filePath, fileExt);
+        }
+        File file = new File(filePath);
+        OutputStream outputStream = new FileOutputStream(file);
+        IOUtils.copy(inputStream, outputStream);
+        IOUtils.closeQuietly(outputStream);
     }
 
     public void saveImg(String fileName, String fileExt, InputStream inputStream) throws IOException {

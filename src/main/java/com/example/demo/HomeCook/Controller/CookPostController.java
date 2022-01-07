@@ -6,6 +6,7 @@ import com.example.demo.HomeCook.Entity.CookPost;
 import com.example.demo.HomeCook.Entity.CookPostPool;
 import com.example.demo.HomeCook.Entity.UserBookmarkCuisinePost;
 import com.example.demo.HomeCook.Entity.UserReactCookPost;
+import com.example.demo.HomeCook.Helper.CookPostHelper;
 import com.example.demo.HomeCook.RequestBody.*;
 import com.example.demo.HomeCook.Service.CookPostPoolService;
 import com.example.demo.HomeCook.Service.CookPostService;
@@ -51,6 +52,9 @@ public class CookPostController {
     @Autowired
     private UsersBookmarkCuisinePostsService usersBookmarkCuisinePostsService;
 
+    @Autowired
+    private CookPostHelper cookPostHelper;
+
     @PostMapping("/create")
     public ResponseEntity<Response> createPost(@RequestBody CreateCuisinePostReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
@@ -77,14 +81,7 @@ public class CookPostController {
 
         String thumbnailUri = null;
         try {
-            UploadResult result = dropBoxHelper.uploadImages(items, 0, 1);
-            ArrayList<Image> success = result.successUploads;
-
-            if (!success.isEmpty()) {
-                thumbnailUri = success.get(0).getUri();
-                cookPost.setThumbnail(success.get(0).getMetadata().getUrl());
-                cookPostService.save(cookPost);
-            }
+            thumbnailUri = cookPostHelper.saveThumbnail(reqBody.thumbnail, cookPost);
         } catch (ExecutionException | InterruptedException e) {
             log.error("Couldn't upload cuisine post thumbnail.");
             e.printStackTrace();
@@ -141,16 +138,8 @@ public class CookPostController {
                 cookPost.setTitle(reqBody.title);
             }
             if (reqBody.thumbnail != null && !reqBody.thumbnail.isEmpty() && !reqBody.thumbnail.isBlank()) {
-                ItemToUpload[] items = new ItemToUpload[1];
-                items[0] = new ItemToUpload(cookPost.getId() + "_cuisine" + "_" + now.getTime() + ".jpg", reqBody.thumbnail);
                 try {
-                    UploadResult result = dropBoxHelper.uploadImages(items, 0, 1);
-                    ArrayList<Image> success = result.successUploads;
-
-                    if (!success.isEmpty()) {
-                        thumbnailUri = success.get(0).getUri();
-                        cookPost.setThumbnail(success.get(0).getMetadata().getUrl());
-                    }
+                    thumbnailUri = cookPostHelper.saveThumbnail(reqBody.thumbnail, cookPost);
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Couldn't upload cuisine post thumbnail.");
                     e.printStackTrace();

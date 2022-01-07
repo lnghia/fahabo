@@ -2,7 +2,9 @@ package com.example.demo.Controllers;
 
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
+import com.example.demo.FileUploader.FileUploader;
 import com.example.demo.Helpers.Helper;
+import com.example.demo.Helpers.MediaFileHelper;
 import com.example.demo.Helpers.UserAlbumHelper;
 import com.example.demo.Helpers.UserPhotoHelper;
 import com.example.demo.RequestForm.DeletePhotoReqForm;
@@ -56,6 +58,9 @@ public class PhotoController {
 
     @Autowired
     private DropBoxAuthenticator dropBoxAuthenticator;
+
+    @Autowired
+    private MediaFileHelper mediaFileHelper;
 
     @PostMapping("/delete")
     public ResponseEntity<Response> deletePhoto(@Valid @RequestBody DeletePhotoReqForm requestBody) {
@@ -138,7 +143,6 @@ public class PhotoController {
     @PostMapping("/update_photo")
     public ResponseEntity<Response> updatePhoto(@Valid @RequestBody UpdatePhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-//        Album album = albumService.findById(requestBody.);
 
         if (userPhotoHelper.canUserUpdatePhoto(user, requestBody.photoId)) {
             Photo photo = photoService.getById(requestBody.photoId);
@@ -147,42 +151,20 @@ public class PhotoController {
 
             if (requestBody.base64Data != null && !requestBody.base64Data.isBlank() && !requestBody.base64Data.isEmpty()) {
                 try {
-                    DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
-                    DropBoxUploader uploader = new DropBoxUploader(clientV2);
-
                     Image image = new Image();
                     image.setName(photo.getName());
                     image.setBase64Data(requestBody.base64Data);
 
-                    UploadExecutionResult result = uploader.uploadItems(Helper.getInstance().listOfImagesToArrOfItemToUploadWithGeneratedName(List.of(image),
-                            List.of(photo),
-                            albumId,
-                            familyId
-                    ));
+                    String photoUri = mediaFileHelper.updatePhoto(image, photo, albumId, familyId);
 
-                    if (result == null) {
+                    if (photoUri == null) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
                     }
 
-                    ArrayList<Image> successUploads = new ArrayList<>();
-                    ArrayList<Image> failUploads = new ArrayList<>();
-
-                    result.getCreationResults().forEach((k, v) -> {
-                        if (v.isOk()) {
-                            successUploads.add(new Image(k, v.metadata, v.uri.get()));
-                        } else {
-                            failUploads.add(new Image(k, v.metadata));
-                        }
-                    });
-
-                    if (successUploads.isEmpty()) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
-                    }
-
-                    photo.setUri(successUploads.get(0).getMetadata().getUrl());
+                    photo.setUri(photoUri);
                     photoService.savePhoto(photo);
 
-                    return ResponseEntity.ok(new Response(photo.getJsonWithRedirectedUri(successUploads.get(0).getUri()), new ArrayList<>()));
+                    return ResponseEntity.ok(new Response(photo.getJsonWithRedirectedUri(photoUri), new ArrayList<>()));
                 } catch (ExecutionException | InterruptedException e) {
                     log.error("Cound not upload image", e.getMessage());
                     e.printStackTrace();
@@ -196,17 +178,16 @@ public class PhotoController {
 
     @GetMapping(value = "/{id:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
-        File file = new File("/home/nghiale/photos/" + id);
         try {
-            FileInputStream fileInputStream = new FileInputStream(file);
+            FileInputStream fileInputStream = mediaFileHelper.readImg(id);
 
             return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(fileInputStream.readAllBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (IOException e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 }
