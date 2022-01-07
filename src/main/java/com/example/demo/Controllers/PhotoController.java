@@ -15,14 +15,17 @@ import com.example.demo.ResponseFormat.Response;
 import com.example.demo.Service.Album.AlbumService;
 import com.example.demo.Service.AlbumsPhotos.AlbumsPhotosService;
 import com.example.demo.Service.Photo.PhotoService;
+import com.example.demo.Service.UserService;
 import com.example.demo.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -62,6 +65,9 @@ public class PhotoController {
     @Autowired
     private MediaFileHelper mediaFileHelper;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/delete")
     public ResponseEntity<Response> deletePhoto(@Valid @RequestBody DeletePhotoReqForm requestBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
@@ -72,12 +78,14 @@ public class PhotoController {
         for (int photoId : requestBody.photoIds) {
             if (photoService.checkIfPhotoExistById(photoId) && userPhotoHelper.canUserUpdatePhoto(user, photoId)) {
                 Photo photo = photoService.getById(photoId);
-                AlbumsPhotos albumsPhotos = albumsPhotosService.getByPhotoId(photoId);
+                ArrayList<AlbumsPhotos> albumsPhotos = albumsPhotosService.getByPhotoId(photoId);
 
-                albumsPhotos.setDeleted(true);
-                photo.setDeleted(true);
-                albumsPhotosService.saveAlbumsPhotos(albumsPhotos);
-                photoService.savePhoto(photo);
+                for (var albumPhoto : albumsPhotos){
+                    albumPhoto.setDeleted(true);
+                    photo.setDeleted(true);
+                    albumsPhotosService.saveAlbumsPhotos(albumPhoto);
+                    photoService.savePhoto(photo);
+                }
 
 //                return ResponseEntity.ok(new Response("deleted successfully.", new ArrayList<>()));
             }
@@ -146,8 +154,8 @@ public class PhotoController {
 
         if (userPhotoHelper.canUserUpdatePhoto(user, requestBody.photoId)) {
             Photo photo = photoService.getById(requestBody.photoId);
-            int albumId = albumsPhotosService.getAlbumIdByPhotoId(requestBody.photoId);
-            int familyId = albumService.getFamilyIdByAlbumId(albumId);
+            ArrayList<Integer> albumId = albumsPhotosService.getAlbumIdByPhotoId(requestBody.photoId);
+            int familyId = albumService.getFamilyIdByAlbumId(albumId.get(0));
 
             if (requestBody.base64Data != null && !requestBody.base64Data.isBlank() && !requestBody.base64Data.isEmpty()) {
                 try {
@@ -155,7 +163,7 @@ public class PhotoController {
                     image.setName(photo.getName());
                     image.setBase64Data(requestBody.base64Data);
 
-                    String photoUri = mediaFileHelper.updatePhoto(image, photo, albumId, familyId);
+                    String photoUri = mediaFileHelper.updatePhoto(image, photo, albumId.get(0), familyId);
 
                     if (photoUri == null) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));

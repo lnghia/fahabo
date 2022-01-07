@@ -7,13 +7,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+
 @Repository
 public interface AlbumsPhotosRepo extends JpaRepository<AlbumsPhotos, Integer> {
     @Query(value = "SELECT album_id FROM photos_in_albums WHERE photo_id=:photoId AND is_deleted=FALSE", nativeQuery = true)
-    Integer getAlbumIdByPhotoId(@Param("photoId") int photoId);
+    ArrayList<Integer> getAlbumIdByPhotoId(@Param("photoId") int photoId);
 
     @Query(value = "SELECT * FROM photos_in_albums WHERE photo_id=:photoId AND is_deleted=FALSE", nativeQuery = true)
-    AlbumsPhotos getByPhotoId(@Param("photoId") int photoId);
+    ArrayList<AlbumsPhotos> getByPhotoId(@Param("photoId") int photoId);
 
     @Modifying
     @Query(value = "UPDATE photos_in_albums SET is_deleted=TRUE " +

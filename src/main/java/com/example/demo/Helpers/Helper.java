@@ -150,7 +150,7 @@ public class Helper {
                         "/api/v1/callback"));
     }
 
-    public String IMG_VIEW_URI_FORMAT = "/api/v1/photos/.*";
+    public String IMG_VIEW_URI_FORMAT = "/api/v1/photos/.*[.].*";
 
     public String mapToJsonString(HashMap<Object, Object> map) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

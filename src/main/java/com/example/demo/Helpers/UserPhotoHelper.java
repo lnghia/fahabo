@@ -10,6 +10,8 @@ import com.example.demo.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 public class UserPhotoHelper {
     @Autowired
@@ -28,8 +30,8 @@ public class UserPhotoHelper {
     private FamilyService familyService;
 
     public boolean canUserUpdatePhoto(User user, int photoId){
-        int albumId = albumsPhotosService.getAlbumIdByPhotoId(photoId);
-        int familyId = albumService.getFamilyIdByAlbumId(albumId);
+        ArrayList<Integer> albumId = albumsPhotosService.getAlbumIdByPhotoId(photoId);
+        int familyId = albumService.getFamilyIdByAlbumId(albumId.get(0));
         Family family = familyService.findById(familyId);
 
         return family.checkIfUserExist(user);

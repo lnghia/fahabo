@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class AlbumsPhotosServiceImpl implements AlbumsPhotosService {
@@ -18,12 +20,12 @@ public class AlbumsPhotosServiceImpl implements AlbumsPhotosService {
     }
 
     @Override
-    public int getAlbumIdByPhotoId(int photoId) {
+    public ArrayList<Integer> getAlbumIdByPhotoId(int photoId) {
         return albumsPhotosRepo.getAlbumIdByPhotoId(photoId);
     }
 
     @Override
-    public AlbumsPhotos getByPhotoId(int photoId) {
+    public ArrayList<AlbumsPhotos> getByPhotoId(int photoId) {
         return albumsPhotosRepo.getByPhotoId(photoId);
     }
 
