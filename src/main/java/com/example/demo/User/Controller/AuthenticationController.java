@@ -188,6 +188,7 @@ public class AuthenticationController {
                 ((requestBody.getBirthday() != null) ? formatter.parse(requestBody.getBirthday()) : null),
                 ((requestBody.getLanguageCode() != null) ? requestBody.getLanguageCode() : null),
                 requestBody.getPassword());
+        Map<String, Object> data;
 
         newuser.setSocialAccountType(socialAccountTypeService.getById(requestBody.getAuthType()));
 
@@ -217,7 +218,21 @@ public class AuthenticationController {
         newuser.setAvatar(userHelper.DEFAULT_AVATAR);
         userService.saveUser(newuser);
 
-        return ResponseEntity.ok(new Response(userHelper.UserToJson(newuser), new ArrayList<>()));
+        if (!requestBody.getAuthType().equals("MANUAL_AUTH")) {
+            CustomUserDetails userDetails = new CustomUserDetails(newuser);
+            String access_token = tokenProvider.generateAccessToken(userDetails);
+            String refresh_token = tokenProvider.generateRefreshToken(userDetails);
+            data = new HashMap<>() {{
+                put("accessToken", access_token);
+                put("refreshToken", refresh_token);
+                put("isValidEmail", true);
+                put("user", userHelper.UserToJson(newuser));
+            }};
+        } else {
+            data = userHelper.UserToJson(newuser);
+        }
+
+        return ResponseEntity.ok(new Response(data, new ArrayList<>()));
     }
 
     @PostMapping("/register_with_phone")
