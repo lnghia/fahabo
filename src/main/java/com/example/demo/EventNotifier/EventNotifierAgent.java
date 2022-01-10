@@ -48,20 +48,20 @@ public class EventNotifierAgent {
 
     @Scheduled(fixedDelay = 55000)
     public void notifyAboutUpComingEvents() {
-        Date start = new Date();
+//        Date start = new Date();
 
-        log.info("Checking for upcoming events ...");
+//        log.info("Checking for upcoming events ...");
 
         ArrayList<Family> families = familyService.findAllFamily();
         Helper helper = Helper.getInstance();
 
         for (var family : families) {
             if (family.getId() == 0) continue;
-            log.debug(TimeZone.getTimeZone(family.getTimezone()).getDisplayName());
+//            log.debug(TimeZone.getTimeZone(family.getTimezone()).getDisplayName());
             ArrayList<Event> eventsIn30Mins = eventService.findAllUpComingEventsIn30Mins(family.getTimezone());
             String langCode = helper.getLangCode(family);
 
-            log.info(String.format("Notifying %d events ...", eventsIn30Mins.size()));
+//            log.info(String.format("Notifying %d events ...", eventsIn30Mins.size()));
             for (var event : eventsIn30Mins) {
                 if (event.getEventAssignUsers().isEmpty()) {
                     firebaseMessageHelper.notifyAllUsersInFamily(
@@ -98,9 +98,9 @@ public class EventNotifierAgent {
             }
         }
 
-        Date end = new Date();
+//        Date end = new Date();
 
-        log.info(String.format("Checking upcoming events completes in %d milliseconds", end.getTime() - start.getTime()));
+//        log.info(String.format("Checking upcoming events completes in %d milliseconds", end.getTime() - start.getTime()));
     }
 
     @Scheduled(fixedDelay = 24 * 60 * 60 * 1000)
