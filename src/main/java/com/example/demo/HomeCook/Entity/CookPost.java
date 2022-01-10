@@ -1,8 +1,7 @@
 package com.example.demo.HomeCook.Entity;
 
 import com.example.demo.Helpers.Helper;
-import com.example.demo.domain.User;
-import com.google.rpc.Help;
+import com.example.demo.User.Entity.User;
 
 import javax.persistence.*;
 import java.io.FileNotFoundException;

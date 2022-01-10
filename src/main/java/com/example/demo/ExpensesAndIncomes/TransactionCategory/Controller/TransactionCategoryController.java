@@ -1,5 +1,6 @@
 package com.example.demo.ExpensesAndIncomes.TransactionCategory.Controller;
 
+import com.example.demo.Album.Entity.Image;
 import com.example.demo.DropBox.*;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.TransactionCategory;
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.RequestBody.CreateTransactionCategoryReqBody;
@@ -9,9 +10,10 @@ import com.example.demo.ExpensesAndIncomes.TransactionCategory.Service.Transacti
 import com.example.demo.ExpensesAndIncomes.TransactionCategoryGroup.Service.TransactionCategoryGroupService;
 import com.example.demo.Helpers.CTransactionHelper;
 import com.example.demo.ResponseFormat.Response;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.domain.*;
-import com.example.demo.domain.Family.Family;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.User.Entity.CustomUserDetails;
+import com.example.demo.User.Entity.User;
+import com.example.demo.Family.Entity.Family;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

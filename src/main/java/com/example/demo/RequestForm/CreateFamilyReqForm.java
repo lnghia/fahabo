@@ -1,8 +1,7 @@
 package com.example.demo.RequestForm;
 
 import com.example.demo.Validators.FamilyName.ValidFamilyName;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.User;
+import com.example.demo.Album.Entity.Image;
 
 import java.util.List;
 

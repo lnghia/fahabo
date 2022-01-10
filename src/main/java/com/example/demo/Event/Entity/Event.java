@@ -1,9 +1,9 @@
 package com.example.demo.Event.Entity;
 
 import com.example.demo.Helpers.Helper;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.Photo;
-import com.example.demo.domain.User;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.Album.Entity.Photo;
+import com.example.demo.User.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;

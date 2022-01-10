@@ -1,7 +1,7 @@
 package com.example.demo.MetaModel;
 
-import com.example.demo.domain.ChoresAssignUsers;
-import com.example.demo.domain.User;
+import com.example.demo.Chore.Entity.ChoresAssignUsers;
+import com.example.demo.User.Entity.User;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

@@ -2,7 +2,7 @@ package com.example.demo.UserFirebaseToken.Helper;
 
 import com.example.demo.UserFirebaseToken.Entity.UserFirebaseToken;
 import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

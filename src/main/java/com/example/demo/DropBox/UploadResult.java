@@ -1,6 +1,6 @@
 package com.example.demo.DropBox;
 
-import com.example.demo.domain.Image;
+import com.example.demo.Album.Entity.Image;
 
 import java.util.ArrayList;
 

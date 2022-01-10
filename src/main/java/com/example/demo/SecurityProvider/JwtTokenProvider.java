@@ -1,6 +1,6 @@
 package com.example.demo.SecurityProvider;
 
-import com.example.demo.domain.CustomUserDetails;
+import com.example.demo.User.Entity.CustomUserDetails;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

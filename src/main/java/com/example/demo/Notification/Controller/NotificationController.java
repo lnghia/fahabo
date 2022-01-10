@@ -1,19 +1,18 @@
 package com.example.demo.Notification.Controller;
 
-import com.example.demo.Helpers.Helper;
 import com.example.demo.Notification.Entity.Notification;
 import com.example.demo.Notification.RequestBody.ClearChatNotiReqBody;
 import com.example.demo.Notification.RequestBody.ClickNotificationReqBody;
 import com.example.demo.Notification.RequestBody.GetNotificationsReqBody;
 import com.example.demo.Notification.Service.NotificationService;
 import com.example.demo.ResponseFormat.Response;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.Service.UserInFamily.UserInFamilyService;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
-import com.example.demo.domain.UserInFamily;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.UserInFamily.Service.UserInFamily.UserInFamilyService;
+import com.example.demo.User.Service.UserService;
+import com.example.demo.User.Entity.CustomUserDetails;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.User.Entity.User;
+import com.example.demo.UserInFamily.Entity.UserInFamily;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

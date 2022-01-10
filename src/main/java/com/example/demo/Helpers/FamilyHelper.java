@@ -1,24 +1,22 @@
 package com.example.demo.Helpers;
 
+import com.example.demo.Album.Helper.AlbumHelper;
 import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.DropBox.UploadResult;
 import com.example.demo.Event.Helper.EventHelper;
 import com.example.demo.FileUploader.FileUploader;
-import com.example.demo.ResponseFormat.Response;
-import com.example.demo.Service.ChoresAssignUsers.ChoresAssignUsersService;
-import com.example.demo.Service.Family.FamilyService;
+import com.example.demo.Chore.Service.ChoresAssignUsers.ChoresAssignUsersService;
+import com.example.demo.Family.Service.Family.FamilyService;
 import com.example.demo.Service.Role.RoleService;
-import com.example.demo.Service.UserInFamily.UserInFamilyService;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.User;
-import com.example.demo.domain.UserInFamily;
+import com.example.demo.UserInFamily.Service.UserInFamily.UserInFamilyService;
+import com.example.demo.User.Service.UserService;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.User.Entity.User;
+import com.example.demo.UserInFamily.Entity.UserInFamily;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

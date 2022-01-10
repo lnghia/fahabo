@@ -1,7 +1,7 @@
 package com.example.demo.Communication.Call.Entity;
 
 import com.example.demo.Communication.Call.IdClass.UserInCallRoomIdClass;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 
 import javax.persistence.*;
 

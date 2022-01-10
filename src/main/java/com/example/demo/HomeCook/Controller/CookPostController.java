@@ -1,11 +1,7 @@
 package com.example.demo.HomeCook.Controller;
 
-import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.*;
-import com.example.demo.HomeCook.Entity.CookPost;
-import com.example.demo.HomeCook.Entity.CookPostPool;
-import com.example.demo.HomeCook.Entity.UserBookmarkCuisinePost;
-import com.example.demo.HomeCook.Entity.UserReactCookPost;
+import com.example.demo.HomeCook.Entity.*;
 import com.example.demo.HomeCook.Helper.CookPostHelper;
 import com.example.demo.HomeCook.RequestBody.*;
 import com.example.demo.HomeCook.Service.CookPostPoolService;
@@ -13,15 +9,14 @@ import com.example.demo.HomeCook.Service.CookPostService;
 import com.example.demo.HomeCook.Service.UserReactCookPostService;
 import com.example.demo.HomeCook.Service.UsersBookmarkCuisinePostsService;
 import com.example.demo.ResponseFormat.Response;
-import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.CustomUserDetails;
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.User.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -237,17 +232,9 @@ public class CookPostController {
         String avatar = null;
         String thumbnail = null;
         try {
-            DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
-            GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(
-                    List.of(new Image(user.getName(), user.getAvatar()),
-                            new Image(Integer.toString(cookPost.getId()), cookPost.getThumbnail()))
-            ));
-
-            if (executionResult != null && !executionResult.getSuccessfulResults().isEmpty()) {
-                avatar = (executionResult.getSuccessfulResults().containsKey(user.getName())) ? executionResult.getSuccessfulResults().get(user.getName()).getUri() : null;
-                thumbnail = (executionResult.getSuccessfulResults().containsKey(Integer.toString(cookPost.getId()))) ?
-                        executionResult.getSuccessfulResults().get(Integer.toString(cookPost.getId())).getUri() : null;
-            }
+            ThumbnailAvatarFetchResult result = cookPostHelper.getThumbnailAndAvatar(user, cookPost);
+            avatar = result.avatar;
+            thumbnail = result.thumbnail;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't get author avatar ready to view url.");
             e.printStackTrace();
@@ -298,10 +285,9 @@ public class CookPostController {
                                            @RequestParam(value = "size", defaultValue = "5") Integer size,
                                            @RequestBody GetAllCookPostReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        ArrayList<CookPost> cookPosts = new ArrayList<>();
 
         ArrayList<CookPostPool> cookPostPools = cookPostPoolService.findAllByUser(user.getId(), reqBody.searchText, page, size);
-        ArrayList<CookPost> cookPostArrayList = new ArrayList<>();
+        ArrayList<CookPost> cookPostArrayList;
         HashSet<Integer> hashSet = new HashSet<>();
 
         if (cookPostPools.isEmpty()) {
@@ -324,36 +310,10 @@ public class CookPostController {
             }
         }
 
-        ArrayList<Image> thumbnails = new ArrayList<>();
-        ArrayList<Image> avatars = new ArrayList<>();
-        for (var item : cookPostArrayList) {
-            thumbnails.add(new Image(Integer.toString(item.getId()), item.getThumbnail()));
-            avatars.add(new Image(Integer.toString(item.getId()), item.getAuthor().getAvatar()));
-        }
-
-        ArrayList<HashMap<String, Object>> data = new ArrayList<>();
         try {
-            DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
-            DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
-            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
-            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
+            ArrayList<HashMap<String, Object>> data = cookPostHelper.getJsonWithThumbnailsAvatars(user, cookPostArrayList);
 
-            if (executionResultAvatar != null && executionResultAvatar != null) {
-                for (var item : cookPostArrayList) {
-                    String key = Integer.toString(item.getId());
-                    String thumbnail = (thumbnailSuccess != null && thumbnailSuccess.containsKey(key)) ? thumbnailSuccess.get(key).getUri() : null;
-                    String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
-                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), item.getId());
-                    int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getId());
-                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", userBookmarkCuisinePost != null));
-                }
-
-                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
-            }
-
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't get author avatar ready to view url.");
             e.printStackTrace();
@@ -378,21 +338,10 @@ public class CookPostController {
         UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), id);
         boolean isBookmarked = userBookmarkCuisinePost != null;
 
-        ArrayList<Image> thumbnails = new ArrayList<>();
-        ArrayList<Image> avatars = new ArrayList<>();
-        thumbnails.add(new Image(Integer.toString(cookPost.getId()), cookPost.getThumbnail()));
-        avatars.add(new Image(Integer.toString(cookPost.getId()), cookPost.getAuthor().getAvatar()));
         try {
-            DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
-            DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
-            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
-            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
-
-            String key = Integer.toString(cookPost.getId());
-            String thumbnail = thumbnailSuccess.containsKey(key) ? thumbnailSuccess.get(key).getUri() : null;
-            String avatar = avatarSuccess.containsKey(key) ? avatarSuccess.get(key).getUri() : null;
+            ThumbnailAvatarFetchResult result = cookPostHelper.getThumbnailAndAvatar(user, cookPost);
+            String thumbnail = result.thumbnail;
+            String avatar = result.avatar;
 
             return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked), null));
         } catch (InterruptedException | ExecutionException e) {
@@ -428,22 +377,10 @@ public class CookPostController {
             usersBookmarkCuisinePostsService.save(rs);
         }
 
-        ArrayList<Image> thumbnails = new ArrayList<>();
-        ArrayList<Image> avatars = new ArrayList<>();
-        String key = Integer.toString(cookPost.getId());
-        thumbnails.add(new Image(key, cookPost.getThumbnail()));
-        avatars.add(new Image(key, cookPost.getAuthor().getAvatar()));
-        DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
-        DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
-        String thumbnail = null;
-        String avatar = null;
         try {
-            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
-            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
-            thumbnail = thumbnailSuccess.containsKey(key) ? thumbnailSuccess.get(key).getUri() : null;
-            avatar = avatarSuccess.containsKey(key) ? avatarSuccess.get(key).getUri() : cookPost.getAuthor().getAvatar();
+            ThumbnailAvatarFetchResult result = cookPostHelper.getThumbnailAndAvatar(user, cookPost);
+            String thumbnail = result.thumbnail;
+            String avatar = result.avatar;
 
             return ResponseEntity.ok(new Response(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked), null));
         } catch (InterruptedException | ExecutionException e) {
@@ -461,40 +398,12 @@ public class CookPostController {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 
         ArrayList<UserBookmarkCuisinePost> rs = usersBookmarkCuisinePostsService.findAllByUserSortByCreatedDate(user.getId(), reqBody.searchText, page, size);
+        ArrayList<CookPost> cookPosts = new ArrayList<>(rs.stream().map(UserBookmarkCuisinePost::getCookPost).collect(Collectors.toList()));
 
-        ArrayList<Image> thumbnails = new ArrayList<>();
-        ArrayList<Image> avatars = new ArrayList<>();
-        for (var item : rs) {
-            CookPost cookPost = item.getCookPost();
-            thumbnails.add(new Image(Integer.toString(cookPost.getId()), cookPost.getThumbnail()));
-            avatars.add(new Image(Integer.toString(cookPost.getId()), cookPost.getAuthor().getAvatar()));
-        }
-
-        ArrayList<HashMap<String, Object>> data = new ArrayList<>();
         try {
-            DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
-            DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
-            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
-            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
+            ArrayList<HashMap<String, Object>> data = cookPostHelper.getJsonWithThumbnailsAvatars(user, cookPosts);
 
-            if (executionResultAvatar != null && executionResultAvatar != null) {
-                for (var item : rs) {
-                    CookPost cookPost = item.getCookPost();
-                    String key = Integer.toString(cookPost.getId());
-                    String thumbnail = (thumbnailSuccess != null && thumbnailSuccess.containsKey(key)) ? thumbnailSuccess.get(key).getUri() : null;
-                    String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
-                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), cookPost.getId());
-                    int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getCookPost().getId());
-                    boolean isBookmarked = userBookmarkCuisinePost != null;
-                    data.add(cookPost.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", isBookmarked));
-                }
-
-                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
-            }
-
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't get author avatar ready to view url.");
             e.printStackTrace();
@@ -511,36 +420,10 @@ public class CookPostController {
 
         ArrayList<CookPost> rs = cookPostService.findAllByAuthor(user.getId(), reqBody.searchText, page, size);
 
-        ArrayList<Image> thumbnails = new ArrayList<>();
-        ArrayList<Image> avatars = new ArrayList<>();
-        for (var item : rs) {
-            thumbnails.add(new Image(Integer.toString(item.getId()), item.getThumbnail()));
-            avatars.add(new Image(Integer.toString(item.getId()), item.getAuthor().getAvatar()));
-        }
-
-        ArrayList<HashMap<String, Object>> data = new ArrayList<>();
         try {
-            DropBoxRedirectedLinkGetter getterAvatar = new DropBoxRedirectedLinkGetter();
-            DropBoxRedirectedLinkGetter getterThumbnail = new DropBoxRedirectedLinkGetter();
-            GetRedirectedLinkExecutionResult executionResultThumbnails = getterThumbnail.getRedirectedLinks(thumbnails);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> thumbnailSuccess = executionResultThumbnails.getSuccessfulResults();
-            GetRedirectedLinkExecutionResult executionResultAvatar = getterAvatar.getRedirectedLinks(avatars);
-            HashMap<String, GetRedirectedLinkTask.GetRedirectedLinkResult> avatarSuccess = executionResultAvatar.getSuccessfulResults();
+            ArrayList<HashMap<String, Object>> data = cookPostHelper.getJsonWithThumbnailsAvatars(user, rs);
 
-            if (executionResultAvatar != null && executionResultAvatar != null) {
-                for (var item : rs) {
-                    String key = Integer.toString(item.getId());
-                    String thumbnail = (thumbnailSuccess != null && thumbnailSuccess.containsKey(key)) ? thumbnailSuccess.get(key).getUri() : null;
-                    String avatar = (avatarSuccess != null && avatarSuccess.containsKey(key)) ? avatarSuccess.get(key).getUri() : null;
-                    UserReactCookPost userReactCookPost = userReactCookPostService.findByUserAndPost(user.getId(), item.getId());
-                    int userReactType = (userReactCookPost != null) ? userReactCookPost.getReaction() : 0;
-                    UserBookmarkCuisinePost userBookmarkCuisinePost = usersBookmarkCuisinePostsService.findByUserAndPost(user.getId(), item.getId());
-                    data.add(item.getJson(thumbnail, avatar, userReactType, "Asia/Saigon", userBookmarkCuisinePost != null));
-                }
-
-                return ResponseEntity.ok(new Response(data, new ArrayList<>()));
-            }
-
+            return ResponseEntity.ok(new Response(data, new ArrayList<>()));
         } catch (InterruptedException | ExecutionException e) {
             log.error("Couldn't get author avatar ready to view url.");
             e.printStackTrace();

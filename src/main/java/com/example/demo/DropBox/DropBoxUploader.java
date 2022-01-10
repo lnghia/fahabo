@@ -1,14 +1,8 @@
 package com.example.demo.DropBox;
 
-import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.sharing.PathLinkMetadata;
 import com.example.demo.Helpers.Helper;
-import com.example.demo.domain.Image;
-import javassist.compiler.ast.Pair;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.io.InputStream;

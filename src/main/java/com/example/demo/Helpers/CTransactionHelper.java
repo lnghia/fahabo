@@ -4,12 +4,11 @@ import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.DropBox.UploadResult;
 import com.example.demo.FileUploader.FileUploader;
-import com.example.demo.domain.Image;
+import com.example.demo.Album.Entity.Image;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;

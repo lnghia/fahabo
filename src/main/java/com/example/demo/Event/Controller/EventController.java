@@ -9,14 +9,13 @@ import com.example.demo.Firebase.FirebaseMessageHelper;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.RequestForm.GetChoresReqForm;
 import com.example.demo.ResponseFormat.Response;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.Service.Photo.PhotoService;
-import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.Photo;
-import com.example.demo.domain.User;
-import com.google.rpc.Help;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.Album.Service.Photo.PhotoService;
+import com.example.demo.User.Entity.CustomUserDetails;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.Album.Entity.Photo;
+import com.example.demo.User.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,10 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -74,10 +70,20 @@ public class EventController {
         String langCode = (family.getTimezone() == null) ? "en" : ((family.getTimezone().equals("Asia/Ho_Chi_Minh") || family.getTimezone().equals("Asia/Saigon")) ? "vi" : "en");
 
         try {
+            Date to = Helper.getInstance().formatDate(reqBody.to);
+            Date from = Helper.getInstance().formatDate(reqBody.from);
+
+            if (to.before(from)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation.toBeforeFromInValid"))));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        try {
             if (reqBody.repeatType == null || reqBody.repeatType.isEmpty() || reqBody.repeatType.isBlank()) {
                 Event event = eventHelper.createEvent(reqBody, user);
                 events.add(event);
-                GroupEvent headGroupEvent = groupEventService.createGroupEvent(event, event);
             } else {
                 events.addAll(eventHelper.createRepeatEvent(reqBody, user));
             }
@@ -121,8 +127,6 @@ public class EventController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(null, new ArrayList<>(List.of("validation."))));
         } catch (ExecutionException | InterruptedException e) {
-//            event.setDeleted(false);
-//            eventService.saveEvent(event);
             log.error("Couldn't upload photos.", e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(null, new ArrayList<>(List.of("unknownError"))));
@@ -272,8 +276,6 @@ public class EventController {
                                                     @RequestParam(name = "size", required = false, defaultValue = "5") Integer size,
                                                     @Valid @RequestBody GetEventPhotoReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-//        int headEventId = groupEventService.findHeadEventId(reqBody.eventId);
-//        Event headEvent = eventService.getById(headEventId);
         Event event = eventService.getById(reqBody.eventId);
 
         if (event.getFamily().checkIfUserExist(user)) {
@@ -323,7 +325,6 @@ public class EventController {
     @PostMapping("/detail")
     private ResponseEntity<Response> getEventDetail(@RequestBody GetEventDetailReqBody reqBody) {
         User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
-        Helper helper = Helper.getInstance();
         Event event = eventService.getById(reqBody.eventId);
 
         if(event == null){

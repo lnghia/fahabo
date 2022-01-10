@@ -2,7 +2,6 @@ package com.example.demo.Event.Repo;
 
 import com.example.demo.Event.Entity.PhotoInEvent;
 import com.example.demo.domain.IdClasses.PhotoInEventId;
-import com.example.demo.domain.PhotoInChore;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

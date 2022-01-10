@@ -1,8 +1,7 @@
 package com.example.demo.ExpensesAndIncomes.Transaction.Entity;
 
 import com.example.demo.ExpensesAndIncomes.Transaction.IdClass.PhotosInTransactionsIdClass;
-import com.example.demo.domain.Photo;
-import liquibase.pro.packaged.C;
+import com.example.demo.Album.Entity.Photo;
 
 import javax.persistence.*;
 

@@ -1,18 +1,14 @@
 package com.example.demo.Firebase;
 
-import com.example.demo.Helpers.Helper;
 import com.example.demo.Notification.Helper.NotificationHelper;
-import com.example.demo.Notification.Service.NotificationService;
-import com.example.demo.UserFirebaseToken.Helper.UserFirebaseTokenHelper;
 import com.example.demo.UserFirebaseToken.Service.UserFirebaseTokenService;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.User.Entity.User;
 import com.google.firebase.messaging.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

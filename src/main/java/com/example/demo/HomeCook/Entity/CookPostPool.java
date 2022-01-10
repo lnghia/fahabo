@@ -1,7 +1,7 @@
 package com.example.demo.HomeCook.Entity;
 
 import com.example.demo.HomeCook.IdClass.UserReactCookPostIdClass;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 
 import javax.persistence.*;
 import java.util.Date;

@@ -1,7 +1,6 @@
 package com.example.demo.Event.Repo;
 
 import com.example.demo.Event.Entity.Event;
-import com.example.demo.domain.Chore;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

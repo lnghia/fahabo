@@ -11,18 +11,15 @@ import com.example.demo.Helpers.Helper;
 import com.example.demo.HomeCook.Entity.CookPost;
 //import com.example.demo.HomeCook.Service.CookPostService;
 import com.example.demo.HomeCook.Service.CookPostService;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
-import liquibase.pro.packaged.A;
-import liquibase.pro.packaged.E;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.User.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 import java.util.stream.Collectors;
 

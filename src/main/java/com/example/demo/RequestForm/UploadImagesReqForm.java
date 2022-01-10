@@ -1,6 +1,6 @@
 package com.example.demo.RequestForm;
 
-import com.example.demo.domain.Image;
+import com.example.demo.Album.Entity.Image;
 import lombok.Data;
 
 import java.util.ArrayList;

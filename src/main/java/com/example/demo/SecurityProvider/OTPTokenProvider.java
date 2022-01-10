@@ -1,12 +1,10 @@
 package com.example.demo.SecurityProvider;
 
 import com.example.demo.Exceptions.OTPGenerationCoolDownHasNotMet;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 

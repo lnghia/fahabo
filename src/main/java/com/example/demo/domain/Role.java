@@ -1,5 +1,7 @@
 package com.example.demo.domain;
 
+import com.example.demo.UserInFamily.Entity.UserInFamily;
+
 import javax.persistence.*;
 import java.util.Set;
 

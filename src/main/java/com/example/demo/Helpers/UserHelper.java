@@ -3,9 +3,8 @@ package com.example.demo.Helpers;
 import com.dropbox.core.v2.DbxClientV2;
 import com.example.demo.DropBox.DropBoxAuthenticator;
 import com.example.demo.DropBox.DropBoxUploader;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;

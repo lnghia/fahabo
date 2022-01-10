@@ -1,6 +1,6 @@
 package com.example.demo.Validators.PhotoId;
 
-import com.example.demo.Service.Photo.PhotoService;
+import com.example.demo.Album.Service.Photo.PhotoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;

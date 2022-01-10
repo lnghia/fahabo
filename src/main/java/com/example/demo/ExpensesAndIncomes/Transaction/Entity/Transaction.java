@@ -2,10 +2,7 @@ package com.example.demo.ExpensesAndIncomes.Transaction.Entity;
 
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.TransactionCategory;
 import com.example.demo.Helpers.Helper;
-import com.example.demo.domain.Family.Family;
-import liquibase.pro.packaged.C;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.example.demo.Family.Entity.Family;
 
 import javax.persistence.*;
 import java.math.BigDecimal;

@@ -1,7 +1,7 @@
 package com.example.demo.Event.Entity;
 
 import com.example.demo.domain.IdClasses.EventAssignUserId;
-import com.example.demo.domain.User;
+import com.example.demo.User.Entity.User;
 
 import javax.persistence.*;
 

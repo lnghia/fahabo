@@ -1,7 +1,7 @@
 package com.example.demo.Event.Entity;
 
 import com.example.demo.domain.IdClasses.PhotoInEventId;
-import com.example.demo.domain.Photo;
+import com.example.demo.Album.Entity.Photo;
 
 import javax.persistence.*;
 

@@ -1,7 +1,7 @@
 package com.example.demo.Validators.AuthType;
 
 
-import com.example.demo.Service.SocialAccountType.SocialAccountTypeService;
+import com.example.demo.SocialAccountType.Service.SocialAccountType.SocialAccountTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;

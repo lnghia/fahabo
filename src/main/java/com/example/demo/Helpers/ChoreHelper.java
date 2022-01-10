@@ -1,18 +1,24 @@
 package com.example.demo.Helpers;
 
+import com.example.demo.Album.Entity.ChoreAlbum;
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.Album.Entity.Photo;
+import com.example.demo.Album.Entity.PhotoInChore;
+import com.example.demo.Chore.Entity.Chore;
+import com.example.demo.Chore.Entity.ChoresAssignUsers;
 import com.example.demo.DropBox.ItemToUpload;
 import com.example.demo.DropBox.UploadExecutionResult;
 import com.example.demo.DropBox.UploadResult;
 import com.example.demo.FileUploader.FileUploader;
-import com.example.demo.Service.Chore.ChoreService;
-import com.example.demo.Service.ChoreAlbum.ChoreAlbumService;
-import com.example.demo.Service.ChoresAssignUsers.ChoresAssignUsersService;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.Service.Photo.PhotoService;
-import com.example.demo.Service.PhotoInChore.PhotoInChoreService;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.*;
-import com.example.demo.domain.Family.Family;
+import com.example.demo.Chore.Service.Chore.ChoreService;
+import com.example.demo.Album.Service.ChoreAlbum.ChoreAlbumService;
+import com.example.demo.Chore.Service.ChoresAssignUsers.ChoresAssignUsersService;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.Album.Service.Photo.PhotoService;
+import com.example.demo.Album.Service.PhotoInChore.PhotoInChoreService;
+import com.example.demo.User.Service.UserService;
+import com.example.demo.User.Entity.User;
+import com.example.demo.Family.Entity.Family;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,20 +1,14 @@
 package com.example.demo.DropBox;
 
 import com.dropbox.core.v2.DbxClientV2;
-import com.example.demo.Helpers.Helper;
-import com.example.demo.domain.Image;
-import com.sun.mail.imap.protocol.Item;
+import com.example.demo.Album.Entity.Image;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 @Component
 public class DropBoxHelper {

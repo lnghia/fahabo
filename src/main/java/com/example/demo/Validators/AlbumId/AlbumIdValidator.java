@@ -1,6 +1,6 @@
 package com.example.demo.Validators.AlbumId;
 
-import com.example.demo.Service.Album.AlbumService;
+import com.example.demo.Album.Service.Album.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;

@@ -2,11 +2,11 @@ package com.example.demo.Notification.Helper;
 
 import com.example.demo.Notification.Entity.Notification;
 import com.example.demo.Notification.Service.NotificationService;
-import com.example.demo.Service.UserInFamily.UserInFamilyService;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
-import com.example.demo.domain.UserInFamily;
+import com.example.demo.UserInFamily.Service.UserInFamily.UserInFamilyService;
+import com.example.demo.User.Service.UserService;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.User.Entity.User;
+import com.example.demo.UserInFamily.Entity.UserInFamily;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

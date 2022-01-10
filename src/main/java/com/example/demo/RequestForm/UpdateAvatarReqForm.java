@@ -1,7 +1,6 @@
 package com.example.demo.RequestForm;
 
-import com.example.demo.Validators.ImageName.ValidImageName;
-import com.example.demo.domain.Image;
+import com.example.demo.Album.Entity.Image;
 import lombok.Data;
 
 @Data

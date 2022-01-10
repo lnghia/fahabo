@@ -1,5 +1,9 @@
 package com.example.demo.Event.Helper;
 
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.Album.Entity.Photo;
+import com.example.demo.Chore.Entity.Chore;
+import com.example.demo.Chore.Entity.ChoresAssignUsers;
 import com.example.demo.DropBox.*;
 import com.example.demo.Event.Entity.*;
 import com.example.demo.Event.RequestBody.CreateEventReqBody;
@@ -8,11 +12,11 @@ import com.example.demo.Event.Service.*;
 import com.example.demo.FileUploader.FileUploader;
 import com.example.demo.Helpers.FamilyHelper;
 import com.example.demo.Helpers.Helper;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.Service.Photo.PhotoService;
-import com.example.demo.Service.UserService;
-import com.example.demo.domain.*;
-import com.example.demo.domain.Family.Family;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.Album.Service.Photo.PhotoService;
+import com.example.demo.User.Service.UserService;
+import com.example.demo.User.Entity.User;
+import com.example.demo.Family.Entity.Family;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -89,9 +93,6 @@ public class EventHelper {
         eventService.saveEvent(event);
 
         assignUsers(reqBody.assigneeIds, event);
-
-        //assign users
-//        assignUsers(reqBody.assigneeIds, event);
 
         return event;
     }
@@ -287,27 +288,28 @@ public class EventHelper {
     public ArrayList<HashMap<String, Object>> getPhotos(Event event, int page, int size) throws ExecutionException, InterruptedException {
         EventAlbum eventAlbum = event.getEventAlbumSet().iterator().next();
         ArrayList<PhotoInEvent> photoInEvents = photoInEventService.getAllPhotos(eventAlbum.getId(), page, size);
-        List<Integer> photoIds = photoInEvents.stream().map(photoInChore -> {
-            return photoInChore.getPhotoId();
-        }).collect(Collectors.toList());
-        List<Photo> photos = photoIds.stream().map(photoId -> {
-            return photoService.getById(photoId);
-        }).collect(Collectors.toList());
+        List<Integer> photoIds = photoInEvents.stream().map(PhotoInEvent::getPhotoId).collect(Collectors.toList());
+        List<Photo> photos = new ArrayList<>();
+        for (Integer photoId : photoIds) {
+            Photo byId = photoService.getById(photoId);
+            photos.add(byId);
+        }
         ArrayList<HashMap<String, Object>> data;
 
-//                DbxClientV2 clientV2 = dropBoxAuthenticator.authenticateDropBoxClient();
         DropBoxRedirectedLinkGetter getter = new DropBoxRedirectedLinkGetter();
 
-        GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(new ArrayList<>(photos.stream().map(photo -> {
-            return new Image(photo.getName(), photo.getUri());
-        }).collect(Collectors.toList())));
+        GetRedirectedLinkExecutionResult executionResult = getter.getRedirectedLinks(
+                new ArrayList<>(photos.stream().map(photo -> new Image(photo.getName(), photo.getUri())).collect(Collectors.toList()))
+        );
 
         if (executionResult != null) {
-            data = new ArrayList<>(photos.stream()
-                    .map(photo -> {
-                        return (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
-                                photo.getJsonWithRedirectedUri(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
-                    }).collect(Collectors.toList()));
+            List<HashMap<String, Object>> list = new ArrayList<>();
+            for (Photo photo : photos) {
+                HashMap<String, Object> stringObjectHashMap = (executionResult.getSuccessfulResults().containsKey(photo.getName())) ?
+                        photo.getJsonWithRedirectedUri(executionResult.getSuccessfulResults().get(photo.getName()).getUri()) : photo.getJson(null);
+                list.add(stringObjectHashMap);
+            }
+            data = new ArrayList<>(list);
 
             return data;
         }
@@ -325,12 +327,13 @@ public class EventHelper {
             put("repeatType", chore.getRepeatType());
         }};
 
-        User[] assignees = chore.getChoresAssignUsers().stream().filter(choresAssignUsers1 -> !choresAssignUsers1.isDeleted()).map(choresAssignUsers1 -> {
-            return choresAssignUsers1.getAssignee();
-        }).toArray(size -> new User[size]);
-        Photo[] photos = Arrays.stream(assignees).map(user -> {
-            return new Photo(Integer.toString(user.getId()), user.getAvatar());
-        }).toArray(size -> new Photo[size]);
+        User[] assignees = chore.getChoresAssignUsers().stream().filter(choresAssignUsers1 -> !choresAssignUsers1.isDeleted()).map(ChoresAssignUsers::getAssignee).toArray(size -> new User[size]);
+        List<Photo> list = new ArrayList<>();
+        for (User assignee : assignees) {
+            Photo photo = new Photo(Integer.toString(assignee.getId()), assignee.getAvatar());
+            list.add(photo);
+        }
+        Photo[] photos = list.toArray(new Photo[0]);
 
         HashMap<String, String> avatars = Helper.getInstance().redirectImageLinks(photos);
 
@@ -456,12 +459,6 @@ public class EventHelper {
         if (!reqBody.to.equals(event.getToAsString())) {
             event.setTo(Helper.getInstance().formatDate(reqBody.to));
         }
-//        if (reqBody.occurrences != event.getRepeatOccurrences()) {
-//            event.setRepeatOccurrences(reqBody.occurrences);
-//        }
-//        if (!reqBody.repeatType.equals(event.getRepeatType())) {
-//            event.setRepeatType(reqBody.repeatType);
-//        }
 
         ArrayList<Image> images = addPhotoToEvent(reqBody.photos, event, event.getFamily());
 
@@ -480,28 +477,12 @@ public class EventHelper {
         if (reqBody.description != null && !reqBody.description.isBlank() && !reqBody.description.isEmpty()) {
             event.setDescription(reqBody.description);
         }
-//        if (reqBody.occurrences != event.getRepeatOccurrences()) {
-//            event.setRepeatOccurrences(reqBody.occurrences);
-//        }
-//        if (!reqBody.repeatType.equals(event.getRepeatType())) {
-//            event.setRepeatType(reqBody.repeatType);
-//        }
         if (!reqBody.from.equals(event.getFromAsString())) {
             event.setFrom(Helper.getInstance().formatDate(reqBody.from));
         }
         if (!reqBody.to.equals(event.getToAsString())) {
             event.setTo(Helper.getInstance().formatDate(reqBody.to));
         }
-//        try {
-//            if (reqBody.from != null && !reqBody.from.isEmpty() && !reqBody.to.isBlank()) {
-//                event.setFrom(Helper.getInstance().formatDate(reqBody.from));
-//            }
-//            if (reqBody.to != null && !reqBody.to.isEmpty() && !reqBody.to.isBlank()) {
-//                event.setTo(Helper.getInstance().formatDate(reqBody.to));
-//            }
-//        } catch (ParseException e) {
-//            throw new ParseException("Couldn't parse from and to", 0);
-//        }
         cancelAssignUsers(event);
         assignUsers(reqBody.assigneeIds, event);
         event.setUpdatedAt(Helper.getInstance().getNowAsTimeZone(event.getFamily().getTimezone()));
@@ -523,11 +504,6 @@ public class EventHelper {
         reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
 
         updateEvent(headEvent, user, reqBody);
-//        if (!firstRepeatType.equals(reqBody.repeatType)) {
-//            updateRepeatType(event, headEvent, user, reqBody);
-//        } else if (firstOccurrences != reqBody.occurrences) {
-//            updateOccurrences(event, headEvent, user, reqBody);
-//        } else {
 
         events = groupEventService.findAllEventsByHeadEventId(headEventId);
         int i = 0;
@@ -540,7 +516,6 @@ public class EventHelper {
             reqBody.to = Helper.getInstance().formatDateWithTime(newTo);
             updateEvent(tmp.getSubEvent(), user, reqBody);
         }
-//        }
 
         if (reqBody.deletePhotos != null && reqBody.deletePhotos.length > 0) {
             for (var tmp : events) {

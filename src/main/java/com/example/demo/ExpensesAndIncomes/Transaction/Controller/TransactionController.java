@@ -13,14 +13,11 @@ import com.example.demo.ExpensesAndIncomes.TransactionCategory.Entity.Transactio
 import com.example.demo.ExpensesAndIncomes.TransactionCategory.Service.TransactionCategoryService;
 import com.example.demo.Helpers.Helper;
 import com.example.demo.ResponseFormat.Response;
-import com.example.demo.Service.Family.FamilyService;
-import com.example.demo.domain.CustomUserDetails;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.Image;
-import com.example.demo.domain.User;
-import jdk.jfr.Category;
-import liquibase.pro.packaged.A;
-import liquibase.pro.packaged.I;
+import com.example.demo.Family.Service.Family.FamilyService;
+import com.example.demo.User.Entity.CustomUserDetails;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.Album.Entity.Image;
+import com.example.demo.User.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +30,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/api/v1/transactions")

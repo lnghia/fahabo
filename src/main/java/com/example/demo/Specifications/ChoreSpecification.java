@@ -1,10 +1,10 @@
 package com.example.demo.Specifications;
 
 import com.example.demo.MetaModel.ChoresAssignUsers_;
-import com.example.demo.domain.Chore;
-import com.example.demo.domain.ChoresAssignUsers;
-import com.example.demo.domain.Family.Family;
-import com.example.demo.domain.User;
+import com.example.demo.Chore.Entity.Chore;
+import com.example.demo.Chore.Entity.ChoresAssignUsers;
+import com.example.demo.Family.Entity.Family;
+import com.example.demo.User.Entity.User;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
