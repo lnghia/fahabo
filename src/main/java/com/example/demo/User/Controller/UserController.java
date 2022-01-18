@@ -399,6 +399,7 @@ public class UserController {
                 put("navigate", "VIDEO_CALL");
                 put("id", reqForm.roomCallId);
                 put("familyId", Integer.toString(reqForm.familyId));
+                put("sound", "default");
             }};
 
             if (reqForm.participantIds != null && reqForm.participantIds.length == 0) {
