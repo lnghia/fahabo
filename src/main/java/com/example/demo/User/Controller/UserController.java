@@ -281,6 +281,7 @@ public class UserController {
             if (family.getUsersInFamily().size() == 1) {
                 familyHelper.deleteFamilyById(requestBody.familyId);
                 family.setDeleted(true);
+                family.setUsersInFamily(new HashSet<>());
                 familyService.saveFamily(family);
                 return ResponseEntity.ok(new Response(userService.getUserById(user.getId()).getJson(), new ArrayList<>()));
             }
