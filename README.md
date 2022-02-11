@@ -1,0 +1,3 @@
+# fahabo
+
+A backend implemented using Java and Spring Boot for a mobile application called Fahabo. This application helps families manage their daily activities including events, chores, expendings. Besides, this application also allows family members to create albums and store their good memories with the family, locate other members in the family, get in touch with family members by text and conference call, it also comes with a cuisine feed where you can share and read many different dish recipes, tips in the kitchen, ...
